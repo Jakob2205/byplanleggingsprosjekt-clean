@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ByPlanlegging Prosjekt Forside</title>
+    <link rel="stylesheet" href="Forside.css">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <h1>Planoversikt - Instans/Firma - Brukernavn</h1>
+            <div class="tabs">
+                <div>Casestudie</div>
+                <div>Planinitiativ</div>
+                <div>Førstegangsbehandling</div>
+                <div>Politisk skjema</div>
+                <div>Medvirkningsskjema</div>
+                <div>Sluttbehandling</div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="plan-section">
+            <div class="plan-title">
+                <h2>Planid - Plannavn - Vindu åpnet</h2>
+            </div>
+            <div class="content-section">
+                <h3>- I hvilke grad er planområder egnet til boligbebyggelse?</h3>
+                
+                <!-- First Question Group -->
+                <div class="question-group" data-question-id="q1">
+                    <div class="temascore-display">
+                        Temascore: <span class="temascore-value">0.00</span>
+                    </div>
+                    <p>Er planområdet tilstrekkelig dekket av nødvendige servicetilbud? <span class="info">(i)</span></p>
+                    <div class="rating">
+                        <span>Prioritet:</span>
+                        <button class="priority-button" onclick="setPriorityButton(this)">Lav</button>
+                        <button class="priority-button" onclick="setPriorityButton(this)">Normal</button>
+                        <button class="priority-button" onclick="setPriorityButton(this)">Høy</button>
+                        <button class="priority-button" onclick="setPriorityButton(this)">Ikke aktuelt</button>
+                        <span>Verdi:</span>
+                        <button class="value-button" onclick="toggleValueButton(this)">-5</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">-4</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">-3</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">-2</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">-1</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">0</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">1</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">2</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">3</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">4</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">5</button>
+                    </div>
+                    <textarea placeholder="Begrunnelse:"></textarea>
+                </div>
+
+                <!-- Second Question Group -->
+                <div class="question-group" data-question-id="q2">
+                    <div class="temascore-display">
+                        Temascore: <span class="temascore-value">0.00</span>
+                    </div>
+                    <p>Planens påvirkningsgrad på omkringliggende kulturminner og kulturmiljø? <span class="info">(i)</span></p>
+                    <div class="rating">
+                        <span>Prioritet:</span>
+                        <button class="priority-button" onclick="setPriorityButton(this)">Lav</button>
+                        <button class="priority-button" onclick="setPriorityButton(this)">Normal</button>
+                        <button class="priority-button" onclick="setPriorityButton(this)">Høy</button>
+                        <button class="priority-button" onclick="setPriorityButton(this)">Ikke aktuelt</button>
+                        <span>Planverdi:</span>
+                        <button class="value-button" onclick="toggleValueButton(this)">-5</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">-4</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">-3</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">-2</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">-1</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">0</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">1</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">2</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">3</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">4</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">5</button>
+                    </div>
+                    <textarea placeholder="Begrunnelse:"></textarea>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Display for the calculated result -->
+        <section id="result-section">
+            <h3>Calculated Value: <span id="displayResult">0.00</span></h3>
+        </section>
+
+        <!-- Hidden form to store the final calculated value -->
+        <form id="hiddenForm" method="post">
+            <input type="hidden" id="hiddenInput" name="finalValue">
+        </form>
+    </main>
+
+    <!-- Link to the external JavaScript file -->
+    <script src="ButtonFunctionality.js"></script>
+</body>
+</html>
