@@ -1,34 +1,61 @@
-// Object to store the selected values and multipliers for each question group
-let questionValues = {};
+// Objects to store the selected values and multipliers for each question group and theme
+let questionValues = {}; // Stores data for each question
+let themeScores = {}; // Stores calculated scores for each theme
 
-function updateFinalValue() {
-    let totalScore = 0;
+// Define multipliers for each question
+const questionMultipliers = {
+    q1: { lav: 1, normal: 1.3, høy: 1.8, ikkeAktuelt: 1 },
+    q2: { lav: 1, normal: 1.2, høy: 1.7, ikkeAktuelt: 1 },
+    q3: { lav: 1, normal: 1.4, høy: 1.9, ikkeAktuelt: 1 },
+    // Add more questions as needed
+};
 
-    // Update each question's temascore and calculate the total score
+function updateThemeScores() {
+    themeScores = {}; // Reset theme scores
+
+    // Calculate the score for each theme based on its subquestions
     for (const questionId in questionValues) {
-        const { value, multiplier, skipInFinal } = questionValues[questionId];
-        const temascore = value * multiplier;
+        const { value, multiplier, skipInFinal, themeId } = questionValues[questionId];
+        const questionScore = value * multiplier;
 
-        // Update the individual temascore display for each question
-        const questionElement = document.querySelector(`[data-question-id="${questionId}"]`);
-        if (questionElement) {
-            questionElement.querySelector('.temascore-value').innerText = temascore.toFixed(2);
+        // Add the question score to its respective theme's total score
+        if (!themeScores[themeId]) {
+            themeScores[themeId] = 0;
         }
 
-        // Add to the total calculated value if not skipped
+        // Only add question score if it's not skipped
         if (!skipInFinal) {
-            totalScore += temascore;
+            themeScores[themeId] += questionScore;
         }
     }
 
-    // Update the hidden input and display the total calculated result
-    document.getElementById("hiddenInput").value = totalScore;
-    document.getElementById("displayResult").innerText = totalScore.toFixed(2); // Display result with 2 decimal places
+    // Update the displayed theme scores
+    for (const themeId in themeScores) {
+        const themeElement = document.querySelector(`[data-tema-id="${themeId}"]`);
+        if (themeElement) {
+            themeElement.querySelector('.tema-score-value').innerText = themeScores[themeId].toFixed(2);
+        }
+    }
+
+    // Update the final calculated value
+    updateFinalValue();
 }
 
-// Function to handle value button selection for a specific question group
+function updateFinalValue() {
+    // Sum all theme scores for the final value
+    const totalScore = Object.values(themeScores).reduce((sum, score) => sum + score, 0);
+
+    // Update the hidden input and display the final score
+    const hiddenInput = document.getElementById("hiddenInput");
+    const displayResult = document.getElementById("displayResult");
+
+    if (hiddenInput) hiddenInput.value = totalScore;
+    if (displayResult) displayResult.innerText = totalScore.toFixed(2); // Display result with 2 decimal places
+}
+
 function toggleValueButton(element) {
     const questionId = element.closest('.question-group').dataset.questionId;
+    const themeId = element.closest('.tema').dataset.temaId;
 
     // Check if the clicked button is already active
     if (element.classList.contains('active')) {
@@ -48,67 +75,51 @@ function toggleValueButton(element) {
         // Parse the selected value and store it in the questionValues object
         const selectedValue = parseInt(element.textContent);
         if (!questionValues[questionId]) {
-            questionValues[questionId] = { value: selectedValue, multiplier: 1, skipInFinal: false };
+            questionValues[questionId] = { value: selectedValue, multiplier: 1, skipInFinal: false, themeId: themeId };
         } else {
             questionValues[questionId].value = selectedValue;
         }
     }
 
-    // Update the final calculated value
-    updateFinalValue();
+    // Update the theme scores
+    updateThemeScores();
 }
 
-// Function to handle priority button selection for a specific question group
 function setPriorityButton(element) {
     const questionId = element.closest('.question-group').dataset.questionId;
+    const themeId = element.closest('.tema').dataset.temaId;
 
-    // Check if the clicked button is already active
-    if (element.classList.contains('active')) {
-        // If active, deselect it and reset the multiplier to 1 and skipInFinal to false
-        element.classList.remove('active');
-        if (questionValues[questionId]) {
-            questionValues[questionId].multiplier = 1;
-            questionValues[questionId].skipInFinal = false;
-        }
+    // Deselect other buttons in the group
+    const priorityButtons = element.parentNode.querySelectorAll('.priority-button');
+    priorityButtons.forEach(button => button.classList.remove('active'));
+
+    element.classList.add('active');
+
+    const selectedPriority = element.textContent.trim().toLowerCase();
+    const multipliers = questionMultipliers[questionId];
+    let multiplier = multipliers ? multipliers[selectedPriority] : 1; // Default to 1 if undefined
+    const skipInFinal = selectedPriority === 'ikke aktuelt';
+
+    // Update the questionValues object
+    if (!questionValues[questionId]) {
+        questionValues[questionId] = { value: 0, multiplier, skipInFinal, themeId };
     } else {
-        // Deselect all other priority buttons within the same question group
-        const priorityButtons = element.parentNode.querySelectorAll('.priority-button');
-        priorityButtons.forEach(button => button.classList.remove('active'));
-
-        // Set the active state of the clicked button
-        element.classList.add('active');
-
-        // Determine the multiplier and skipInFinal flag based on the selected priority
-        let multiplier;
-        let skipInFinal = false;
-        switch (element.textContent.trim().toLowerCase()) {
-            case 'lav':
-                multiplier = 1;
-                break;
-            case 'normal':
-                multiplier = 1.3;
-                break;
-            case 'høy':
-                multiplier = 1.8;
-                break;
-            case 'ikke aktuelt':
-                multiplier = 1;
-                skipInFinal = true;
-                break;
-            default:
-                multiplier = 1;
-                break;
-        }
-
-        // Store the multiplier and skipInFinal in the questionValues object
-        if (!questionValues[questionId]) {
-            questionValues[questionId] = { value: 0, multiplier: multiplier, skipInFinal: skipInFinal };
-        } else {
-            questionValues[questionId].multiplier = multiplier;
-            questionValues[questionId].skipInFinal = skipInFinal;
-        }
+        questionValues[questionId].multiplier = multiplier;
+        questionValues[questionId].skipInFinal = skipInFinal;
     }
 
-    // Update the final calculated value
-    updateFinalValue();
+    updateThemeScores();
+}
+
+function toggleCollapse(button) {
+    const themeSection = button.closest('.tema');
+    const contentSection = themeSection.querySelector('.content-section');
+
+    if (contentSection.style.display === 'none') {
+        contentSection.style.display = 'block';
+        button.textContent = '-';
+    } else {
+        contentSection.style.display = 'none';
+        button.textContent = '+';
+    }
 }

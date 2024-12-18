@@ -128,3 +128,78 @@ textarea {
     color: blue;
     border: 2px solid #4CAF50;
 }
+
+/* Theme Styling */
+.tema {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+    position: relative;
+}
+
+.tema-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.tema-header h2 {
+    margin-left: 10px; /* Add space between the button and title */
+    font-size: 16px;
+}
+
+.tema-header .collapse-button {
+    order: -1; /* Move the button to the left of the header content */
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: #333;
+}
+
+.tema-header .collapse-button:hover {
+    color: #4CAF50;
+}
+
+.tema-header .temascore-display {
+    margin-left: auto; /* Keep the score aligned to the right */
+    text-align: right;
+    font-size: 14px;
+    color: #333;
+}
+
+.tema .content-section {
+    padding: 10px;
+    border-top: 1px solid #ccc;
+}
+
+/* Subquestion Styling */
+.tema .question-group {
+    margin-left: 20px;
+    margin-top: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Hidden Content for Collapsed Themes */
+.tema .content-section.collapsed {
+    display: none;
+}
+
+/* Final Result Section */
+#result-section {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#result-section span {
+    color: #4CAF50;
+}
