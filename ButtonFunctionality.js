@@ -7,6 +7,7 @@ const questionMultipliers = {
     q1: { lav: 1, normal: 1.3, høy: 1.8, ikkeAktuelt: 1 },
     q2: { lav: 1, normal: 1.2, høy: 1.7, ikkeAktuelt: 1 },
     q3: { lav: 1, normal: 1.4, høy: 1.9, ikkeAktuelt: 1 },
+    q4: { lav: 1.2, normal: 1.7, høy: 2.1, ikkeAktuelt: 1 },
     // Add more questions as needed
 };
 
@@ -33,7 +34,16 @@ function updateThemeScores() {
     for (const themeId in themeScores) {
         const themeElement = document.querySelector(`[data-tema-id="${themeId}"]`);
         if (themeElement) {
-            themeElement.querySelector('.tema-score-value').innerText = themeScores[themeId].toFixed(2);
+            const scoreElement = themeElement.querySelector('.tema-score-value');
+            const score = themeScores[themeId].toFixed(2);
+            scoreElement.innerText = score;
+
+            // Update color based on score
+            if (parseFloat(score) < 0) {
+                scoreElement.style.color = 'red';
+            } else {
+                scoreElement.style.color = 'green';
+            }
         }
     }
 
@@ -50,7 +60,16 @@ function updateFinalValue() {
     const displayResult = document.getElementById("displayResult");
 
     if (hiddenInput) hiddenInput.value = totalScore;
-    if (displayResult) displayResult.innerText = totalScore.toFixed(2); // Display result with 2 decimal places
+    if (displayResult) {
+        displayResult.innerText = totalScore.toFixed(2); // Display result with 2 decimal places
+
+        // Update color based on total score
+        if (totalScore < 0) {
+            displayResult.style.color = 'red';
+        } else {
+            displayResult.style.color = 'green';
+        }
+    }
 }
 
 function toggleValueButton(element) {
@@ -89,27 +108,40 @@ function setPriorityButton(element) {
     const questionId = element.closest('.question-group').dataset.questionId;
     const themeId = element.closest('.tema').dataset.temaId;
 
-    // Deselect other buttons in the group
-    const priorityButtons = element.parentNode.querySelectorAll('.priority-button');
-    priorityButtons.forEach(button => button.classList.remove('active'));
+    // Check if the clicked button is already active
+    if (element.classList.contains('active')) {
+        // If active, deselect it and reset the multiplier and skipInFinal
+        element.classList.remove('active');
 
-    element.classList.add('active');
-
-    const selectedPriority = element.textContent.trim().toLowerCase();
-    const multipliers = questionMultipliers[questionId];
-    let multiplier = multipliers ? multipliers[selectedPriority] : 1; // Default to 1 if undefined
-    const skipInFinal = selectedPriority === 'ikke aktuelt';
-
-    // Update the questionValues object
-    if (!questionValues[questionId]) {
-        questionValues[questionId] = { value: 0, multiplier, skipInFinal, themeId };
+        if (questionValues[questionId]) {
+            questionValues[questionId].multiplier = 1; // Reset multiplier to default
+            questionValues[questionId].skipInFinal = false;
+        }
     } else {
-        questionValues[questionId].multiplier = multiplier;
-        questionValues[questionId].skipInFinal = skipInFinal;
+        // Deselect other buttons in the group
+        const priorityButtons = element.parentNode.querySelectorAll('.priority-button');
+        priorityButtons.forEach(button => button.classList.remove('active'));
+
+        // Set the active state on the clicked button
+        element.classList.add('active');
+
+        const selectedPriority = element.textContent.trim().toLowerCase();
+        const multipliers = questionMultipliers[questionId];
+        let multiplier = multipliers ? multipliers[selectedPriority] : 1; // Default to 1 if undefined
+        const skipInFinal = selectedPriority === 'ikke aktuelt';
+
+        // Update the questionValues object
+        if (!questionValues[questionId]) {
+            questionValues[questionId] = { value: 0, multiplier, skipInFinal, themeId };
+        } else {
+            questionValues[questionId].multiplier = multiplier;
+            questionValues[questionId].skipInFinal = skipInFinal;
+        }
     }
 
     updateThemeScores();
 }
+
 
 function toggleCollapse(button) {
     const themeSection = button.closest('.tema');

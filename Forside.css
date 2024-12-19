@@ -22,6 +22,7 @@
     display: flex;
     justify-content: center;
     gap: 5px;
+    flex-wrap: wrap; /* Allow tabs to wrap to the next line if needed */
 }
 
 .tabs div {
@@ -38,7 +39,8 @@
 
 /* Main Plan Section */
 main {
-    width: 80%;
+    width: 90%; /* Adjust width for smaller screens */
+    max-width: 1200px;
     margin: 20px auto;
     background-color: #fff;
     border: 2px solid #000;
@@ -80,34 +82,45 @@ main {
 .content-section {
     padding: 10px;
 }
+.rating button {
+    padding: 3px 8px; /* Controls the button's inner spacing */
+    font-size: 12px; /* Sets the text size inside the button */
+    border: 1px solid #ccc; /* Defines the button's border */
+    background-color: #f0f0f0; /* Sets the background color */
+    cursor: pointer; /* Adds a pointer cursor on hover */
+}
 
+/* Responsive Grid for Rating */
 .rating {
     display: flex;
-    align-items: center;
-    gap: 5px;
+    flex-wrap: wrap;
+    gap: 8px; /* Adjusted spacing between Prioritet and Verdi sections */
     margin-top: 10px;
 }
 
-.rating span {
+.rating-group {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Reduced gap between the label and buttons */
+    flex: 1; /* Ensure both groups take equal width */
+}
+
+.rating-group span {
     font-weight: bold;
     font-size: 14px;
+    white-space: nowrap; /* Prevent wrapping */
 }
 
-.rating button {
-    padding: 3px 8px;
-    font-size: 12px;
-    border: 1px solid #ccc;
-    background-color: #f0f0f0;
-    cursor: pointer;
-}
-
-.rating button:hover {
-    background-color: #ddd;
+.rating-group .buttons {
+    display: flex;
+    gap: 2px; /* Adjust spacing between buttons */
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
 }
 
 /* Text Area */
 textarea {
-    width: 100%;
+    width: 100%; /* Full width for responsiveness */
+    max-width: 500px;
     margin-top: 10px;
     padding: 5px;
     border: 1px solid #ccc;
@@ -124,9 +137,16 @@ textarea {
 
 /* Highlight selected button */
 .active {
-    background-color: #4CAF50; /* Highlight color */
-    color: blue;
-    border: 2px solid #4CAF50;
+    background-color: grey; /* Highlight color */
+    color: rgb(15, 15, 15);
+    border: 2px solid black;
+}
+.rating button:hover {
+    background-color: #ddd; /* Slightly darker on hover */
+}
+.rating button.active {
+    background-color: grey; /* Highlighted background color */
+    color: rgb(15, 15, 15); /* Highlighted text color */
 }
 
 /* Theme Styling */
@@ -202,4 +222,39 @@ textarea {
 
 #result-section span {
     color: #4CAF50;
+}
+
+/* Save PDF Button */
+#savePdfButton {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#savePdfButton:hover {
+    background-color: #45a049;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .tabs div {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+
+    .rating {
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); /* Smaller buttons */
+    }
+
+    textarea {
+        max-width: 100%; /* Expand textarea to fit smaller screens */
+    }
+
+    #result-section {
+        font-size: 16px; /* Adjust font size for smaller screens */
+    }
 }

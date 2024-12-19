@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ByPlanlegging Prosjekt Forside</title>
     <link rel="stylesheet" href="Forside.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 </head>
 <body>
     <header>
@@ -34,7 +35,7 @@
             <div class="content-section">
                 <!-- Subquestion 1 -->
                 <div class="question-group" data-question-id="q1">
-                    <p>Er planområdet tilstrekkelig dekket av nødvendige servicetilbud? <span class="info">(i)</span></p>
+                    <p>Er planområdet tilstrekkelig dekket av nødvendige servicetilbud?</span></p>
                     <div class="rating">
                         <span>Prioritet:</span>
                         <button class="priority-button" onclick="setPriorityButton(this)">Lav</button>
@@ -59,7 +60,7 @@
 
                 <!-- Subquestion 2 -->
                 <div class="question-group" data-question-id="q2">
-                    <p>Planens påvirkningsgrad på omkringliggende kulturminner og kulturmiljø? <span class="info">(i)</span></p>
+                    <p>Planens påvirkningsgrad på omkringliggende kulturminner og kulturmiljø?</p>
                     <div class="rating">
                         <span>Prioritet:</span>
                         <button class="priority-button" onclick="setPriorityButton(this)">Lav</button>
@@ -119,12 +120,41 @@
                     <textarea placeholder="Begrunnelse:"></textarea>
                 </div>
             </div>
+            <div class="content-section">
+                <!-- Subquestion 2 -->
+                <div class="question-group" data-question-id="q4">
+                    <p>Påvirkning av kollektivtrafikk?</p>
+                    <div class="rating">
+                        <span>Prioritet:</span>
+                        <button class="priority-button" onclick="setPriorityButton(this)">Lav</button>
+                        <button class="priority-button" onclick="setPriorityButton(this)">Normal</button>
+                        <button class="priority-button" onclick="setPriorityButton(this)">Høy</button>
+                        <button class="priority-button" onclick="setPriorityButton(this)">Ikke aktuelt</button>
+                        <span>Verdi:</span>
+                        <button class="value-button" onclick="toggleValueButton(this)">-5</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">-4</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">-3</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">-2</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">-1</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">0</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">1</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">2</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">3</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">4</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">5</button>
+                    </div>
+                    <textarea placeholder="Begrunnelse:"></textarea>
+                </div>
+            </div>
         </section>
 
         <!-- Display for the calculated result -->
         <section id="result-section">
             <h3>Calculated Value: <span id="displayResult">0.00</span></h3>
         </section>
+
+        <!-- Save as PDF -->
+        <button id="savePdfButton">Save as PDF</button>
 
         <!-- Hidden form to store the final calculated value -->
         <form id="hiddenForm" method="post">
