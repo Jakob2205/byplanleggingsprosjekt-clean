@@ -19,6 +19,8 @@
                 <div>Medvirkningsskjema</div>
                 <div>Sluttbehandling</div>
             </div>
+            <button id="logoutButton" class="logout-button">Logout</button>
+
         </div>
     </header>
 
@@ -60,6 +62,30 @@
 
                 <!-- Subquestion 2 -->
                 <div class="question-group" data-question-id="q2">
+                    <p>Planens påvirkningsgrad på omkringliggende kulturminner og kulturmiljø?</p>
+                    <div class="rating">
+                        <span>Prioritet:</span>
+                        <button class="priority-button" onclick="setPriorityButton(this)">Lav</button>
+                        <button class="priority-button" onclick="setPriorityButton(this)">Normal</button>
+                        <button class="priority-button" onclick="setPriorityButton(this)">Høy</button>
+                        <button class="priority-button" onclick="setPriorityButton(this)">Ikke aktuelt</button>
+                        <span>Verdi:</span>
+                        <button class="value-button" onclick="toggleValueButton(this)">-5</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">-4</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">-3</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">-2</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">-1</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">0</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">1</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">2</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">3</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">4</button>
+                        <button class="value-button" onclick="toggleValueButton(this)">5</button>
+                    </div>
+                    <textarea placeholder="Begrunnelse:"></textarea>
+                </div>
+            </div>
+                            <div class="question-group" data-question-id="q2">
                     <p>Planens påvirkningsgrad på omkringliggende kulturminner og kulturmiljø?</p>
                     <div class="rating">
                         <span>Prioritet:</span>
@@ -164,5 +190,20 @@
 
     <!-- Link to the external JavaScript file -->
     <script src="ButtonFunctionality.js"></script>
-</body>
+    <script type="module">
+        import { auth } from "./firebase-config.js";
+        import { signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    
+        document.getElementById("logoutButton").addEventListener("click", () => {
+            signOut(auth)
+                .then(() => {
+                    alert("You have been logged out.");
+                    window.location.href = "index.html";
+                })
+                .catch((error) => {
+                    console.error("Error during logout:", error.message);
+                    alert("Error during logout: " + error.message);
+                });
+        });
+    </script>
 </html>
