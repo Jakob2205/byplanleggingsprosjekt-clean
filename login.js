@@ -1,4 +1,3 @@
-// login.js
 import { auth } from './firebase-config.js';
 import { signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
@@ -30,6 +29,10 @@ onAuthStateChanged(auth, (user) => {
         window.location.href = "Forside.html";
     } else {
         console.log("No user is signed in.");
+        // Redirect to index.html if the user is not authenticated
+        if (window.location.pathname !== "/index.html") {
+            window.location.href = "index.html";
+        }
     }
 });
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ByPlanlegging Prosjekt Forside</title>
+    <title>Forside</title>
     <link rel="stylesheet" href="Forside.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 </head>
@@ -20,7 +20,6 @@
                 <div>Sluttbehandling</div>
             </div>
             <button id="logoutButton" class="logout-button">Logout</button>
-
         </div>
     </header>
 
@@ -34,81 +33,7 @@
                     Temascore: <span class="tema-score-value">0.00</span>
                 </div>
             </div>
-            <div class="content-section">
-                <!-- Subquestion 1 -->
-                <div class="question-group" data-question-id="q1">
-                    <p>Er planområdet tilstrekkelig dekket av nødvendige servicetilbud?</span></p>
-                    <div class="rating">
-                        <span>Prioritet:</span>
-                        <button class="priority-button" onclick="setPriorityButton(this)">Lav</button>
-                        <button class="priority-button" onclick="setPriorityButton(this)">Normal</button>
-                        <button class="priority-button" onclick="setPriorityButton(this)">Høy</button>
-                        <button class="priority-button" onclick="setPriorityButton(this)">Ikke aktuelt</button>
-                        <span>Verdi:</span>
-                        <button class="value-button" onclick="toggleValueButton(this)">-5</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">-4</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">-3</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">-2</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">-1</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">0</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">1</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">2</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">3</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">4</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">5</button>
-                    </div>
-                    <textarea placeholder="Begrunnelse:"></textarea>
-                </div>
-
-                <!-- Subquestion 2 -->
-                <div class="question-group" data-question-id="q2">
-                    <p>Planens påvirkningsgrad på omkringliggende kulturminner og kulturmiljø?</p>
-                    <div class="rating">
-                        <span>Prioritet:</span>
-                        <button class="priority-button" onclick="setPriorityButton(this)">Lav</button>
-                        <button class="priority-button" onclick="setPriorityButton(this)">Normal</button>
-                        <button class="priority-button" onclick="setPriorityButton(this)">Høy</button>
-                        <button class="priority-button" onclick="setPriorityButton(this)">Ikke aktuelt</button>
-                        <span>Verdi:</span>
-                        <button class="value-button" onclick="toggleValueButton(this)">-5</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">-4</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">-3</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">-2</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">-1</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">0</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">1</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">2</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">3</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">4</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">5</button>
-                    </div>
-                    <textarea placeholder="Begrunnelse:"></textarea>
-                </div>
-            </div>
-                            <div class="question-group" data-question-id="q2">
-                    <p>Planens påvirkningsgrad på omkringliggende kulturminner og kulturmiljø?</p>
-                    <div class="rating">
-                        <span>Prioritet:</span>
-                        <button class="priority-button" onclick="setPriorityButton(this)">Lav</button>
-                        <button class="priority-button" onclick="setPriorityButton(this)">Normal</button>
-                        <button class="priority-button" onclick="setPriorityButton(this)">Høy</button>
-                        <button class="priority-button" onclick="setPriorityButton(this)">Ikke aktuelt</button>
-                        <span>Verdi:</span>
-                        <button class="value-button" onclick="toggleValueButton(this)">-5</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">-4</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">-3</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">-2</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">-1</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">0</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">1</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">2</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">3</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">4</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">5</button>
-                    </div>
-                    <textarea placeholder="Begrunnelse:"></textarea>
-                </div>
-            </div>
+            <div class="content-section"></div> <!-- Questions will be inserted here -->
         </section>
 
         <!-- Theme 2 -->
@@ -120,58 +45,7 @@
                     Temascore: <span class="tema-score-value">0.00</span>
                 </div>
             </div>
-            <div class="content-section">
-                <!-- Subquestion 1 -->
-                <div class="question-group" data-question-id="q3">
-                    <p>Påvirkning på nærliggende kulturarv?</p>
-                    <div class="rating">
-                        <span>Prioritet:</span>
-                        <button class="priority-button" onclick="setPriorityButton(this)">Lav</button>
-                        <button class="priority-button" onclick="setPriorityButton(this)">Normal</button>
-                        <button class="priority-button" onclick="setPriorityButton(this)">Høy</button>
-                        <button class="priority-button" onclick="setPriorityButton(this)">Ikke aktuelt</button>
-                        <span>Verdi:</span>
-                        <button class="value-button" onclick="toggleValueButton(this)">-5</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">-4</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">-3</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">-2</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">-1</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">0</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">1</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">2</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">3</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">4</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">5</button>
-                    </div>
-                    <textarea placeholder="Begrunnelse:"></textarea>
-                </div>
-            </div>
-            <div class="content-section">
-                <!-- Subquestion 2 -->
-                <div class="question-group" data-question-id="q4">
-                    <p>Påvirkning av kollektivtrafikk?</p>
-                    <div class="rating">
-                        <span>Prioritet:</span>
-                        <button class="priority-button" onclick="setPriorityButton(this)">Lav</button>
-                        <button class="priority-button" onclick="setPriorityButton(this)">Normal</button>
-                        <button class="priority-button" onclick="setPriorityButton(this)">Høy</button>
-                        <button class="priority-button" onclick="setPriorityButton(this)">Ikke aktuelt</button>
-                        <span>Verdi:</span>
-                        <button class="value-button" onclick="toggleValueButton(this)">-5</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">-4</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">-3</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">-2</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">-1</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">0</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">1</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">2</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">3</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">4</button>
-                        <button class="value-button" onclick="toggleValueButton(this)">5</button>
-                    </div>
-                    <textarea placeholder="Begrunnelse:"></textarea>
-                </div>
-            </div>
+            <div class="content-section"></div> <!-- Questions will be inserted here -->
         </section>
 
         <!-- Display for the calculated result -->
@@ -188,12 +62,15 @@
         </form>
     </main>
 
-    <!-- Link to the external JavaScript file -->
-    <script src="ButtonFunctionality.js"></script>
+    <!-- Load JavaScript Modules -->
     <script type="module">
         import { auth } from "./firebase-config.js";
         import { signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    
+        import { toggleValueButton, setPriorityButton, toggleCollapse } from './ButtonFunctionality.js';
+        
+        import { renderQuestions } from './questions.js';
+        renderQuestions();
+
         document.getElementById("logoutButton").addEventListener("click", () => {
             signOut(auth)
                 .then(() => {
@@ -205,5 +82,11 @@
                     alert("Error during logout: " + error.message);
                 });
         });
+
+        // **Make sure JavaScript functions are accessible globally**
+        window.toggleValueButton = toggleValueButton;
+        window.setPriorityButton = setPriorityButton;
+        window.toggleCollapse = toggleCollapse;
     </script>
+</body>
 </html>

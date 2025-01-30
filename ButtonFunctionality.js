@@ -1,136 +1,147 @@
-// Objects to store the selected values and multipliers for each question group and theme
-let questionValues = {}; // Stores data for each question
-let themeScores = {}; // Stores calculated scores for each theme
+import { questionValues, themeScores, questionMultipliers } from './questions.js';
 
-// Define multipliers for each question
-const questionMultipliers = {
-    q1: { lav: 1, normal: 1.3, høy: 1.8, ikkeAktuelt: 1 },
-    q2: { lav: 1, normal: 1.2, høy: 1.7, ikkeAktuelt: 1 },
-    q3: { lav: 1, normal: 1.4, høy: 1.9, ikkeAktuelt: 1 },
-    q4: { lav: 1.2, normal: 1.7, høy: 2.1, ikkeAktuelt: 1 },
-    // Add more questions as needed
-};
+// **Update Theme Scores**
+export function updateThemeScores() {
+    Object.keys(themeScores).forEach(themeId => {
+        themeScores[themeId] = { score: 0, answeredQuestions: 0 };
+    });
 
-function updateThemeScores() {
-    themeScores = {}; // Reset theme scores
+    let totalQuestionsAnswered = 0;
+    let totalSumOfScores = 0;
 
-    // Calculate the score for each theme based on its subquestions
+    console.clear();
+    console.log("Updating Theme Scores...");
+
+    // **Ensure all themes are initialized**
+    document.querySelectorAll(".tema").forEach(theme => {
+        const themeId = theme.dataset.temaId;
+        if (!themeScores[themeId]) {
+            themeScores[themeId] = { score: 0, answeredQuestions: 0 };
+        }
+    });
+
+    // **Process all answered questions**
     for (const questionId in questionValues) {
         const { value, multiplier, skipInFinal, themeId } = questionValues[questionId];
+
+        if (skipInFinal || value === 0) continue;
+
         const questionScore = value * multiplier;
-
-        // Add the question score to its respective theme's total score
-        if (!themeScores[themeId]) {
-            themeScores[themeId] = 0;
-        }
-
-        // Only add question score if it's not skipped
-        if (!skipInFinal) {
-            themeScores[themeId] += questionScore;
-        }
+        themeScores[themeId].score += questionScore;
+        totalSumOfScores += questionScore;
     }
 
-    // Update the displayed theme scores
+    // **Update the count of answered questions per theme**
+    for (const themeId in themeScores) {
+        themeScores[themeId].answeredQuestions = Object.values(questionValues)
+            .filter(q => q.themeId === themeId && q.value !== 0 && !q.skipInFinal)
+            .length;
+
+        totalQuestionsAnswered += themeScores[themeId].answeredQuestions;
+    }
+
+    // **Update the UI for each theme's score**
     for (const themeId in themeScores) {
         const themeElement = document.querySelector(`[data-tema-id="${themeId}"]`);
         if (themeElement) {
             const scoreElement = themeElement.querySelector('.tema-score-value');
-            const score = themeScores[themeId].toFixed(2);
-            scoreElement.innerText = score;
+            const { score, answeredQuestions } = themeScores[themeId];
 
-            // Update color based on score
-            if (parseFloat(score) < 0) {
-                scoreElement.style.color = 'red';
+            if (answeredQuestions >= 3) {
+                const normalizedScore = (score / answeredQuestions).toFixed(2);
+                scoreElement.innerText = normalizedScore;
+                scoreElement.style.color = parseFloat(normalizedScore) < 0 ? 'red' : 'green';
             } else {
-                scoreElement.style.color = 'green';
+                scoreElement.innerText = "0.00";
+                scoreElement.style.color = 'black';
             }
         }
     }
 
-    // Update the final calculated value
-    updateFinalValue();
+    console.log("Theme Scores Updated:", themeScores);
+    console.log("Total Questions Answered (excluding 'Ikke aktuelt'):", totalQuestionsAnswered);
+
+    updateFinalValue(totalQuestionsAnswered, totalSumOfScores);
+    updateQuestionCounter();
 }
 
-function updateFinalValue() {
-    // Sum all theme scores for the final value
-    const totalScore = Object.values(themeScores).reduce((sum, score) => sum + score, 0);
-
-    // Update the hidden input and display the final score
-    const hiddenInput = document.getElementById("hiddenInput");
+// **Update Final Score**
+export function updateFinalValue(totalQuestionsAnswered, totalSumOfScores) {
     const displayResult = document.getElementById("displayResult");
 
-    if (hiddenInput) hiddenInput.value = totalScore;
-    if (displayResult) {
-        displayResult.innerText = totalScore.toFixed(2); // Display result with 2 decimal places
+    console.log("Updating Final Score...");
+    console.log("Total Questions Answered for Final Score:", totalQuestionsAnswered);
 
-        // Update color based on total score
-        if (totalScore < 0) {
-            displayResult.style.color = 'red';
-        } else {
-            displayResult.style.color = 'green';
-        }
+    let finalScore = "0.00";
+    if (totalQuestionsAnswered >= 3) {
+        finalScore = (totalSumOfScores / totalQuestionsAnswered).toFixed(2);
+    }
+
+    displayResult.innerText = finalScore;
+    displayResult.style.color = parseFloat(finalScore) < 0 ? 'red' : 'green';
+}
+
+// **Update Active Question Counter**
+export function updateQuestionCounter() {
+    const counterDisplay = document.getElementById("questionCounter");
+    if (counterDisplay) {
+        let totalAnswered = Object.values(themeScores).reduce((sum, theme) => sum + theme.answeredQuestions, 0);
+        counterDisplay.innerText = `Active Questions: ${totalAnswered}`;
     }
 }
 
-function toggleValueButton(element) {
+// **Toggle Value Button**
+export function toggleValueButton(element) {
     const questionId = element.closest('.question-group').dataset.questionId;
     const themeId = element.closest('.tema').dataset.temaId;
 
-    // Check if the clicked button is already active
+    console.log(`Toggling value button for questionId: ${questionId}, themeId: ${themeId}`);
+
+    if (!questionValues[questionId]) {
+        questionValues[questionId] = { value: 0, multiplier: 1, skipInFinal: false, themeId: themeId };
+    }
+
     if (element.classList.contains('active')) {
-        // If active, deselect it and reset the value to 0
         element.classList.remove('active');
-        if (questionValues[questionId]) {
-            questionValues[questionId].value = 0;
-        }
+        questionValues[questionId].value = 0;
     } else {
-        // Deselect all other value buttons within the same question group
         const valueButtons = element.parentNode.querySelectorAll('.value-button');
         valueButtons.forEach(button => button.classList.remove('active'));
 
-        // Set the active state of the clicked button
         element.classList.add('active');
-
-        // Parse the selected value and store it in the questionValues object
-        const selectedValue = parseInt(element.textContent);
-        if (!questionValues[questionId]) {
-            questionValues[questionId] = { value: selectedValue, multiplier: 1, skipInFinal: false, themeId: themeId };
-        } else {
-            questionValues[questionId].value = selectedValue;
-        }
+        questionValues[questionId].value = parseInt(element.textContent);
     }
 
-    // Update the theme scores
     updateThemeScores();
+    updateQuestionCounter();
+    saveQuestionValues();
 }
 
-function setPriorityButton(element) {
+// **Toggles Priority Selection**
+export function setPriorityButton(element) {
     const questionId = element.closest('.question-group').dataset.questionId;
     const themeId = element.closest('.tema').dataset.temaId;
 
-    // Check if the clicked button is already active
+    console.log(`Setting priority button for questionId: ${questionId}, themeId: ${themeId}`);
+
     if (element.classList.contains('active')) {
-        // If active, deselect it and reset the multiplier and skipInFinal
         element.classList.remove('active');
 
         if (questionValues[questionId]) {
-            questionValues[questionId].multiplier = 1; // Reset multiplier to default
+            questionValues[questionId].multiplier = 1;
             questionValues[questionId].skipInFinal = false;
         }
     } else {
-        // Deselect other buttons in the group
         const priorityButtons = element.parentNode.querySelectorAll('.priority-button');
         priorityButtons.forEach(button => button.classList.remove('active'));
 
-        // Set the active state on the clicked button
         element.classList.add('active');
 
         const selectedPriority = element.textContent.trim().toLowerCase();
         const multipliers = questionMultipliers[questionId];
-        let multiplier = multipliers ? multipliers[selectedPriority] : 1; // Default to 1 if undefined
+        let multiplier = multipliers ? multipliers[selectedPriority] : 1;
         const skipInFinal = selectedPriority === 'ikke aktuelt';
 
-        // Update the questionValues object
         if (!questionValues[questionId]) {
             questionValues[questionId] = { value: 0, multiplier, skipInFinal, themeId };
         } else {
@@ -140,10 +151,11 @@ function setPriorityButton(element) {
     }
 
     updateThemeScores();
+    saveQuestionValues();
 }
 
-
-function toggleCollapse(button) {
+// **Toggle Collapse Button**
+export function toggleCollapse(button) {
     const themeSection = button.closest('.tema');
     const contentSection = themeSection.querySelector('.content-section');
 
@@ -155,3 +167,23 @@ function toggleCollapse(button) {
         button.textContent = '+';
     }
 }
+
+// **Save Values to Firestore**
+export function saveQuestionValues() {
+    const user = auth.currentUser;
+    if (user) {
+        const userDoc = doc(db, "users", user.uid);
+        setDoc(userDoc, { questionValues }, { merge: true })
+            .then(() => console.log("Question values saved successfully."))
+            .catch((error) => console.error("Error saving question values:", error));
+    }
+}
+
+// **Ensure Functions Are Globally Accessible**
+window.toggleValueButton = toggleValueButton;
+window.setPriorityButton = setPriorityButton;
+window.updateThemeScores = updateThemeScores;
+window.updateFinalValue = updateFinalValue;
+window.updateQuestionCounter = updateQuestionCounter;
+window.toggleCollapse = toggleCollapse;
+window.saveQuestionValues = saveQuestionValues;
