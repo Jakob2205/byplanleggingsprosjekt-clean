@@ -20,30 +20,20 @@ export const questions = [
     {
         id: "q3",
         theme: "tema1",
-        text: "Er planområdet tilstrekkelig dekket av nødvendige servicetilbud?",
-    },
-    {
-        id: "q4",
-        theme: "tema1",
-        text: "Planens påvirkningsgrad på nødtjenester?",
-    },
-    {
-        id: "q5",
-        theme: "tema1",
         text: "Planens påvirkningsgrad på omkringliggende kulturminner og kulturmiljø?",
     },
     {
-        id: "q6",
+        id: "q4",
         theme: "tema2",
         text: "Påvirkning på nærliggende kulturarv?",
     },
     {
-        id: "q7",
+        id: "q5",
         theme: "tema2",
         text: "Påvirkning av kollektivtrafikk?",
     },
     {
-        id: "q8",
+        id: "q6",
         theme: "tema2",
         text: "Annen relevant påvirkning?",
     },
@@ -101,5 +91,4 @@ export const questionMultipliers = {
     q4: { lav: 1.2, normal: 1.7, høy: 2.1, ikkeAktuelt: 1 },
     q5: { lav: 1.2, normal: 1.7, høy: 2.1, ikkeAktuelt: 1 },
     q6: { lav: 1.2, normal: 1.7, høy: 2.1, ikkeAktuelt: 1 },
-    q7: { lav: 1.2, normal: 1.7, høy: 2.1, ikkeAktuelt: 1 },
 };

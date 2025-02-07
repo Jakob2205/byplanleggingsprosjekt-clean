@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plansikt</title>
-    <link rel="stylesheet" href="Forside.css">
+    <link rel="stylesheet" href=".../Forside.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 </head>
 <body>
@@ -22,75 +22,65 @@
             <button id="logoutButton" class="logout-button">Logout</button>
         </div>
     </header>
-    <div class="sidebar">
-        <h3>Mine Planer</h3>
-        <ul id="planList">
-            <!-- Plans will be dynamically added here -->
-        </ul>
-        <button id="newPlanButton">+ Ny plan</button>
-    </div>
-
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" id="closeModal">&times;</span>
-            <iframe src="skjema.html"></iframe>
-        </div>
-    </div>
 
     <main>
+        <!-- Theme 1 -->
         <section class="tema" data-tema-id="tema1">
             <div class="tema-header">
                 <h2>Tema 1: Boligbebyggelse</h2>
                 <button class="collapse-button" onclick="toggleCollapse(this)">-</button>
                 <div class="temascore-display">
-                    Temascore: <span class="tema-score-value">0.00</span>
+                    Temaverdi: <span class="tema-score-value">0.00</span>
                 </div>
             </div>
-            <div class="content-section"></div>
+            <div class="content-section"></div> <!-- Questions will be inserted here -->
         </section>
 
+        <!-- Theme 2 -->
         <section class="tema" data-tema-id="tema2">
             <div class="tema-header">
                 <h2>Tema 2: Kulturminner</h2>
                 <button class="collapse-button" onclick="toggleCollapse(this)">-</button>
                 <div class="temascore-display">
-                    Temascore: <span class="tema-score-value">0.00</span>
+                    Temaverdi: <span class="tema-score-value">0.00</span>
                 </div>
             </div>
-            <div class="content-section"></div>
+            <div class="content-section"></div> <!-- Questions will be inserted here -->
         </section>
 
-<<<<<<< HEAD
-=======
         <!-- Theme 3 -->
         <section class="tema" data-tema-id="tema3">
             <div class="tema-header">
                 <h2>Tema 3: Barn og unges interesser</h2>
                 <button class="collapse-button" onclick="toggleCollapse(this)">-</button>
                 <div class="temascore-display">
-                    Temascore: <span class="tema-score-value">0.00</span>
+                    Temaverdi: <span class="tema-score-value">0.00</span>
                 </div>
             </div>
             <div class="content-section"></div> <!-- Questions will be inserted here -->
         </section>
 
         <!-- Display for the calculated result -->
->>>>>>> 8462e8091043a5b34e38f33b8e42ed7c562f8b3a
         <section id="result-section">
-            <h3>Calculated Value: <span id="displayResult">0.00</span></h3>
+            <h3>Planverdi: <span id="displayResult">0.00</span></h3>
         </section>
 
+        <!-- Save as PDF -->
+        <button id="savePdfButton">Save as PDF</button>
+
+        <!-- Hidden form to store the final calculated value -->
         <form id="hiddenForm" method="post">
             <input type="hidden" id="hiddenInput" name="finalValue">
         </form>
     </main>
 
+    <!-- Load JavaScript Modules -->
     <script type="module">
         import { auth } from "./firebase-config.js";
         import { signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        import { toggleValueButton, setPriorityButton, toggleCollapse } from './ButtonFunctionality.js';
-        import { renderQuestions } from './questions.js';
-
+        import { toggleValueButton, setPriorityButton, toggleCollapse } from '1110-FB-Boligbebyggelse.js';
+        
+        import { renderQuestions } from './1110-FB-Spørsmål.js';
         renderQuestions();
 
         document.getElementById("logoutButton").addEventListener("click", () => {
@@ -105,31 +95,10 @@
                 });
         });
 
+        // **Make sure JavaScript functions are accessible globally**
         window.toggleValueButton = toggleValueButton;
         window.setPriorityButton = setPriorityButton;
         window.toggleCollapse = toggleCollapse;
-
-        const modal = document.getElementById('modal');
-        const newPlanButton = document.getElementById('newPlanButton');
-        const closeModal = document.getElementById('closeModal');
-
-        newPlanButton.addEventListener('click', () => {
-            modal.style.display = 'flex';
-        });
-
-        closeModal.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-
-        window.addEventListener('click', (event) => {
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-
-        window.closeModal = function() {
-            modal.style.display = 'none';
-        };
     </script>
 </body>
 </html>
