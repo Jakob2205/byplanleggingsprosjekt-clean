@@ -24,20 +24,14 @@ export function updateThemeScores() {
     for (const questionId in questionValues) {
         const { value, multiplier, skipInFinal, themeId } = questionValues[questionId];
 
-        if (skipInFinal || value === 0) continue;
+        if (skipInFinal) continue; // Now allowing value === 0
 
         const questionScore = value * multiplier;
         themeScores[themeId].score += questionScore;
         totalSumOfScores += questionScore;
-    }
 
-    // **Update the count of answered questions per theme**
-    for (const themeId in themeScores) {
-        themeScores[themeId].answeredQuestions = Object.values(questionValues)
-            .filter(q => q.themeId === themeId && q.value !== 0 && !q.skipInFinal)
-            .length;
-
-        totalQuestionsAnswered += themeScores[themeId].answeredQuestions;
+        themeScores[themeId].answeredQuestions += 1; // Count even if value is 0
+        totalQuestionsAnswered += 1;
     }
 
     // **Update the UI for each theme's score**
@@ -59,7 +53,7 @@ export function updateThemeScores() {
     }
 
     console.log("Theme Scores Updated:", themeScores);
-    console.log("Total Questions Answered (excluding 'Ikke aktuelt'):", totalQuestionsAnswered);
+    console.log("Total Questions Answered (including 0 values):", totalQuestionsAnswered);
 
     updateFinalValue(totalQuestionsAnswered, totalSumOfScores);
     updateQuestionCounter();
@@ -103,7 +97,7 @@ export function toggleValueButton(element) {
 
     if (element.classList.contains('active')) {
         element.classList.remove('active');
-        questionValues[questionId].value = 0;
+        questionValues[questionId].value = 0; // Ensure 0 is set
     } else {
         const valueButtons = element.parentNode.querySelectorAll('.value-button');
         valueButtons.forEach(button => button.classList.remove('active'));

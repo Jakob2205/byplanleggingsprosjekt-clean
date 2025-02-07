@@ -22,7 +22,6 @@
     display: flex;
     justify-content: center;
     gap: 5px;
-    flex-wrap: wrap; /* Allow tabs to wrap to the next line if needed */
 }
 
 .tabs div {
@@ -39,8 +38,7 @@
 
 /* Main Plan Section */
 main {
-    width: 90%; /* Adjust width for smaller screens */
-    max-width: 1200px;
+    width: 80%;
     margin: 20px auto;
     background-color: #fff;
     border: 2px solid #000;
@@ -82,45 +80,34 @@ main {
 .content-section {
     padding: 10px;
 }
-.rating button {
-    padding: 3px 8px; /* Controls the button's inner spacing */
-    font-size: 12px; /* Sets the text size inside the button */
-    border: 1px solid #ccc; /* Defines the button's border */
-    background-color: #f0f0f0; /* Sets the background color */
-    cursor: pointer; /* Adds a pointer cursor on hover */
-}
 
-/* Responsive Grid for Rating */
 .rating {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px; /* Adjusted spacing between Prioritet and Verdi sections */
+    align-items: center;
+    gap: 5px;
     margin-top: 10px;
 }
 
-.rating-group {
-    display: flex;
-    align-items: center;
-    gap: 5px; /* Reduced gap between the label and buttons */
-    flex: 1; /* Ensure both groups take equal width */
-}
-
-.rating-group span {
+.rating span {
     font-weight: bold;
     font-size: 14px;
-    white-space: nowrap; /* Prevent wrapping */
 }
 
-.rating-group .buttons {
-    display: flex;
-    gap: 2px; /* Adjust spacing between buttons */
-    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+.rating button {
+    padding: 3px 8px;
+    font-size: 12px;
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+
+.rating button:hover {
+    background-color: #ddd;
 }
 
 /* Text Area */
 textarea {
-    width: 100%; /* Full width for responsiveness */
-    max-width: 500px;
+    width: 100%;
     margin-top: 10px;
     padding: 5px;
     border: 1px solid #ccc;
@@ -137,16 +124,9 @@ textarea {
 
 /* Highlight selected button */
 .active {
-    background-color: grey; /* Highlight color */
-    color: rgb(15, 15, 15);
-    border: 2px solid black;
-}
-.rating button:hover {
-    background-color: #ddd; /* Slightly darker on hover */
-}
-.rating button.active {
-    background-color: grey; /* Highlighted background color */
-    color: rgb(15, 15, 15); /* Highlighted text color */
+    background-color: #4CAF50; /* Highlight color */
+    color: blue;
+    border: 2px solid #4CAF50;
 }
 
 /* Theme Styling */
@@ -224,37 +204,51 @@ textarea {
     color: #4CAF50;
 }
 
-/* Save PDF Button */
-#savePdfButton {
-    margin-top: 20px;
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
+.modal {
+    display: none; /* Ensure it's hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: transparent;
+    margin: auto;
+    padding: 0;
     border: none;
-    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
     cursor: pointer;
+    color: black;
 }
 
-#savePdfButton:hover {
-    background-color: #45a049;
+iframe {
+    width: 600px;
+    height: 500px;
+    border: none;
+    background: transparent;
 }
 
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-    .tabs div {
-        font-size: 12px;
-        padding: 6px 12px;
-    }
+.header-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-    .rating {
-        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); /* Smaller buttons */
-    }
-
-    textarea {
-        max-width: 100%; /* Expand textarea to fit smaller screens */
-    }
-
-    #result-section {
-        font-size: 16px; /* Adjust font size for smaller screens */
-    }
+.tabs {
+    margin-top: 10px;
 }
