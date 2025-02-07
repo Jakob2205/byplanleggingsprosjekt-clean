@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plansikt</title>
-    <link rel="stylesheet" href="Forside.css">
+    <link rel="stylesheet" href=".../Forside.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 </head>
 <body>
@@ -30,7 +30,7 @@
                 <h2>Tema 1: Boligbebyggelse</h2>
                 <button class="collapse-button" onclick="toggleCollapse(this)">-</button>
                 <div class="temascore-display">
-                    Temascore: <span class="tema-score-value">0.00</span>
+                    Temaverdi: <span class="tema-score-value">0.00</span>
                 </div>
             </div>
             <div class="content-section"></div> <!-- Questions will be inserted here -->
@@ -42,7 +42,7 @@
                 <h2>Tema 2: Kulturminner</h2>
                 <button class="collapse-button" onclick="toggleCollapse(this)">-</button>
                 <div class="temascore-display">
-                    Temascore: <span class="tema-score-value">0.00</span>
+                    Temaverdi: <span class="tema-score-value">0.00</span>
                 </div>
             </div>
             <div class="content-section"></div> <!-- Questions will be inserted here -->
@@ -54,7 +54,7 @@
                 <h2>Tema 3: Barn og unges interesser</h2>
                 <button class="collapse-button" onclick="toggleCollapse(this)">-</button>
                 <div class="temascore-display">
-                    Temascore: <span class="tema-score-value">0.00</span>
+                    Temaverdi: <span class="tema-score-value">0.00</span>
                 </div>
             </div>
             <div class="content-section"></div> <!-- Questions will be inserted here -->
@@ -62,7 +62,7 @@
 
         <!-- Display for the calculated result -->
         <section id="result-section">
-            <h3>Calculated Value: <span id="displayResult">0.00</span></h3>
+            <h3>Planverdi: <span id="displayResult">0.00</span></h3>
         </section>
 
         <!-- Save as PDF -->
@@ -78,9 +78,9 @@
     <script type="module">
         import { auth } from "./firebase-config.js";
         import { signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        import { toggleValueButton, setPriorityButton, toggleCollapse } from './ButtonFunctionality.js';
+        import { toggleValueButton, setPriorityButton, toggleCollapse } from '1110-FB-Boligbebyggelse.js';
         
-        import { renderQuestions } from './questions.js';
+        import { renderQuestions } from './1110-FB-Spørsmål.js';
         renderQuestions();
 
         document.getElementById("logoutButton").addEventListener("click", () => {
