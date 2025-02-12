@@ -3,7 +3,6 @@ export let themeScores = {};
 export const themes = [
     { id: "tema1", title: "Boligbebyggelse" },
     { id: "tema2", title: "Kulturminner" },
-    { id: "tema3", title: "Barn og unges interesser" }
 ];
 
 export const questions = [
@@ -47,11 +46,7 @@ export const questions = [
         theme: "tema2",
         text: "Annen relevant påvirkning?",
     },
-    {
-        id: "q7",
-        theme: "tema3",
-        text: "I hvilke grad er barn og unges interesser ivaretatt?",
-    }
+
 ];
 
 // Function to render questions dynamically
@@ -102,4 +97,5 @@ export const questionMultipliers = {
     q5: { lav: 1.2, normal: 1.7, høy: 2.1, ikkeAktuelt: 1 },
     q6: { lav: 1.2, normal: 1.7, høy: 2.1, ikkeAktuelt: 1 },
     q7: { lav: 1.2, normal: 1.7, høy: 2.1, ikkeAktuelt: 1 },
+    q8: { lav: 1.2, normal: 1.7, høy: 2.1, ikkeAktuelt: 1 },
 };

@@ -2,6 +2,8 @@ import { questionValues, themeScores, questionMultipliers } from './questions.js
 
 // **Update Theme Scores**
 export function updateThemeScores() {
+    console.log("Triggered: updateThemeScores()");
+
     Object.keys(themeScores).forEach(themeId => {
         themeScores[themeId] = { score: 0, answeredQuestions: 0 };
     });
@@ -9,10 +11,6 @@ export function updateThemeScores() {
     let totalQuestionsAnswered = 0;
     let totalSumOfScores = 0;
 
-    console.clear();
-    console.log("Updating Theme Scores...");
-
-    // **Ensure all themes are initialized**
     document.querySelectorAll(".tema").forEach(theme => {
         const themeId = theme.dataset.temaId;
         if (!themeScores[themeId]) {
@@ -20,40 +18,51 @@ export function updateThemeScores() {
         }
     });
 
-    // **Process all answered questions**
     for (const questionId in questionValues) {
         const { value, multiplier, skipInFinal, themeId } = questionValues[questionId];
 
-        if (skipInFinal) continue; // Now allowing value === 0
+        if (skipInFinal) continue;
 
         const questionScore = value * multiplier;
         themeScores[themeId].score += questionScore;
-        totalSumOfScores += questionScore;
 
-        themeScores[themeId].answeredQuestions += 1; // Count even if value is 0
-        totalQuestionsAnswered += 1;
+        if (value !== 0) {  // Count only active questions
+            themeScores[themeId].answeredQuestions += 1;
+            totalQuestionsAnswered += 1;
+        }
+
+        totalSumOfScores += questionScore;
     }
 
-    // **Update the UI for each theme's score**
+    console.log("Theme Scores:", themeScores);
+    console.log("Total Sum of Scores:", totalSumOfScores);
+    console.log("Total Questions Answered:", totalQuestionsAnswered);
+
+    // Update each theme's score display
     for (const themeId in themeScores) {
         const themeElement = document.querySelector(`[data-tema-id="${themeId}"]`);
+        console.log(`Updating theme: ${themeId}`, themeElement);
+
         if (themeElement) {
             const scoreElement = themeElement.querySelector('.tema-score-value');
             const { score, answeredQuestions } = themeScores[themeId];
+
+            console.log(`Score for ${themeId}:`, score, "Answered Questions:", answeredQuestions);
 
             if (answeredQuestions >= 3) {
                 const normalizedScore = (score / answeredQuestions).toFixed(2);
                 scoreElement.innerText = normalizedScore;
                 scoreElement.style.color = parseFloat(normalizedScore) < 0 ? 'red' : 'green';
+
+                console.log(`Updated Temascore for ${themeId}:`, normalizedScore);
             } else {
-                scoreElement.innerText = "0.00";
-                scoreElement.style.color = 'black';
+                scoreElement.innerText = ""; // Hide score if less than 3 answers
+                console.log(`Temascore hidden for ${themeId} (less than 3 answered questions)`);
             }
+        } else {
+            console.error(`Theme element not found for ID: ${themeId}`);
         }
     }
-
-    console.log("Theme Scores Updated:", themeScores);
-    console.log("Total Questions Answered (including 0 values):", totalQuestionsAnswered);
 
     updateFinalValue(totalQuestionsAnswered, totalSumOfScores);
     updateQuestionCounter();
@@ -62,17 +71,33 @@ export function updateThemeScores() {
 // **Update Final Score**
 export function updateFinalValue(totalQuestionsAnswered, totalSumOfScores) {
     const displayResult = document.getElementById("displayResult");
+    const footerDisplayResult = document.getElementById("footerDisplayResult");
 
     console.log("Updating Final Score...");
     console.log("Total Questions Answered for Final Score:", totalQuestionsAnswered);
 
-    let finalScore = "0.00";
     if (totalQuestionsAnswered >= 3) {
-        finalScore = (totalSumOfScores / totalQuestionsAnswered).toFixed(2);
-    }
+        const finalScore = (totalSumOfScores / totalQuestionsAnswered).toFixed(2);
 
-    displayResult.innerText = finalScore;
-    displayResult.style.color = parseFloat(finalScore) < 0 ? 'red' : 'green';
+        if (displayResult) {
+            displayResult.innerText = finalScore;
+            displayResult.style.color = parseFloat(finalScore) < 0 ? 'red' : 'green';
+
+            console.log("Display Result Updated:", displayResult.innerText, "Color:", displayResult.style.color);
+        }
+
+        if (footerDisplayResult) {
+            footerDisplayResult.innerText = finalScore;
+            footerDisplayResult.style.color = parseFloat(finalScore) < 0 ? 'red' : 'green';
+
+            console.log("Footer Display Result Updated:", footerDisplayResult.innerText, "Color:", footerDisplayResult.style.color);
+        }
+    } else {
+        if (displayResult) displayResult.innerText = ""; // Hide total score if less than 3 answered questions
+        if (footerDisplayResult) footerDisplayResult.innerText = "";
+
+        console.log("Total score hidden (less than 3 answered questions)");
+    }
 }
 
 // **Update Active Question Counter**
