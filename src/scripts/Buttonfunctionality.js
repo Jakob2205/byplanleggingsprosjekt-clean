@@ -1,4 +1,6 @@
 import { questionValues, themeScores, questionMultipliers } from './questions.js';
+import { auth } from "../scripts/firebase-config"; // Adjust path if needed
+
 
 // **Update Theme Scores**
 export function updateThemeScores() {
