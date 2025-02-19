@@ -1,13 +1,17 @@
 import React from "react";
 
-function Sidebar() {
-  return (
-    <aside className="sidebar">
-      <h3>Mine Planer</h3>
-      <ul id="planList"></ul>
-      <button id="newPlanButton">+ Ny plan</button>
-    </aside>
-  );
-}
+const Sidebar = () => {
+    return (
+        <aside className="sidebar">
+            <div className="sidebar-top">
+                <button className="sidebar-button">+ Ny plan</button>
+            </div>
+
+            <div className="sidebar-bottom">
+                Arkiv
+            </div>
+        </aside>
+    );
+};
 
 export default Sidebar;
