@@ -1,51 +1,70 @@
+// App.jsx
 import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
-import MainContent from "./components/MainContent"; // ✅ Ensure it's in the components folder
+import MainContent from "./components/MainContent";
 import Footer from "./components/Footer";
+import LoginMenu from "./components/LoginMenu";
 import { auth } from "./scripts/firebase-config";
-import { doc, setDoc } from "firebase/firestore";
-import "./styles/main.css"; // ✅ Ensure this path is correct
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import "./styles/main.css";
 
 function App() {
-  const [themeScores, setThemeScores] = useState({});
+  const [user, setUser] = useState(null);
+  const [totalScore, setTotalScore] = useState(0);
 
-  // ✅ Function to update scores based on question responses
-  const updateScores = (questionId, score, isAnswered) => {
-    setThemeScores((prevScores) => {
-      const newScores = { ...prevScores };
-      const themeId = questionId.split("_")[0]; // Extracting theme from question ID
-
-      if (!newScores[themeId]) {
-        newScores[themeId] = { score: 0, answeredQuestions: 0 };
-      }
-
-      newScores[themeId].score += score;
-      if (isAnswered) newScores[themeId].answeredQuestions += 1;
-
-      return newScores;
+  // ✅ Listen for auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
     });
+    return () => unsubscribe();
+  }, []);
+
+  // ✅ Logout function
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      console.log("User logged out");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
-  // ✅ Save to Firebase whenever themeScores update
-  useEffect(() => {
-    if (auth.currentUser) {
-      const userDoc = doc(db, "users", auth.currentUser.uid);
-      setDoc(userDoc, { themeScores }, { merge: true })
-        .then(() => console.log("Scores saved to Firestore"))
-        .catch((error) => console.error("Error saving scores:", error));
-    }
-  }, [themeScores]);
+  // ✅ Update Total Score function
+  const updateTotalScore = (score) => {
+    setTotalScore(score);
+  };
 
   return (
-    <div className="app-container">
-      <Header />
-      <div className="content-wrapper">
-        <Sidebar /> {/* ✅ Sidebar goes here */}
-        <MainContent updateScores={updateScores} /> {/* ✅ Pass updateScores as a prop */}
+    <Router>
+      <div className="app-container">
+        <Routes>
+          {/* ✅ Login page route */}
+          <Route path="/login" element={!user ? <LoginMenu /> : <Navigate to="/" />} />
+
+          {/* ✅ Main app route */}
+          <Route
+            path="/"
+            element={
+              user ? (
+                <>
+                  <Header onLogout={handleLogout} />
+                  <div className="content-wrapper">
+                    <Sidebar />
+                    <MainContent updateTotalScore={updateTotalScore} />
+                  </div>
+                  <Footer totalScore={totalScore} />
+                </>
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+        </Routes>
       </div>
-      <Footer themeScores={themeScores} />
-    </div>
+    </Router>
   );
 }
 

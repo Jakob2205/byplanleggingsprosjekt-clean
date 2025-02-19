@@ -1,12 +1,12 @@
+// MainContent.jsx
 import React, { useState, useEffect } from "react";
 import QuestionComponent from "../scripts/QuestionComponent.js";
 import { questions, themes } from "../scripts/questionData.js";
 import { doc, setDoc } from "firebase/firestore";
-import { db, auth } from "../scripts/firebase-config.js";
+import { db, auth } from "../scripts/firebase-config";
 
-const MainContent = () => {
+const MainContent = ({ updateTotalScore }) => {
   const [themeScores, setThemeScores] = useState({});
-  const [totalScore, setTotalScore] = useState(0);
   const [collapsedThemes, setCollapsedThemes] = useState({});
 
   // **🔹 Update theme scores**
@@ -21,7 +21,6 @@ const MainContent = () => {
       }
 
       if (isExcluded) {
-        // Remove the question's score and count entirely
         newScores[themeId].totalScore -= scoreChange;
         newScores[themeId].answeredCount = Math.max(0, newScores[themeId].answeredCount - 1);
       } else {
@@ -48,21 +47,21 @@ const MainContent = () => {
     });
 
     if (totalAnswered >= 3) {
-      setTotalScore((totalSum / totalAnswered).toFixed(2));
+      updateTotalScore((totalSum / totalAnswered).toFixed(2));
     } else {
-      setTotalScore(0);
+      updateTotalScore(0);
     }
-  }, [themeScores]);
+  }, [themeScores, updateTotalScore]);
 
   // **🔹 Save scores to Firebase when updated**
   useEffect(() => {
     if (auth.currentUser) {
       const userDoc = doc(db, "users", auth.currentUser.uid);
-      setDoc(userDoc, { themeScores, totalScore }, { merge: true })
+      setDoc(userDoc, { themeScores }, { merge: true })
         .then(() => console.log("Scores saved to Firestore"))
         .catch((error) => console.error("Error saving scores:", error));
     }
-  }, [themeScores, totalScore]);
+  }, [themeScores]);
 
   // **🔹 Toggle Collapse State**
   const toggleCollapse = (themeId) => {
@@ -109,9 +108,6 @@ const MainContent = () => {
           )}
         </div>
       ))}
-      <div className="total-score">
-        <h3>Totalverdi: <span>{totalScore}</span></h3>
-      </div>
     </main>
   );
 };

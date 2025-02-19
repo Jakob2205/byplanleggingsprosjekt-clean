@@ -1,13 +1,14 @@
+// components/Footer.jsx
 import React from "react";
 
-function Footer() {
+const Footer = ({ totalScore }) => {
   return (
     <footer className="footer-container">
       <div className="footer-row">
         <button className="footer-box export-pdf">Eksporter til PDF</button>
         <div className="footer-box planinitiatv">Planinitiativ - x,xx</div>
         <div className="footer-box horingsinnspill">Høringsinnspill - x,xx</div>
-        <div className="footer-box totalverdi">Totalverdi - <span id="footerDisplayResult">0.00</span></div>
+        <div className="footer-box totalverdi">Totalverdi - <span>{totalScore}</span></div> {/* ✅ Totalverdi Updated */}
       </div>
       <div className="footer-row">
         <button className="footer-box export-word">Eksporter til Word</button>
@@ -17,6 +18,6 @@ function Footer() {
       </div>
     </footer>
   );
-}
+};
 
 export default Footer;

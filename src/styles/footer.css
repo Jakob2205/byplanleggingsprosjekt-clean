@@ -23,31 +23,9 @@
     font-weight: bold;
 }
 
-.export-pdf, .export-word, .import-sosi {
-    background-color: white;
-    cursor: pointer;
-}
-
-.planinitiatv {
-    background-color: #f4cccc;
-}
-
-.horingsinnspill {
-    background-color: #fff2cc;
-}
-
-.forstegangsbehandling {
-    background-color: #d9ead3;
-}
-
-.sluttbehandling {
-    background-color: #93e99a;
-}
-
 .totalverdi {
     background-color: white;
-}
-
-button:hover {
-    background-color: #ddd;
+    color: black;
+    font-size: 16px;
+    font-weight: bold;
 }
