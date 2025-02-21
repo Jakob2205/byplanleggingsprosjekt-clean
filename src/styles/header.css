@@ -1,0 +1,68 @@
+/* 📌 Header container */
+.header-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #e1e1e1;
+    border-bottom: 1px solid #ccc;
+    padding: 5px 15px;
+    text-align: center;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 50px;
+}
+
+/* Header - Full Width */
+.header-container {
+    width: 100%;
+    background-color: #e1e1e1;
+    border-bottom: 1px solid #ccc;
+    padding: 10px 20px;
+    text-align: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+/* 📌 Tabs section */
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 3px;
+    flex-wrap: nowrap;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* 📌 Individual tab */
+.tabs div {
+    padding: 4px 10px;
+    border: 1px solid #000;
+    background-color: #d3d3d3;
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.tabs div:hover {
+    background-color: #bbb;
+}
+
+/* 📌 Logout Button */
+.logout-button {
+    padding: 5px 10px;
+    font-size: 12px;
+    border: none;
+    background-color: #d9534f;
+    color: white;
+    cursor: pointer;
+    margin-left: auto;
+}
+
+.logout-button:hover {
+    background-color: #c9302c;
+}
