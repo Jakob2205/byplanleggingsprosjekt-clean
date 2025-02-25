@@ -1,71 +1,74 @@
 import React, { useState, useEffect } from "react";
 import { questionMultipliers } from "../scripts/questionData.js";
 
-const QuestionComponent = ({ question, updateThemeScores }) => {
+const QuestionComponent = ({ question, updateQuestionScore }) => {
   const [selectedValue, setSelectedValue] = useState(null);
   const [selectedPriority, setSelectedPriority] = useState(null);
   const [isExcluded, setIsExcluded] = useState(false);
 
-  // **🔹 Handle value selection (toggle on/off)**
+  // Handle value selection with toggle logic.
   const handleValueClick = (value) => {
-    if (isExcluded) return; // Prevent selection if "Ikke aktuelt" is active
-    setSelectedValue((prevValue) => (prevValue === value ? null : value));
+    if (isExcluded) return;
+    setSelectedValue((prev) => (prev === value ? null : value));
   };
 
-  // **🔹 Handle priority selection (toggle on/off)**
+  // Handle priority selection.
+  // If "Ikke aktuelt" is chosen, mark the question as excluded.
   const handlePriorityClick = (priority) => {
     if (priority === "Ikke aktuelt") {
       setIsExcluded(true);
       setSelectedPriority(priority);
-      setSelectedValue(null); // Reset value
-      updateThemeScores(question.id, 0, false, true); // Exclude question
+      setSelectedValue(null);
     } else {
       setIsExcluded(false);
-      setSelectedPriority((prevPriority) =>
-        prevPriority === priority ? null : priority
-      );
+      setSelectedPriority((prev) => (prev === priority ? null : priority));
     }
   };
 
-  // **🔹 Calculate Score & Update Parent Component**
+  // Whenever the selection changes, update the question score.
+  // If excluded, score is 0 and the question is marked as unanswered.
   useEffect(() => {
-    if (!isExcluded) {
-      const multiplier = selectedPriority
-        ? questionMultipliers[question.id]?.[selectedPriority] || 1
-        : 1;
+    if (isExcluded) {
+      updateQuestionScore(question.id, 0, false);
+    } else {
+      const multiplier =
+        selectedPriority
+          ? questionMultipliers[question.id]?.[selectedPriority] || 1
+          : 1;
       const score = selectedValue !== null ? selectedValue * multiplier : 0;
-      updateThemeScores(question.id, score, selectedValue !== null, false);
+      updateQuestionScore(question.id, score, selectedValue !== null);
     }
-  }, [selectedValue, selectedPriority, isExcluded]);
+  }, [selectedValue, selectedPriority, isExcluded, question.id, updateQuestionScore]);
 
   return (
     <div className="question-group">
       <p>{question.text}</p>
       <div className="rating">
-        <span>Prioritet:</span>
-        {["Lav", "Normal", "Høy", "Ikke aktuelt"].map((priority) => (
-          <button
-            key={priority}
-            className={`priority-button ${
-              selectedPriority === priority ? "active" : ""
-            }`}
-            onClick={() => handlePriorityClick(priority)}
-          >
-            {priority}
-          </button>
-        ))}
-        <span>Verdi:</span>
-        {[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5].map((value) => (
-          <button
-            key={value}
-            className={`value-button ${
-              selectedValue === value ? "active" : ""
-            }`}
-            onClick={() => handleValueClick(value)}
-          >
-            {value}
-          </button>
-        ))}
+        <div className="rating-group">
+          <span>Prioritet:</span>
+          {["Lav", "Normal", "Høy", "Ikke aktuelt"].map((priority) => (
+            <button
+              key={priority}
+              className={`priority-button ${selectedPriority === priority ? "active" : ""}`}
+              onClick={() => handlePriorityClick(priority)}
+            >
+              {priority}
+            </button>
+          ))}
+        </div>
+
+        <div className="rating-group">
+          <span>Verdi:</span>
+          {[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5].map((value) => (
+            <button
+              key={value}
+              className={`value-button ${selectedValue === value ? "active" : ""}`}
+              onClick={() => handleValueClick(value)}
+            >
+              {value}
+            </button>
+          ))}
+        </div>
       </div>
       <textarea placeholder="Begrunnelse:"></textarea>
     </div>
