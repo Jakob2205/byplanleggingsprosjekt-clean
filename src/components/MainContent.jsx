@@ -1,14 +1,15 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import QuestionComponent from "../scripts/QuestionComponent.js";
 import { questions, themes } from "../scripts/questionData.js";
 
+// MainContent now accepts updateTotalScore as a prop
 const MainContent = ({ updateTotalScore }) => {
-  // New state: an object that maps question IDs to their score and answered flag.
+  // Store individual question scores and answered flags for each question.
   const [questionScores, setQuestionScores] = useState({});
+  // Track whether each theme is collapsed.
   const [collapsedThemes, setCollapsedThemes] = useState({});
 
-  // updateQuestionScore now simply stores each question's current score and answered status.
-  // Wrapped in useCallback to prevent unnecessary re-renders in children.
+  // Update the score and answered flag for a given question.
   const updateQuestionScore = useCallback((questionId, score, answered) => {
     setQuestionScores((prev) => ({
       ...prev,
@@ -16,12 +17,14 @@ const MainContent = ({ updateTotalScore }) => {
     }));
   }, []);
 
-  // Compute the theme score by aggregating scores for all questions in that theme.
-  // Only return a score if at least three questions in the theme are answered.
+  // Compute the average score for a theme based on a dynamic threshold:
+  // - If the theme has fewer than 3 questions, require all to be answered.
+  // - Otherwise, require at least 3 answered.
   const getThemeScore = (themeId) => {
-    const themeQuestions = questions.filter(q => q.theme === themeId);
+    const themeQuestions = questions.filter((q) => q.theme === themeId);
     let totalScore = 0;
     let answeredCount = 0;
+
     themeQuestions.forEach((q) => {
       const qs = questionScores[q.id];
       if (qs && qs.answered) {
@@ -29,25 +32,37 @@ const MainContent = ({ updateTotalScore }) => {
         answeredCount += 1;
       }
     });
-    return answeredCount >= 3 ? (totalScore / answeredCount).toFixed(2) : null;
+
+    // Determine threshold: if theme has fewer than 3 total questions, threshold = themeQuestions.length; else 3.
+    const threshold = themeQuestions.length < 3 ? themeQuestions.length : 3;
+    return answeredCount >= threshold ? (totalScore / answeredCount).toFixed(2) : null;
   };
 
-  // Recalculate the overall total score when any question score changes.
-  // The total score is only updated if at least three questions overall are answered.
-  useEffect(() => {
-    let totalScore = 0;
-    let totalAnswered = 0;
-    questions.forEach((q) => {
-      const qs = questionScores[q.id];
-      if (qs && qs.answered) {
-        totalScore += qs.score;
-        totalAnswered += 1;
-      }
+  // Build an object mapping theme IDs to their computed average score.
+  const themeAverageScores = useMemo(() => {
+    const scores = {};
+    themes.forEach((theme) => {
+      scores[theme.id] = getThemeScore(theme.id);
     });
-    updateTotalScore(totalAnswered >= 3 ? (totalScore / totalAnswered).toFixed(2) : 0);
-  }, [questionScores, updateTotalScore]);
+    return scores;
+  }, [questionScores]);
 
-  // Toggle the collapse state for each theme.
+  // Calculate the overall total score (Totalverdi) from active theme scores.
+  useEffect(() => {
+    const activeScores = Object.values(themeAverageScores).filter(
+      (score) => score !== null
+    );
+    const overallTotal =
+      activeScores.length > 0
+        ? (
+            activeScores.reduce((acc, score) => acc + parseFloat(score), 0) /
+            activeScores.length
+          ).toFixed(2)
+        : 0;
+    updateTotalScore(overallTotal);
+  }, [themeAverageScores, updateTotalScore]);
+
+  // Toggle the collapse state for a theme.
   const toggleCollapse = (themeId) => {
     setCollapsedThemes((prev) => ({
       ...prev,
@@ -60,7 +75,10 @@ const MainContent = ({ updateTotalScore }) => {
       {themes.map((theme) => (
         <div key={theme.id} className="tema">
           <div className="tema-header">
-            <button className="collapse-button" onClick={() => toggleCollapse(theme.id)}>
+            <button
+              className="collapse-button"
+              onClick={() => toggleCollapse(theme.id)}
+            >
               {collapsedThemes[theme.id] ? "+" : "-"}
             </button>
             <h2>{theme.title}</h2>
