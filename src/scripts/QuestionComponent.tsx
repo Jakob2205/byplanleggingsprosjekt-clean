@@ -5,24 +5,28 @@ const QuestionComponent = ({ question, updateQuestionScore, questionMultipliers,
   const currentValue = storedAnswer?.score ?? null;
   const currentAnswered = storedAnswer?.answered ?? false;
   
-  // For priority, we'll maintain local state since we have no external stored value.
+  // For priority, we maintain local state since we don't store it externally.
   const [selectedPriority, setSelectedPriority] = React.useState(null);
   const [isExcluded, setIsExcluded] = React.useState(false);
 
+  // When a value button is clicked, update the parent's state immediately.
   const handleValueClick = (value) => {
     if (isExcluded) return;
+    // Call the parent's update function immediately
     updateQuestionScore(question.id, value, true);
   };
 
+  // When a priority button is clicked, update local state and then update parent's state.
   const handlePriorityClick = (priority) => {
     if (priority === "Ikke aktuelt") {
       setIsExcluded(true);
       setSelectedPriority(priority);
+      // Mark the question as excluded (score = 0, not answered)
       updateQuestionScore(question.id, 0, false);
     } else {
       setIsExcluded(false);
       setSelectedPriority(priority);
-      // Re-calculate score using the current value and new multiplier.
+      // Re-calculate the score using the current value and the new multiplier.
       const multiplier = questionMultipliers[question.id]?.[priority] || 1;
       updateQuestionScore(question.id, currentValue !== null ? currentValue * multiplier : 0, currentValue !== null);
     }
@@ -37,6 +41,7 @@ const QuestionComponent = ({ question, updateQuestionScore, questionMultipliers,
           {["Lav", "Normal", "Høy", "Ikke aktuelt"].map((priority) => (
             <button
               key={priority}
+              // Apply the "active" class if the selectedPriority matches
               className={`priority-button ${selectedPriority === priority ? "active" : ""}`}
               onClick={() => handlePriorityClick(priority)}
             >
@@ -49,6 +54,7 @@ const QuestionComponent = ({ question, updateQuestionScore, questionMultipliers,
           {[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5].map((value) => (
             <button
               key={value}
+              // Apply "active" if the stored currentValue matches this value.
               className={`value-button ${currentValue === value ? "active" : ""}`}
               onClick={() => handleValueClick(value)}
             >
