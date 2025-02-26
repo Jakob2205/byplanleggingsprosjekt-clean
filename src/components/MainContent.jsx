@@ -160,7 +160,7 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
               </button>
               <h2>{theme.title}</h2>
               <div className="temascore-display">
-                {themeScore !== null && <span>Score: {themeScore}</span>}
+                {themeScore !== null && <span>Verdi: {themeScore}</span>}
               </div>
 
               {/* Toggle Switch for including/excluding theme from total */}
