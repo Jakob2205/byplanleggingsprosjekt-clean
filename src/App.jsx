@@ -32,9 +32,8 @@ function App() {
                 <Header onLogout={() => void 0} />
                 <div className="content-wrapper">
                   <Sidebar selectedForm={selectedForm} onSelectForm={handleSelectForm} />
-                  {/* Adding a key based on selectedForm forces MainContent to re-mount when the form changes */}
+                  {/* Do not use a key here to preserve state */}
                   <MainContent
-                    key={selectedForm}
                     updateTotalScore={updateTotalScore}
                     selectedForm={selectedForm}
                   />

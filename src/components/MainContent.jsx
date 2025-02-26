@@ -47,7 +47,7 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
       }
     });
 
-    // If no questions are answered, return null.
+    // Avoid division by zero.
     if (answeredCount === 0) {
       console.log("getThemeScore:", { themeId, totalScore, answeredCount, computedScore: null });
       return null;
@@ -143,7 +143,9 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
                 onClick={() => toggleInclude(theme.id)}
                 style={{ marginLeft: "10px" }}
               >
-                {includeInTotal[theme.id] ? "Exclude from Total" : "Include in Total"}
+                {includeInTotal[theme.id]
+                  ? "Exclude from Total"
+                  : "Include in Total"}
               </button>
             </div>
             <div
