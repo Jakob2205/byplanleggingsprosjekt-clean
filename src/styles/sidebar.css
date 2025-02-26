@@ -63,3 +63,24 @@
     color: #555;
     text-align: center;
 }
+/* FormSelector Styles */
+.form-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .form-selector button {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .form-selector button.active {
+    background-color: #4CAF50;
+    color: white;
+  }
+  

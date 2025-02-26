@@ -1,5 +1,4 @@
-// App.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
@@ -8,13 +7,18 @@ import Footer from "./components/Footer";
 import "./styles/main.css";
 
 function App() {
-  const [user, setUser] = useState(null);
   const [totalScore, setTotalScore] = useState(0);
+  // Initialize with "default" so that the default form data is loaded initially.
+  const [selectedForm, setSelectedForm] = useState("default");
 
   // Update Total Score function that will be passed to MainContent.
-  // MainContent will calculate overall Totalverdi from its theme scores and call this.
   const updateTotalScore = (score) => {
     setTotalScore(score);
+  };
+
+  // Handler for changing forms (called from FormSelector in Sidebar)
+  const handleSelectForm = (formId) => {
+    setSelectedForm(formId);
   };
 
   return (
@@ -27,9 +31,15 @@ function App() {
               <>
                 <Header onLogout={() => void 0} />
                 <div className="content-wrapper">
-                  <Sidebar />
-                  {/* Pass the updateTotalScore callback so MainContent can calculate the overall score */}
-                  <MainContent updateTotalScore={updateTotalScore} />
+                  <Sidebar 
+                    selectedForm={selectedForm} 
+                    onSelectForm={handleSelectForm} 
+                  />
+                  {/* Pass selectedForm to MainContent so it can load the corresponding form's data */}
+                  <MainContent 
+                    updateTotalScore={updateTotalScore} 
+                    selectedForm={selectedForm} 
+                  />
                 </div>
                 <Footer totalScore={totalScore} />
               </>

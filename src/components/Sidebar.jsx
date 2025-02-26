@@ -1,17 +1,19 @@
 import React from "react";
+import FormSelector from "./FormSelector"; // Adjust the path as needed
 
-const Sidebar = () => {
-    return (
-        <aside className="sidebar">
-            <div className="sidebar-top">
-                <button className="sidebar-button">+ Ny plan</button>
-            </div>
-
-            <div className="sidebar-bottom">
-                Arkiv
-            </div>
-        </aside>
-    );
+const Sidebar = ({ selectedForm, onSelectForm }) => {
+  return (
+    <aside className="sidebar">
+      <div className="sidebar-top">
+        <button className="sidebar-button">+ Ny plan</button>
+        {/* Render the FormSelector here */}
+        <FormSelector selectedForm={selectedForm} onSelectForm={onSelectForm} />
+      </div>
+      <div className="sidebar-bottom">
+        Arkiv
+      </div>
+    </aside>
+  );
 };
 
 export default Sidebar;

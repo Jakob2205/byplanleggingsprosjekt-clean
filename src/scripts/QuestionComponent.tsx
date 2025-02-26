@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { questionMultipliers } from "../scripts/questionData.js";
 
-const QuestionComponent = ({ question, updateQuestionScore }) => {
+const QuestionComponent = ({ question, updateQuestionScore, questionMultipliers }) => {
   const [selectedValue, setSelectedValue] = useState(null);
   const [selectedPriority, setSelectedPriority] = useState(null);
   const [isExcluded, setIsExcluded] = useState(false);
@@ -38,7 +37,7 @@ const QuestionComponent = ({ question, updateQuestionScore }) => {
       const score = selectedValue !== null ? selectedValue * multiplier : 0;
       updateQuestionScore(question.id, score, selectedValue !== null);
     }
-  }, [selectedValue, selectedPriority, isExcluded, question.id, updateQuestionScore]);
+  }, [selectedValue, selectedPriority, isExcluded, question.id, updateQuestionScore, questionMultipliers]);
 
   return (
     <div className="question-group">
@@ -56,7 +55,6 @@ const QuestionComponent = ({ question, updateQuestionScore }) => {
             </button>
           ))}
         </div>
-
         <div className="rating-group">
           <span>Verdi:</span>
           {[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5].map((value) => (

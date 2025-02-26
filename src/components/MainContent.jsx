@@ -1,24 +1,52 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import QuestionComponent from "../scripts/QuestionComponent.js";
-import { questions, themes } from "../scripts/questionData.js";
+// Import both default data and form2 data
+import * as defaultData from "../scripts/questionData.js";
+import * as råstoffUtvinningData from "../scripts/råstoffUtvinning.js";
 
-// MainContent now accepts updateTotalScore as a prop
-const MainContent = ({ updateTotalScore }) => {
-  // Store individual question scores and answered flags for each question.
-  const [questionScores, setQuestionScores] = useState({});
-  // Track whether each theme is collapsed.
+console.log("MainContent.jsx file is loaded in the bundle");
+
+const MainContent = ({ updateTotalScore, selectedForm }) => {
+  console.log("MainContent component is rendering now...");
+
+  // Choose which form data to use based on selectedForm.
+  // "default" represents the default form; "form2" uses råstoffUtvinningData.
+  const formData = selectedForm === "form2" ? råstoffUtvinningData : defaultData;
+  const { questions, themes, questionMultipliers } = formData;
+
+  // Instead of one state for questionScores, we store answers per form.
+  const [answersByForm, setAnswersByForm] = useState({
+    default: {},
+    form2: {},
+  });
+  // Derive the current answers based on selectedForm.
+  const currentAnswers = answersByForm[selectedForm] || {};
+
+  // Control collapse state for each theme.
   const [collapsedThemes, setCollapsedThemes] = useState({});
+  // Track whether each theme should be included in the overall Totalverdi calculation.
+  const [includeInTotal, setIncludeInTotal] = useState(() => {
+    const defaults = {};
+    themes.forEach((theme) => {
+      defaults[theme.id] = true;
+    });
+    return defaults;
+  });
 
-  // Update the score and answered flag for a given question.
+  // Update the score and answered flag for a given question in the current form.
   const updateQuestionScore = useCallback((questionId, score, answered) => {
-    setQuestionScores((prev) => ({
+    console.log("updateQuestionScore called:", { questionId, score, answered });
+    setAnswersByForm((prev) => ({
       ...prev,
-      [questionId]: { score, answered },
+      [selectedForm]: {
+        ...prev[selectedForm],
+        [questionId]: { score, answered },
+      },
     }));
-  }, []);
+  }, [selectedForm]);
 
-  // Compute the average score for a theme based on a dynamic threshold:
-  // - If the theme has fewer than 3 questions, require all to be answered.
+  // Calculate the average score for a theme based on a dynamic threshold:
+  // - If a theme has fewer than 3 questions, require all to be answered.
   // - Otherwise, require at least 3 answered.
   const getThemeScore = (themeId) => {
     const themeQuestions = questions.filter((q) => q.theme === themeId);
@@ -26,16 +54,27 @@ const MainContent = ({ updateTotalScore }) => {
     let answeredCount = 0;
 
     themeQuestions.forEach((q) => {
-      const qs = questionScores[q.id];
+      const qs = currentAnswers[q.id];
       if (qs && qs.answered) {
         totalScore += qs.score;
         answeredCount += 1;
       }
     });
 
-    // Determine threshold: if theme has fewer than 3 total questions, threshold = themeQuestions.length; else 3.
     const threshold = themeQuestions.length < 3 ? themeQuestions.length : 3;
-    return answeredCount >= threshold ? (totalScore / answeredCount).toFixed(2) : null;
+    const computedScore =
+      answeredCount >= threshold
+        ? (totalScore / answeredCount).toFixed(2)
+        : null;
+
+    console.log("getThemeScore:", {
+      themeId,
+      totalScore,
+      answeredCount,
+      threshold,
+      computedScore,
+    });
+    return computedScore;
   };
 
   // Build an object mapping theme IDs to their computed average score.
@@ -44,14 +83,19 @@ const MainContent = ({ updateTotalScore }) => {
     themes.forEach((theme) => {
       scores[theme.id] = getThemeScore(theme.id);
     });
+    console.log("themeAverageScores object built:", scores);
     return scores;
-  }, [questionScores]);
+  }, [currentAnswers, themes]);
 
-  // Calculate the overall total score (Totalverdi) from active theme scores.
+  // Calculate the overall Totalverdi based only on themes that are toggled "in."
   useEffect(() => {
-    const activeScores = Object.values(themeAverageScores).filter(
-      (score) => score !== null
-    );
+    const activeScores = themes
+      .filter((theme) => includeInTotal[theme.id])
+      .map((theme) => themeAverageScores[theme.id])
+      .filter((score) => score !== null);
+
+    console.log("Active theme scores for total:", activeScores);
+
     const overallTotal =
       activeScores.length > 0
         ? (
@@ -59,12 +103,24 @@ const MainContent = ({ updateTotalScore }) => {
             activeScores.length
           ).toFixed(2)
         : 0;
+
+    console.log("overallTotal (Totalverdi) being passed to updateTotalScore:", overallTotal);
     updateTotalScore(overallTotal);
-  }, [themeAverageScores, updateTotalScore]);
+  }, [themeAverageScores, includeInTotal, themes, updateTotalScore]);
 
   // Toggle the collapse state for a theme.
   const toggleCollapse = (themeId) => {
+    console.log("toggleCollapse clicked:", themeId);
     setCollapsedThemes((prev) => ({
+      ...prev,
+      [themeId]: !prev[themeId],
+    }));
+  };
+
+  // Toggle whether a theme's score should be included in the overall Totalverdi.
+  const toggleInclude = (themeId) => {
+    console.log("toggleInclude clicked:", themeId);
+    setIncludeInTotal((prev) => ({
       ...prev,
       [themeId]: !prev[themeId],
     }));
@@ -72,24 +128,41 @@ const MainContent = ({ updateTotalScore }) => {
 
   return (
     <main>
-      {themes.map((theme) => (
-        <div key={theme.id} className="tema">
-          <div className="tema-header">
-            <button
-              className="collapse-button"
-              onClick={() => toggleCollapse(theme.id)}
-            >
-              {collapsedThemes[theme.id] ? "+" : "-"}
-            </button>
-            <h2>{theme.title}</h2>
-            <div className="temascore-display">
-              {getThemeScore(theme.id) !== null && (
-                <span>Score: {getThemeScore(theme.id)}</span>
-              )}
+      {themes.map((theme) => {
+        const themeScore = getThemeScore(theme.id);
+        console.log("Rendering theme row:", theme.id, { themeScore });
+
+        return (
+          <div key={theme.id} className="tema">
+            <div className="tema-header">
+              {/* Collapse toggle for the theme */}
+              <button
+                className="collapse-button"
+                onClick={() => toggleCollapse(theme.id)}
+              >
+                {collapsedThemes[theme.id] ? "+" : "-"}
+              </button>
+              <h2>{theme.title}</h2>
+              {/* Display the theme's score if available */}
+              <div className="temascore-display">
+                {themeScore !== null && <span>Score: {themeScore}</span>}
+              </div>
+              {/* Toggle inclusion in Totalverdi */}
+              <button
+                className="include-toggle"
+                onClick={() => toggleInclude(theme.id)}
+                style={{ marginLeft: "10px" }}
+              >
+                {includeInTotal[theme.id]
+                  ? "Exclude from Total"
+                  : "Include in Total"}
+              </button>
             </div>
-          </div>
-          {!collapsedThemes[theme.id] && (
-            <div className="content-section">
+            {/* Always render the content section; hide it with inline style if collapsed */}
+            <div
+              className="content-section"
+              style={{ display: collapsedThemes[theme.id] ? "none" : "block" }}
+            >
               {questions
                 .filter((q) => q.theme === theme.id)
                 .map((question) => (
@@ -97,12 +170,13 @@ const MainContent = ({ updateTotalScore }) => {
                     key={question.id}
                     question={question}
                     updateQuestionScore={updateQuestionScore}
+                    questionMultipliers={questionMultipliers}
                   />
                 ))}
             </div>
-          )}
-        </div>
-      ))}
+          </div>
+        );
+      })}
     </main>
   );
 };
