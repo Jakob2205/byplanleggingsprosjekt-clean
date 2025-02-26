@@ -5,7 +5,6 @@ const Sidebar = ({ selectedForm, onSelectForm }) => {
   return (
     <aside className="sidebar">
       <div className="sidebar-top">
-        <button className="sidebar-button">+ Ny plan</button>
         {/* Render the FormSelector here */}
         <FormSelector selectedForm={selectedForm} onSelectForm={onSelectForm} />
       </div>

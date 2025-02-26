@@ -20,7 +20,7 @@ const Footer = ({ totalScore }) => {
             <div className="footer-box planinitiatv">Planinitiativ - x,xx</div>
             <div className="footer-box horingsinnpill">Høringsinnspill - x,xx</div>
             <div className="footer-box totalverdi">
-              Totalverdi - <span>{totalScore}</span>
+              Totalverdi: <span>{totalScore}</span>
             </div>
           </div>
           <div className="footer-row">

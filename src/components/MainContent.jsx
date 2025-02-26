@@ -2,19 +2,36 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import QuestionComponent from "../scripts/QuestionComponent.js";
 // Import data as namespaces since there is no default export
 import * as defaultData from "../scripts/questionData.js";
+import * as boligBebyggelsePlanInData from "../scripts/boligBebyggelsePlanIn.js";
 import * as råstoffUtvinningData from "../scripts/råstoffUtvinning.js";
+import * as råStoffPlanInData from "../scripts/råStoffPlanIn.js";
 
 console.log("MainContent.jsx file is loaded in the bundle");
 
 const MainContent = ({ updateTotalScore, selectedForm }) => {
   console.log("MainContent rendering with selectedForm:", selectedForm);
 
-  // Choose which form data to use based on selectedForm.
-  // "default" represents the default form; "form2" uses råstoffUtvinningData.
-  const formData = selectedForm === "form2" ? råstoffUtvinningData : defaultData;
+  // Select the proper data file based on selectedForm.
+  let formData;
+  switch (selectedForm) {
+    case "planIn1":
+      formData = boligBebyggelsePlanInData;
+      break;
+    case "form2":
+      formData = råstoffUtvinningData;
+      break;
+    case "planIn2":
+      formData = råStoffPlanInData;
+      break;
+    case "default":
+    default:
+      formData = defaultData;
+      break;
+  }
+  
   const { questions, themes, questionMultipliers } = formData;
 
-  // Store all answers in one state using a composite key: `${selectedForm}_${questionId}`
+  // Store all answers in one state using composite keys: `${selectedForm}_${questionId}`
   const [answers, setAnswers] = useState({});
 
   // Update the score and answered flag for a given question.
@@ -30,7 +47,7 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
     [selectedForm]
   );
 
-  // Helper: get the stored answer for a question in the current form.
+  // Helper: retrieve the stored answer for a given question.
   const getAnswer = (questionId) => answers[`${selectedForm}_${questionId}`];
 
   // Calculate the average score for a theme using answers for the current form.
@@ -38,7 +55,6 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
     const themeQuestions = questions.filter((q) => q.theme === themeId);
     let totalScore = 0;
     let answeredCount = 0;
-
     themeQuestions.forEach((q) => {
       const ans = getAnswer(q.id);
       if (ans && ans.answered) {
@@ -46,7 +62,6 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
         answeredCount++;
       }
     });
-
     if (answeredCount === 0) {
       console.log("getThemeScore:", { themeId, totalScore, answeredCount, computedScore: null });
       return null;
@@ -54,12 +69,11 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
     const threshold = themeQuestions.length < 3 ? themeQuestions.length : 3;
     const computedScore =
       answeredCount >= threshold ? (totalScore / answeredCount).toFixed(2) : null;
-
     console.log("getThemeScore:", { themeId, totalScore, answeredCount, threshold, computedScore });
     return computedScore;
   };
 
-  // Build an object mapping theme IDs to their computed average score.
+  // Build an object mapping theme IDs to computed average score.
   const themeAverageScores = useMemo(() => {
     const scores = {};
     themes.forEach((theme) => {
@@ -69,7 +83,7 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
     return scores;
   }, [answers, themes]);
 
-  // State to track whether each theme should be included in the overall total.
+  // State to track whether a theme's score should be included in the overall total.
   const [includeInTotal, setIncludeInTotal] = useState(() => {
     const defaults = {};
     themes.forEach((theme) => {
@@ -84,9 +98,7 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
       .filter((theme) => includeInTotal[theme.id])
       .map((theme) => themeAverageScores[theme.id])
       .filter((score) => score !== null);
-
     console.log("Active theme scores for total:", activeScores);
-
     const overallTotal =
       activeScores.length > 0
         ? (
@@ -94,7 +106,6 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
             activeScores.length
           ).toFixed(2)
         : 0;
-
     console.log("overallTotal (Totalverdi) being passed to updateTotalScore:", overallTotal);
     updateTotalScore(overallTotal);
   }, [themeAverageScores, includeInTotal, themes, updateTotalScore]);
@@ -109,7 +120,7 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
     }));
   };
 
-  // Toggle whether a theme's score should be included in the overall total.
+  // Toggle inclusion of a theme in the overall total.
   const toggleInclude = (themeId) => {
     console.log("toggleInclude clicked:", themeId);
     setIncludeInTotal((prev) => ({
@@ -126,10 +137,7 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
         return (
           <div key={theme.id} className="tema">
             <div className="tema-header">
-              <button
-                className="collapse-button"
-                onClick={() => toggleCollapse(theme.id)}
-              >
+              <button className="collapse-button" onClick={() => toggleCollapse(theme.id)}>
                 {collapsedThemes[theme.id] ? "+" : "-"}
               </button>
               <h2>{theme.title}</h2>
@@ -141,9 +149,7 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
                 onClick={() => toggleInclude(theme.id)}
                 style={{ marginLeft: "10px" }}
               >
-                {includeInTotal[theme.id]
-                  ? "Exclude from Total"
-                  : "Include in Total"}
+                {includeInTotal[theme.id] ? "Exclude from Total" : "Include in Total"}
               </button>
             </div>
             <div

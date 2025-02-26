@@ -7,15 +7,26 @@ const FormSelector = ({ selectedForm, onSelectForm }) => {
         onClick={() => onSelectForm("default")}
         className={selectedForm === "default" ? "active" : ""}
       >
-        Default Form
+        Boligbebyggelse Førstegangsbehandling
+      </button>
+      <button
+        onClick={() => onSelectForm("planIn1")}
+        className={selectedForm === "planIn1" ? "active" : ""}
+      >
+        BoligBegyggelsePlanIn
       </button>
       <button
         onClick={() => onSelectForm("form2")}
         className={selectedForm === "form2" ? "active" : ""}
       >
-        Form 2
+        RåstoffUtvinning Førstegangsbehandling
       </button>
-      {/* Add additional buttons for more forms as needed */}
+      <button
+        onClick={() => onSelectForm("planIn2")}
+        className={selectedForm === "planIn2" ? "active" : ""}
+      >
+        RåStoffPlanIn
+      </button>
     </div>
   );
 };
