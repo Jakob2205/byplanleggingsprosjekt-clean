@@ -8,7 +8,7 @@ import "./styles/main.css";
 
 function App() {
   const [totalScore, setTotalScore] = useState(0);
-  // Initialize with "default" so that the default form data is loaded initially.
+  // Initialize with "default" so the default form data is loaded initially.
   const [selectedForm, setSelectedForm] = useState("default");
 
   // Update Total Score function that will be passed to MainContent.
@@ -31,14 +31,12 @@ function App() {
               <>
                 <Header onLogout={() => void 0} />
                 <div className="content-wrapper">
-                  <Sidebar 
-                    selectedForm={selectedForm} 
-                    onSelectForm={handleSelectForm} 
-                  />
-                  {/* Pass selectedForm to MainContent so it can load the corresponding form's data */}
-                  <MainContent 
-                    updateTotalScore={updateTotalScore} 
-                    selectedForm={selectedForm} 
+                  <Sidebar selectedForm={selectedForm} onSelectForm={handleSelectForm} />
+                  {/* Adding a key based on selectedForm forces MainContent to re-mount when the form changes */}
+                  <MainContent
+                    key={selectedForm}
+                    updateTotalScore={updateTotalScore}
+                    selectedForm={selectedForm}
                   />
                 </div>
                 <Footer totalScore={totalScore} />
