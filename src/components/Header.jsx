@@ -20,7 +20,7 @@ const Header = () => {
 
   return (
     <header className="header-container">
-      <h1>Planoversikt - Instans/Firma - Brukernavn</h1>
+      <h1>Plansikt</h1>
       <div className="tabs">
         <div>Casestudie</div>
         <div>Planinitiativ</div>

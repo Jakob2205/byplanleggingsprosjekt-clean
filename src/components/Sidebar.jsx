@@ -9,7 +9,6 @@ const Sidebar = ({ selectedForm, onSelectForm }) => {
         <FormSelector selectedForm={selectedForm} onSelectForm={onSelectForm} />
       </div>
       <div className="sidebar-bottom">
-        Arkiv
       </div>
     </aside>
   );

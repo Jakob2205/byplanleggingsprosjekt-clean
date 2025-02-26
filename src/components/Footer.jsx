@@ -16,7 +16,7 @@ const Footer = ({ totalScore }) => {
       {!collapsed && (
         <>
           <div className="footer-row">
-            <button className="footer-box export-pdf">Eksporter til PDF</button>
+            <button className="footer-box export-pdf"></button>
             <div className="footer-box planinitiatv">Planinitiativ - x,xx</div>
             <div className="footer-box horingsinnpill">Høringsinnspill - x,xx</div>
             <div className="footer-box totalverdi">
@@ -24,14 +24,14 @@ const Footer = ({ totalScore }) => {
             </div>
           </div>
           <div className="footer-row">
-            <button className="footer-box export-word">Eksporter til Word</button>
+            <button className="footer-box export-word"></button>
             <div className="footer-box forstegangsbehandling">
               Førstegangsbehandling - x,xx
             </div>
             <div className="footer-box sluttbehandling">
               Sluttbehandling - x,xx
             </div>
-            <button className="footer-box import-sosi">Importer SOSI-fil</button>
+            <button className="footer-box import-sosi"></button>
           </div>
         </>
       )}
