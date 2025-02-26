@@ -5,14 +5,13 @@
 // -------------------------------
 export const themes = [
     { id: "r_tema1", title: "Egnethet" },
-    { id: "r_tema2", title: "Infrastruktur og samferdsel" },
-    { id: "r_tema3", title: "Utforming og inngrep" },
-    { id: "r_tema4", title: "Lekeplasser, natur- og grøntområder" },
-    { id: "r_tema5", title: "Barn og unges interesser" },
-    { id: "r_tema6", title: "Universell utforming og tilgjengelighet" },
-    { id: "r_tema7", title: "Vann og avløp" },
-    { id: "r_tema8", title: "Rekkefølgekrav" },
-    { id: "r_tema9", title: "Kvalitet på plan og kunnskapsgrunnlag" },
+    { id: "r_tema2", title: "Utforming og inngrep" },
+    { id: "r_tema3", title: "Natur og miljø" },
+    { id: "r_tema4", title: "Påvirkning av omkrigliggende områder" },
+    { id: "r_tema5", title: "Samferdsel og logistikk" },
+    { id: "r_tema6", title: "Tilbakeføring og sonedeling" },
+    { id: "r_tema7", title: "Rekkefølgekrav" },
+    { id: "r_tema8", title: "Kvalitet på plan og kunnskapsgrunnlag" },
   ];
   
   // -------------------------------

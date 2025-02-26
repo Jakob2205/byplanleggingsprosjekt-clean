@@ -6,6 +6,7 @@ import * as boligBebyggelsePlanInData from "../scripts/boligBebyggelsePlanIn.js"
 import * as råstoffUtvinningData from "../scripts/råstoffUtvinning.js";
 import * as råStoffPlanInData from "../scripts/råStoffPlanIn.js";
 
+
 console.log("MainContent.jsx file is loaded in the bundle");
 
 const MainContent = ({ updateTotalScore, selectedForm }) => {
@@ -28,7 +29,7 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
       formData = defaultData;
       break;
   }
-  
+
   const { questions, themes, questionMultipliers } = formData;
 
   // Store all answers in one state using composite keys: `${selectedForm}_${questionId}`
@@ -63,13 +64,24 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
       }
     });
     if (answeredCount === 0) {
-      console.log("getThemeScore:", { themeId, totalScore, answeredCount, computedScore: null });
+      console.log("getThemeScore:", {
+        themeId,
+        totalScore,
+        answeredCount,
+        computedScore: null,
+      });
       return null;
     }
     const threshold = themeQuestions.length < 3 ? themeQuestions.length : 3;
     const computedScore =
       answeredCount >= threshold ? (totalScore / answeredCount).toFixed(2) : null;
-    console.log("getThemeScore:", { themeId, totalScore, answeredCount, threshold, computedScore });
+    console.log("getThemeScore:", {
+      themeId,
+      totalScore,
+      answeredCount,
+      threshold,
+      computedScore,
+    });
     return computedScore;
   };
 
@@ -133,24 +145,33 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
     <main>
       {themes.map((theme) => {
         const themeScore = getThemeScore(theme.id);
+        const isIncluded = includeInTotal[theme.id];
+
         console.log("Rendering theme row:", theme.id, { themeScore });
+
         return (
           <div key={theme.id} className="tema">
             <div className="tema-header">
-              <button className="collapse-button" onClick={() => toggleCollapse(theme.id)}>
+              <button
+                className="collapse-button"
+                onClick={() => toggleCollapse(theme.id)}
+              >
                 {collapsedThemes[theme.id] ? "+" : "-"}
               </button>
               <h2>{theme.title}</h2>
               <div className="temascore-display">
                 {themeScore !== null && <span>Score: {themeScore}</span>}
               </div>
-              <button
-                className="include-toggle"
-                onClick={() => toggleInclude(theme.id)}
-                style={{ marginLeft: "10px" }}
-              >
-                {includeInTotal[theme.id] ? "Exclude from Total" : "Include in Total"}
-              </button>
+
+              {/* Toggle Switch for including/excluding theme from total */}
+              <label className="toggle-switch" style={{ marginLeft: "10px" }}>
+                <input
+                  type="checkbox"
+                  checked={isIncluded}
+                  onChange={() => toggleInclude(theme.id)}
+                />
+                <span className="slider" />
+              </label>
             </div>
             <div
               className="content-section"
