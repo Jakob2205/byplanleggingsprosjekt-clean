@@ -7,7 +7,7 @@ import * as råstoffUtvinningData from "../scripts/råstoffUtvinning.js";
 console.log("MainContent.jsx file is loaded in the bundle");
 
 const MainContent = ({ updateTotalScore, selectedForm }) => {
-  console.log("MainContent component is rendering now with selectedForm:", selectedForm);
+  console.log("MainContent rendering with selectedForm:", selectedForm);
 
   // Choose which form data to use based on selectedForm.
   // "default" represents the default form; "form2" uses råstoffUtvinningData.
@@ -30,7 +30,7 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
     [selectedForm]
   );
 
-  // Helper: get the answer for a question in the current form.
+  // Helper: get the stored answer for a question in the current form.
   const getAnswer = (questionId) => answers[`${selectedForm}_${questionId}`];
 
   // Calculate the average score for a theme using answers for the current form.
@@ -47,7 +47,6 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
       }
     });
 
-    // Avoid division by zero.
     if (answeredCount === 0) {
       console.log("getThemeScore:", { themeId, totalScore, answeredCount, computedScore: null });
       return null;
@@ -66,7 +65,7 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
     themes.forEach((theme) => {
       scores[theme.id] = getThemeScore(theme.id);
     });
-    console.log("themeAverageScores object built:", scores);
+    console.log("themeAverageScores built:", scores);
     return scores;
   }, [answers, themes]);
 
@@ -124,7 +123,6 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
       {themes.map((theme) => {
         const themeScore = getThemeScore(theme.id);
         console.log("Rendering theme row:", theme.id, { themeScore });
-
         return (
           <div key={theme.id} className="tema">
             <div className="tema-header">
@@ -160,6 +158,7 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
                     question={question}
                     updateQuestionScore={updateQuestionScore}
                     questionMultipliers={questionMultipliers}
+                    storedAnswer={getAnswer(question.id)}
                   />
                 ))}
             </div>
