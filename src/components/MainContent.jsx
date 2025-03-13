@@ -6,13 +6,12 @@ import * as boligBebyggelsePlanInData from "../scripts/boligBebyggelsePlanIn.js"
 import * as råstoffUtvinningData from "../scripts/råstoffUtvinning.js";
 import * as råStoffPlanInData from "../scripts/råStoffPlanIn.js";
 
-
 console.log("MainContent.jsx file is loaded in the bundle");
 
 const MainContent = ({ updateTotalScore, selectedForm }) => {
   console.log("MainContent rendering with selectedForm:", selectedForm);
 
-  // Select the proper data file based on selectedForm.
+  // Select the correct data file based on selectedForm.
   let formData;
   switch (selectedForm) {
     case "planIn1":
@@ -51,30 +50,30 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
   // Helper: retrieve the stored answer for a given question.
   const getAnswer = (questionId) => answers[`${selectedForm}_${questionId}`];
 
-  // Calculate the average score for a theme using answers for the current form.
+  // Helper: Calculate the theme score
   const getThemeScore = (themeId) => {
     const themeQuestions = questions.filter((q) => q.theme === themeId);
     let totalScore = 0;
-    let answeredCount = 0;
+    let activeQuestions = 0;
+
     themeQuestions.forEach((q) => {
       const ans = getAnswer(q.id);
       if (ans && ans.answered) {
         totalScore += ans.score;
-        answeredCount++;
+        activeQuestions++;
       }
     });
-    if (answeredCount === 0) {
-      console.log("getThemeScore:", { themeId, totalScore, answeredCount, computedScore: null });
-      return null;
+
+    if (activeQuestions === 0) {
+      return null; // No active questions in theme, return null
     }
-    const threshold = themeQuestions.length < 3 ? themeQuestions.length : 3;
-    const computedScore =
-      answeredCount >= threshold ? (totalScore / answeredCount).toFixed(2) : null;
-    console.log("getThemeScore:", { themeId, totalScore, answeredCount, threshold, computedScore });
-    return computedScore;
+
+    const themeScore = totalScore / activeQuestions; // Normalize by active questions
+
+    return parseFloat(Math.max(-5, Math.min(themeScore, 5)).toFixed(2)); // Clamp and format
   };
 
-  // Build an object mapping theme IDs to computed average score.
+  // Build an object mapping theme IDs to computed theme scores.
   const themeAverageScores = useMemo(() => {
     const scores = {};
     themes.forEach((theme) => {
@@ -84,7 +83,7 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
     return scores;
   }, [answers, themes]);
 
-  // State to track whether each theme's score is included in the overall total.
+  // State to track whether each theme's score is included in the total score.
   const [includeInTotal, setIncludeInTotal] = useState(() => {
     const defaults = {};
     themes.forEach((theme) => {
@@ -99,14 +98,15 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
       .filter((theme) => includeInTotal[theme.id])
       .map((theme) => themeAverageScores[theme.id])
       .filter((score) => score !== null);
-    console.log("Active theme scores for total:", activeScores);
-    const overallTotal =
-      activeScores.length > 0
-        ? (
-            activeScores.reduce((acc, score) => acc + parseFloat(score), 0) /
-            activeScores.length
-          ).toFixed(2)
-        : 0;
+    
+    let overallTotal = 0;
+    if (activeScores.length > 0) {
+      overallTotal = activeScores.reduce((acc, score) => acc + parseFloat(score), 0) / activeScores.length;
+    }
+
+    // Clamp the total score between -5 and 5, and format to 2 decimal places
+    overallTotal = parseFloat(Math.max(-5, Math.min(overallTotal, 5)).toFixed(2));
+
     console.log("overallTotal (Totalverdi) being passed to updateTotalScore:", overallTotal);
     updateTotalScore(overallTotal);
   }, [themeAverageScores, includeInTotal, themes, updateTotalScore]);
@@ -114,7 +114,6 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
   // Collapse state for each theme.
   const [collapsedThemes, setCollapsedThemes] = useState({});
   const toggleCollapse = (themeId) => {
-    console.log("toggleCollapse clicked:", themeId);
     setCollapsedThemes((prev) => ({
       ...prev,
       [themeId]: !prev[themeId],
@@ -123,7 +122,6 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
 
   // Toggle inclusion of a theme in the overall total.
   const toggleInclude = (themeId) => {
-    console.log("toggleInclude clicked:", themeId);
     setIncludeInTotal((prev) => ({
       ...prev,
       [themeId]: !prev[themeId],
@@ -135,7 +133,7 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
       {themes.map((theme) => {
         const themeScore = getThemeScore(theme.id);
         const isIncluded = includeInTotal[theme.id];
-        console.log("Rendering theme row:", theme.id, { themeScore });
+
         return (
           <div key={theme.id} className="tema">
             <div className="tema-header">
@@ -144,7 +142,7 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
               </button>
               <h2>{theme.title}</h2>
               <div className="temascore-display">
-                {themeScore !== null && <span>Verdi: {themeScore}</span>}
+                {themeScore !== null && <span>Verdi: {themeScore.toFixed(2)}</span>}
               </div>
               {/* Toggle Switch for including/excluding theme from total */}
               <label className="toggle-switch" htmlFor={`toggle-${theme.id}`} style={{ marginLeft: "10px" }}>
