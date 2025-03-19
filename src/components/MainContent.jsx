@@ -34,6 +34,15 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
   // Store all answers in one state using composite keys: `${selectedForm}_${questionId}`
   const [answers, setAnswers] = useState({});
 
+  // State to track whether each theme's score is included in the overall total.
+  const [includeInTotal, setIncludeInTotal] = useState(() => {
+    const defaults = {};
+    themes.forEach((theme) => {
+      defaults[theme.id] = true;
+    });
+    return defaults;
+  });
+
   // Update the score and answered flag for a given question.
   const updateQuestionScore = useCallback(
     (questionId, score, answered) => {
@@ -50,7 +59,7 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
   // Helper: retrieve the stored answer for a given question.
   const getAnswer = (questionId) => answers[`${selectedForm}_${questionId}`];
 
-  // Helper: Calculate the theme score
+  // Helper: Calculate the theme score and active question count.
   const getThemeScore = (themeId) => {
     const themeQuestions = questions.filter((q) => q.theme === themeId);
     let totalScore = 0;
@@ -64,13 +73,14 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
       }
     });
 
-    if (activeQuestions === 0) {
-      return null; // No active questions in theme, return null
+    // If fewer than 3 active questions exist in a theme, we return null so that
+    // the theme is not included in the total.
+    if (activeQuestions < 3) {
+      return null;
     }
 
-    const themeScore = totalScore / activeQuestions; // Normalize by active questions
-
-    return parseFloat(Math.max(-5, Math.min(themeScore, 5)).toFixed(2)); // Clamp and format
+    const themeScore = totalScore / activeQuestions;
+    return parseFloat(Math.max(-5, Math.min(themeScore, 5)).toFixed(2));
   };
 
   // Build an object mapping theme IDs to computed theme scores.
@@ -83,14 +93,18 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
     return scores;
   }, [answers, themes]);
 
-  // State to track whether each theme's score is included in the total score.
-  const [includeInTotal, setIncludeInTotal] = useState(() => {
-    const defaults = {};
-    themes.forEach((theme) => {
-      defaults[theme.id] = true;
+  // Automatically disable themes with fewer than 3 active questions.
+  useEffect(() => {
+    setIncludeInTotal((prev) => {
+      const newInclude = { ...prev };
+      themes.forEach((theme) => {
+        if (getThemeScore(theme.id) === null) {
+          newInclude[theme.id] = false;
+        }
+      });
+      return newInclude;
     });
-    return defaults;
-  });
+  }, [themeAverageScores, themes]);
 
   // Calculate the overall Totalverdi based on active theme scores.
   useEffect(() => {
@@ -103,10 +117,7 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
     if (activeScores.length > 0) {
       overallTotal = activeScores.reduce((acc, score) => acc + parseFloat(score), 0) / activeScores.length;
     }
-
-    // Clamp the total score between -5 and 5, and format to 2 decimal places
     overallTotal = parseFloat(Math.max(-5, Math.min(overallTotal, 5)).toFixed(2));
-
     console.log("overallTotal (Totalverdi) being passed to updateTotalScore:", overallTotal);
     updateTotalScore(overallTotal);
   }, [themeAverageScores, includeInTotal, themes, updateTotalScore]);
@@ -151,6 +162,7 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
                   type="checkbox"
                   checked={isIncluded}
                   onChange={() => toggleInclude(theme.id)}
+                  disabled={themeScore === null} // Disable if theme doesn't meet the threshold
                 />
                 <span className="slider" />
               </label>

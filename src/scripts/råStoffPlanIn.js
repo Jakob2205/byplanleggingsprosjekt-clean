@@ -1,80 +1,169 @@
-// newForm.js
-
-// -------------------------------
-// Themes
-// -------------------------------
+// **y_question Data**
 export const themes = [
-    { id: "y_tema1", title: "Egnethet" },
-    { id: "y_tema2", title: "Ser" },
-  ];
-  
-  // -------------------------------
-  // Question List
-  // -------------------------------
-  export const questions = [
-    // Tema 1: Egnethet
-    { id: "y_q1", theme: "y_tema1", text: "I hvilke grad har området en god økonomisk forutsetning for å realisere prosjektet?" },
-    { id: "y_q2", theme: "y_tema1", text: "I hvilke grad kan foretaket generere samfunns- og økonomiske verdier?" },
-    { id: "y_q3", theme: "y_tema1", text: "Hvilke påvirkning vil tiltaket ha på dyrket og dyrkbar mark?" },
-    { id: "y_q4", theme: "y_tema1", text: "Hvilke påvirkning vil tiltaket ha for urørt natur og dyreliv?" },
-    { id: "y_q5", theme: "y_tema1", text: "Er dagens infrastruktur frem til området egnet for forventet trafikkøkning?" },
-    { id: "y_q6", theme: "y_tema1", text: "Er dagens terreng krevende eller enkelt for å realisere prosjektet?" },
-    { id: "y_q7", theme: "y_tema1", text: "Hvordan påvirkes eventuelle kulturmiljø og kulturminner?" },
-    { id: "y_q8", theme: "y_tema1", text: "I hvilke grad egner området seg for råstoffutvinning kontra andre arealformål, da også nullalternativ?" },
-    { id: "y_q9", theme: "y_tema1", text: "Er utgangspunktet godt for å oppnå gode støyforhold for omkringliggende områder, da også natur?" },
-    { id: "y_q10", theme: "y_tema1", text: "Foreligger det et godt utgangspunkt for synergier med andre foretak og næringer innenfor nærområdet?" },
-    { id: "y_q11", theme: "y_tema1", text: "I hvilke grad er utvinningen samfunnsmessig nødvendig?" },
-    { id: "y_q12", theme: "y_tema1", text: "I hvilke grad kan området tilbakeføres i en forbedret tilstand?" },
-    { id: "y_q13", theme: "y_tema1", text: "I hvilke grad gjøres det irreversible inngrep som forringer dagens tilstand?" },
-    { id: "y_q14", theme: "y_tema1", text: "I hvilke grad kan det gjennomføres et gradvis uttak og en gradvis tilbakeføring?" },
-    { id: "y_q15", theme: "y_tema1", text: "Hvilke påvirkning vil uttaket ha for miljø og klima?" },
-    
-    // Tema 2: Ser prosjekt ut til å tilpasse seg gitte premisser?
-    { id: "y_q18", theme: "y_tema2", text: "Ser prosjektet ut til å tilpasse seg omkringliggende miljø i driftstiden?" },
-    { id: "y_q19", theme: "y_tema2", text: "Ser tenkt sluttprodukt etter endt uttak ut til å tilpasse seg omkringliggende miljø?" },
-    { id: "y_q20", theme: "y_tema2", text: "Har man gjort en god innledende vurdering på mulig etterbruk av området?" },
-    { id: "y_q21", theme: "y_tema2", text: "Ser prosjektet ut til å følge overordnede bestemmelser og retningslinjer?" },
-    { id: "y_q22", theme: "y_tema2", text: "Legges det gode premisser for at viktige natur- og terrengformasjoner kan bevares?" },
-    { id: "y_q23", theme: "y_tema2", text: "Har man i tilstrekkelig grad vurdert aktuelle tileggsfunksjoner? Har man et godt utgangspunkt for å etablere funksjonene?" },
-    { id: "y_q24", theme: "y_tema2", text: "Legges det gode premisser for soneinndelt uttak, dersom det er aktuelt?" },
-    { id: "y_q25", theme: "y_tema2", text: "Er innledende planavgrensing hensiktsmessig?" },
-    { id: "y_q26", theme: "y_tema2", text: "Skapes det gode forutsetninger for intern infrastruktur og infrastruktur frem til hovedinfrastruktur?" },
-    { id: "y_q27", theme: "y_tema2", text: "Legges det gode premisser for å forhindre uønskede hendelser og forurrensning?" },
-    { id: "y_q28", theme: "y_tema2", text: "Legges det gode premisser for å bruk av bimasser?" },
-    { id: "y_q29", theme: "y_tema2", text: "Er foreslått utvikling i tråd med tenkt helhetlig utvikling av nærområdet?" }
-  ];
-  
-  export const questionMultipliers = {
-    // Tema 1 Egnethet
-    y_q1: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    y_q2: { Lav: 0.6, Normal: 1.1, Høy: 1.5, "Ikke aktuelt": 1 },
-    y_q3: { Lav: 1, Normal: 1.4, Høy: 1.8, "Ikke aktuelt": 1 },
-    y_q4: { Lav: 1, Normal: 1.4, Høy: 1.8, "Ikke aktuelt": 1 },
-    y_q5: { Lav: 0.6, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    y_q6: { Lav: 0.6, Normal: 0.8, Høy: 1.2, "Ikke aktuelt": 1 },
-    y_q7: { Lav: 0.5, Normal: 1, Høy: 1.5, "Ikke aktuelt": 1 },
-    y_q8: { Lav: 0.5, Normal: 1, Høy: 1.3, "Ikke aktuelt": 1 },
-    y_q9: { Lav: 0.4, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    y_q10: { Lav: 0.6, Normal: 0.8, Høy: 1.2, "Ikke aktuelt": 1 },
-    y_q11: { Lav: 0.8, Normal: 1.2, Høy: 1.6, "Ikke aktuelt": 1 },
-    y_q12: { Lav: 0.5, Normal: 0.8, Høy: 1, "Ikke aktuelt": 1 },
-    y_q13: { Lav: 0.5, Normal: 1, Høy: 1.5, "Ikke aktuelt": 1 },
-    y_q14: { Lav: 0.4, Normal: 1, Høy: 1.5, "Ikke aktuelt": 1 },
-    y_q15: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    y_q16: { Lav: 0.6, Normal: 0.8, Høy: 1, "Ikke aktuelt": 1 },
-    y_q17: { Lav: 0.5, Normal: 0.9, Høy: 1.3, "Ikke aktuelt": 1 },
-    // Tema 2 Infrastruktur og samferdsel
-    y_q18: { Lav: 0.7, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    y_q19: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    y_q20: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    y_q21: { Lav: 0.7, Normal: 1, Høy: 1.3, "Ikke aktuelt": 1 },
-    y_q22: { Lav: 0.6, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    y_q23: { Lav: 0.8, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
-    y_q24: { Lav: 0.7, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    y_q25: { Lav: 0.6, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
-    y_q26: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    y_q27: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    y_q28: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    y_q29: { Lav: 0.6, Normal: 1, Høy: 1, "Ikke aktuelt": 1 },
-  };
-  
+  { id: "y_tema1", title: "Egnethet" },
+  { id: "y_tema2", title: "Utforming og inngrep" },
+  { id: "y_tema3", title: "Natur og miljø" },
+  { id: "y_tema4", title: "Påvirkning av omkrigliggende områder" },
+  { id: "y_tema5", title: "Samferdsel og logistikk" },
+  { id: "y_tema6", title: "Tilbakeføring og sonedeling" },
+  { id: "y_tema7", title: "Rekkefølgekrav" },
+  { id: "y_tema8", title: "Kvalitet på plan og kunnskapsgrunnlag" },
+];
+
+// **question List**
+export const questions = [
+  //y_tema 1 Egnethet
+  { id: "y_q1", theme: "y_tema1", text: "I hvilke grad har området en god økonomisk forutsetning for å realisere prosjektet?" },
+  { id: "y_q2", theme: "y_tema1", text: "I hvilke grad kan foretaket generere samfunns- og økonomiske verdier?" },
+  { id: "y_q3", theme: "y_tema1", text: "Hvilke påvirkning vil tiltaket ha på dyrket og dyrkbar mark?" },
+  { id: "y_q4", theme: "y_tema1", text: "Hvilke påvirkning vil tiltaket ha for urørt natur og dyreliv?" },
+  { id: "y_q5", theme: "y_tema1", text: "Er dagens infrastruktur frem til området egnet for forventet trafikkøkning?" },
+  { id: "y_q6", theme: "y_tema1", text: "Er dagens terreng krevende eller enkelt for å realisere prosjektet?" },
+  { id: "y_q7", theme: "y_tema1", text: "Hvordan påvirkes eventuelle kulturmiljø og kulturminner?" },
+  { id: "y_q8", theme: "y_tema1", text: "I hvilke grad egner området seg for råstoffutvinning kontra andre arealformål, da også nullalternativ?" },
+  { id: "y_q9", theme: "y_tema1", text: "Er utgangspunktet godt for å oppnå gode støyforhold for omkringliggende områder, da også natur?" },
+  { id: "y_q10", theme: "y_tema1", text: "Foreligger det et godt utgangspunkt for synergier med andre foretak og næringer?" },
+  { id: "y_q11", theme: "y_tema1", text: "I hvilke grad er utvinningen samfunnsmessig nødvendig?" },
+  { id: "y_q12", theme: "y_tema1", text: "I hvilke grad kan området tilbakeføres i en forbedret tilstand?" },
+  { id: "y_q13", theme: "y_tema1", text: "I hvilke grad gjøres det irreversible inngrep som forringer dagens tilstand?" },
+  { id: "y_q14", theme: "y_tema1", text: "I hvilke grad kan det gjennomføres et gradvis uttak og en gradvis tilbakeføring?" },
+  { id: "y_q15", theme: "y_tema1", text: "Hvilke påvirkning vil uttaket ha for miljø og klima?" },
+  //y_tema 2 Utforming og inngrep
+  { id: "y_q18", theme: "y_tema2", text: "Sikres det nødvendig areal til lagring og mellomlagring av masser?" },
+  { id: "y_q19", theme: "y_tema2", text: "Sikres en god håndtering av eventuelle biprodukter fra uttaket?" },
+  { id: "y_q20", theme: "y_tema2", text: "Setter man hensiktsmessige dybdegrenser for maksimalt uttak, som gir en god balanse mellom utnytting av arealressurs og ivaretakelse av andre interesser?" },
+  { id: "y_q21", theme: "y_tema2", text: "Setter man hensiktsmessige arealgrenser for maksimalt uttak, som gir en god balanse mellom utnytting av arealressurs og ivaretakelse av andre interesser?" },
+  { id: "y_q22", theme: "y_tema2", text: "Er det kartlagt hvilke andre funksjoner som kan ha synergier med råstoffutvinningen som legges til området? Er det eventuelt en hensiktsmessig plassering for slike funksjoner?" },
+  { id: "y_q23", theme: "y_tema2", text: "Dersom man tenker sonedelt uttak, sikres det tilstrekkelig areal for alle nødvendige funksjoner for hver sone?" },
+  { id: "y_q24", theme: "y_tema2", text: "Sikres det areal til nødvendig bebyggelse?" },
+  { id: "y_q25", theme: "y_tema2", text: "I hvilke grad er det tenkt på og avsatt areal til nødvendige serviceareal som f.eks parkering og servicefunksjoner?" },
+  //y_tema 3 Natur og miljø
+  { id: "y_q26", theme: "y_tema3", text: "I hvilken grad vil foretak forurrense miljøet?Sikres det en god estetisk kvalitet?" },
+  { id: "y_q27", theme: "y_tema3", text: "I hvilke grad kan foretaket forårsake negative og uplanlagte miljøhendelser? " },
+  { id: "y_q28", theme: "y_tema3", text: "Foreligger det rødlistede arter innenfor planområdet, om ja, hvordan er ivaretagelsen av artene?" },
+  { id: "y_q29", theme: "y_tema3", text: "Hvilke påvirkning vil foretaket ha på vassdrag og vannmiljø?" },
+  { id: "y_q30", theme: "y_tema3", text: "Beholdes identifiserte viktige naturelement som trær, terrengformasjoner og dyreliv og får de en naturlig kobling til tilgresende naturområder?" },
+  { id: "y_q31", theme: "y_tema3", text: "Er eksisternde natur- og landskapsdrag av høy kvalitet identifisert og sikret bevart?" },
+  { id: "y_q32", theme: "y_tema3", text: "Dersom området skal tilbakeføres til natur- eller kulturlandskap; I hvilken grad sikres en bedre utforming og bruk av området kontra dagens situasjon?" },
+  { id: "y_q33", theme: "y_tema3", text: "Er avrenning fra området i tilstrekkelig grad håndtert?" },
+  { id: "y_q34", theme: "y_tema3", text: "Er overvannssystemer og flomveier sikret og vist i plankart?" },
+  //y_tema 4 Påvirkning på omkringliggende områder
+  { id: "y_q35", theme: "y_tema4", text: "Sikres det hensiktsmessige åpningstider for uttak for å redusere påkjenning på omkringliggende områder?" },
+  { id: "y_q36", theme: "y_tema4", text: "Settes det i nødvendig grad krav om støvreduserende tiltak?" },
+  { id: "y_q37", theme: "y_tema4", text: "Settes det i nødvendig grad krav om støyreduserende tiltak?" },
+  { id: "y_q38", theme: "y_tema4", text: "Sikres området i tilstrekkelig grad mot uønsket bruk og hendelser?" },
+  { id: "y_q39", theme: "y_tema4", text: "Settes det av nødvendige landskaps- og terrengbuffere mot tilgrensende funksjoner og urørt natur?" },
+  { id: "y_q40", theme: "y_tema4", text: "Er det tatt tilstrekkelige hensyn til tilgrensende funksjoner, som boliger, landbruk, reakreasjonstilbud m.m?" },
+  { id: "y_q41", theme: "y_tema4", text: "Hvilke fjernvirkninger vil utvinningsanlegget ha?" },
+  { id: "y_q42", theme: "y_tema4", text: "Hvilke påvirkning har tiltaket på berørte kulturminner og kulturmiljø?" },
+  //y_tema 5 Samferdsel og logistikk
+  { id: "y_q43", theme: "y_tema5", text: "I hvilke grad sikres det en tilstrekkelig veistandard frem til uttaket på offentlig vei?" },
+  { id: "y_q44", theme: "y_tema5", text: "Sikres det tilstrekkelig gode og sikre kryssløsninger fra uttak til offentlig vei?" },
+  { id: "y_q45", theme: "y_tema5", text: "I hvilke grad sikres en hensiktsmessig standard og utforming på internt veinett?" },
+  { id: "y_q46", theme: "y_tema5", text: "Er veinettet som benyttes tilstrekkelig dimensjonert for forventet trafikkøkning og bruk, da også med tanke på støy" },
+  { id: "y_q47", theme: "y_tema5", text: "Sikres det et hensiktsmessig antall parkeringsplasser?" },
+  { id: "y_q48", theme: "y_tema5", text: "Sikres det tilstrekkelig kvalitet for utforming og lokalisering av parkeringsløsninger?" },
+  { id: "y_q49", theme: "y_tema5", text: "I hvilke grad sikres det en tilstrekkelig sikkerhet for myke trafikanter på veinett som benyttes?" },
+  { id: "y_q50", theme: "y_tema5", text: "Sikres det tilstrekkelig antall sykkelparkeringsplasser og kvalitet på disse?" },
+  { id: "y_q51", theme: "y_tema5", text: "Får tiltaket tilstrekkelig kollektivdekning?" },
+  //y_tema 6 Tilbakeføring og sonedeling
+  { id: "y_q52", theme: "y_tema6", text: "Er det i tilstrekkelig grad utforsket alternativer til etterbruk av området?" },
+  { id: "y_q53", theme: "y_tema6", text: "Er det utarbeidet en hensiktsmessig tilbakeføringsplan som knyttes opp til og sikres i planens bestemmelser?" },
+  { id: "y_q54", theme: "y_tema6", text: "Er det sikret en sonedelt gradvis tilbakeføring etterhvert som uttaket fullføres?" },
+  { id: "y_q55", theme: "y_tema6", text: "Får tilbakeført område en hensiktsmessig utforming som gir et naturlig preg og er tilrettelagt for enkel etablering av tenkt etterbruksformål?" },
+  { id: "y_q56", theme: "y_tema6", text: "Får området en bedre utforming og bruk som et resultat av råstoffutvinningen?" },
+  { id: "y_q57", theme: "y_tema6", text: "Bevares råmateriale slik at det, i den grad det er mulig, kan brukes ved etablering av etterbruk?" },
+  //y_tema 7 Rekkefølgekrav
+  { id: "y_q58", theme: "y_tema7", text: "I hvilke grad sikres rekkefølgekrav for opparbeiding av nødvendig infrastruktur for samferdsel?" },
+  { id: "y_q59", theme: "y_tema7", text: "I hvilke grad sikres rekkefølgekrav for nødvendige tiltak for miljø og avrenning?" },
+  { id: "y_q60", theme: "y_tema7", text: "I hvilke grad sikres rekkefølgekrav for tilbakeføring av utvinningsområder, da også sonedelt tilbakeføring?" },
+  { id: "y_q61", theme: "y_tema7", text: "I hvilke grad sikres rekkefølgekrav for etablering av eventuelle terrengbuffere og andre tiltak som er ment å forhindre negative konsekvenser på omkringliggende områder?" },
+  { id: "y_q62", theme: "y_tema7", text: "I hvilke grad sikres andre nødvendige rekkefølgekrav for prosjektet?" },
+  //y_tema 8 Kvalitet på plan og kunnskapsgrunnlag
+  { id: "y_q63", theme: "y_tema8", text: "Foreligger det et nødvendig kunnskapsgrunnlag for å kunne sette gode rekkefølgekrav?" },
+  { id: "y_q64", theme: "y_tema8", text: "Foreligger det et nødvendig kunnskapsgrunnlag for å oppnå tilstrekkelig sikkerhet for planområdet og omkringliggende områder?" },
+  { id: "y_q65", theme: "y_tema8", text: "Foreligger det et nødvendig kunnskapsgrunnlag for å kunne vurdere og ivareta natur-, kultur-, og miljøinteresser?" },
+  { id: "y_q66", theme: "y_tema8", text: "I hvilke grad er plankart tilstrekkelig detaljert for å sikre planens intensjoner og kvaliteter?" },
+  { id: "y_q67", theme: "y_tema8", text: "I hvilke grad er bestemmelser i nødvendig grad konkrete og i nødvendig grad dekkende for å sikre planens intensjoner og kvaliteter?" },
+  { id: "y_q68", theme: "y_tema8", text: "Foreligger det tilstrekkelig gode illustrasjoner og snitt som viser dagens terreng, terreng etter uttak og terreng ved etterbruk?" },
+  { id: "y_q69", theme: "y_tema8", text: "Er det i stor grad samsvar mellom ikke juridiske og juridisk bindende dokumenter?" }
+];
+
+// **Priority Multipliers (Uniy_que per y_question)**
+export const y_questionMultipliers = {
+  //y_tema 1 Egnethet
+  y_q1: { Lav: 0.8, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q2: { Lav: 0.6, Normal: 1.1, Høy: 1.5, "Ikke aktuelt": 1 },
+  y_q3: { Lav: 1, Normal: 1.4, Høy: 1.8, "Ikke aktuelt": 1 },
+  y_q4: { Lav: 1, Normal: 1.4, Høy: 1.8, "Ikke aktuelt": 1 },
+  y_q5: { Lav: 0.6, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
+  y_q6: { Lav: 0.6, Normal: 0.8, Høy: 1.2, "Ikke aktuelt": 1 },
+  y_q7: { Lav: 0.5, Normal: 1, Høy: 1.5, "Ikke aktuelt": 1 },
+  y_q8: { Lav: 0.5, Normal: 1, Høy: 1.3, "Ikke aktuelt": 1 },
+  y_q9: { Lav: 0.4, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
+  y_q10: { Lav: 0.6, Normal: 0.8, Høy: 1.2, "Ikke aktuelt": 1 },
+  y_q11: { Lav: 0.8, Normal: 1.2, Høy: 1.6, "Ikke aktuelt": 1 },
+  y_q12: { Lav: 0.5, Normal: 1, Høy: 1.5, "Ikke aktuelt": 1 },
+  y_q13: { Lav: 0.5, Normal: 1, Høy: 1.5, "Ikke aktuelt": 1 },
+  y_q14: { Lav: 0.4, Normal: 1, Høy: 1.5, "Ikke aktuelt": 1 },
+  y_q15: { Lav: 0.8, Normal: 1.2, Høy: 1.6, "Ikke aktuelt": 1 },
+  //y_tema 2 Utforming og inngrep
+  y_q18: { Lav: 0.6, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q19: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
+  y_q20: { Lav: 0.8, Normal: 1.2, Høy: 1.6, "Ikke aktuelt": 1 },
+  y_q21: { Lav: 0.8, Normal: 1.2, Høy: 1.6, "Ikke aktuelt": 1 },
+  y_q22: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
+  y_q23: { Lav: 0.6, Normal: 1, Høy: 1.3, "Ikke aktuelt": 1 },
+  y_q24: { Lav: 0.6, Normal: 0.8, Høy: 1.2, "Ikke aktuelt": 1 },
+  y_q25: { Lav: 0.4, Normal: 0.6, Høy: 0.8, "Ikke aktuelt": 1 },
+  //y_tema 3 Natur og miljø
+  y_q26: { Lav: 0.8, Normal: 1.2, Høy: 1.6, "Ikke aktuelt": 1 },
+  y_q27: { Lav: 0.4, Normal: 1, Høy: 1.3, "Ikke aktuelt": 1 },
+  y_q28: { Lav: 1, Normal: 1.2, Høy: 1.6, "Ikke aktuelt": 1 },
+  y_q29: { Lav: 0.5, Normal: 1, Høy: 1.5, "Ikke aktuelt": 1 },
+  y_q30: { Lav: 0.7, Normal: 1.1, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q31: { Lav: 0.7, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q32: { Lav: 1, Normal: 1.2, Høy: 1.6, "Ikke aktuelt": 1 },
+  y_q33: { Lav: 0.5, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q34: { Lav: 0.4, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
+  //y_tema 4 Påvirkning på omkringliggende områder
+  y_q35: { Lav: 0.6, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q36: { Lav: 0.8, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q37: { Lav: 0.8, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q38: { Lav: 0.6, Normal: 0.8, Høy: 1.2, "Ikke aktuelt": 1 },
+  y_q39: { Lav: 0.8, Normal: 1.2, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q40: { Lav: 1, Normal: 1.2, Høy: 1.6, "Ikke aktuelt": 1 },
+  y_q41: { Lav: 0.6, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q42: { Lav: 0.5, Normal: 1, Høy: 1.6, "Ikke aktuelt": 1 },
+  //y_tema 5 Samferdsel og logistikk
+  y_q43: { Lav: 0.8, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q44: { Lav: 0.8, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q45: { Lav: 0.8, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q46: { Lav: 1, Normal: 1.2, Høy: 1.6, "Ikke aktuelt": 1 },
+  y_q47: { Lav: 0.5, Normal: 0.8, Høy: 1.2, "Ikke aktuelt": 1 },
+  y_q48: { Lav: 0.5, Normal: 0.8, Høy: 1.1, "Ikke aktuelt": 1 },
+  y_q49: { Lav: 1, Normal: 1.2, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q50: { Lav: 0.4, Normal: 0.7, Høy: 1, "Ikke aktuelt": 1 },
+  y_q51: { Lav: 0.4, Normal: 0.7, Høy: 1, "Ikke aktuelt": 1 },
+  //y_tema 6 Tilbakeføring og sonedeling
+  y_q52: { Lav: 0.4, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q53: { Lav: 0.4, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
+  y_q54: { Lav: 0.6, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q55: { Lav: 0.7, Normal: 1, Høy: 1.3, "Ikke aktuelt": 1 },
+  y_q56: { Lav: 0.7, Normal: 1, Høy: 1.5, "Ikke aktuelt": 1 },
+  y_q57: { Lav: 0.8, Normal: 1, Høy: 1.3, "Ikke aktuelt": 1 },
+  //y_tema 7 Rekkefølgekrav
+  y_q58: { Lav: 0.8, Normal: 1.2, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q59: { Lav: 0.8, Normal: 1.1, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q60: { Lav: 0.8, Normal: 1.1, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q61: { Lav: 0.6, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
+  y_q62: { Lav: 0.6, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
+  //y_tema 8 Kvalitet på plan og kunnskapsgrunnlag
+  y_q63: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
+  y_q64: { Lav: 1, Normal: 1.2, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q65: { Lav: 1, Normal: 1.4, Høy: 1.8, "Ikke aktuelt": 1 },
+  y_q66: { Lav: 1, Normal: 1.2, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q67: { Lav: 1, Normal: 1.2, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q68: { Lav: 1, Normal: 1.2, Høy: 1.4, "Ikke aktuelt": 1 },
+  y_q69: { Lav: 1, Normal: 1.2, Høy: 1.4, "Ikke aktuelt": 1 }
+};

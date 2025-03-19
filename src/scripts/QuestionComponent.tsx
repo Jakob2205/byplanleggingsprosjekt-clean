@@ -35,9 +35,6 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
     storedAnswer ? !storedAnswer.answered : false
   );
 
-  // NOTE: We removed the effect that reinitializes local state when storedAnswer changes
-  // so that the component's state persists and doesn't reset on re-renders.
-
   // Handler for value buttons.
   const handleValueClick = (value: number) => {
     if (isExcluded) return;
@@ -57,7 +54,7 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
   // Handler for priority buttons.
   const handlePriorityClick = (priority: string) => {
     if (selectedPriority === priority) {
-      // Toggling off: remove priority (and multiplier) so score reverts to rawValue.
+      // Toggle off the currently active priority (remove multiplier).
       setSelectedPriority(null);
       setIsExcluded(false);
       updateQuestionScore(question.id, rawValue, rawValue !== null);
@@ -78,26 +75,8 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
     }
   };
 
-  // useEffect to update parent's score when local state changes.
-  useEffect(() => {
-    if (isExcluded) {
-      updateQuestionScore(question.id, 0, false);
-    } else if (rawValue !== null) {
-      const multiplier = selectedPriority
-        ? questionMultipliers[question.id]?.[selectedPriority] || 1
-        : 1;
-      updateQuestionScore(question.id, rawValue * multiplier, true);
-    } else {
-      updateQuestionScore(question.id, null, false);
-    }
-  }, [
-    rawValue,
-    selectedPriority,
-    isExcluded,
-    question.id,
-    updateQuestionScore,
-    questionMultipliers,
-  ]);
+  // We no longer use an additional useEffect here to re-update the score.
+  // All updates occur within the event handlers.
 
   return (
     <div className="question-group">
