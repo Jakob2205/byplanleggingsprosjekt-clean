@@ -1,0 +1,27 @@
+/* Layout Adjustments */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Main Content Grid */
+.content-wrapper {
+    display: flex;
+    width: 100%;
+    flex-grow: 1;
+}
+
+/* Sidebar */
+.sidebar {
+    flex: 1;  /* Sidebar takes 1 fraction */
+    max-width: 25%; /* Optional: Limit sidebar width */
+    border-right: 1px solid #ccc;
+    background-color: #f5f5f5;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Main Content */
+main {
+    flex: 3;  /* Main content takes 3 fractions */
+}
