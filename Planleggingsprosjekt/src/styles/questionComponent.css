@@ -1,0 +1,52 @@
+/* 📌 Question Group Styling */
+.tema .question-group {
+    margin-top: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* 📌 Rating Buttons */
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.rating span {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.rating button {
+    padding: 3px 8px;
+    font-size: 12px;
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.rating button:hover {
+    background-color: #ddd;
+}
+
+/* 📌 Highlight Selected Button (Active State) */
+.rating button.active {
+    background-color: #676060; /* Dark gray background */
+    color: #111;            /* Darker text */
+    border-color: #222;     /* Darker border */
+}
+
+/* 📌 Text Area */
+textarea {
+    width: 100%;
+    margin-top: 10px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: vertical;
+    height: 60px;
+}
