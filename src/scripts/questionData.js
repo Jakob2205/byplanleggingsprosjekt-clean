@@ -1,4 +1,6 @@
 // **Question Data**
+
+
 export const themes = [
   { id: "tema1", title: "Egnethet" },
   { id: "tema2", title: "Infrastruktur og samferdsel" },
