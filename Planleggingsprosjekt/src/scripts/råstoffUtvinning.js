@@ -1,11 +1,11 @@
 // **r_question Data**
-export const themes = [
+export const r_themes = [
   { id: "r_tema1", title: "Egnethet" },
   { id: "r_tema2", title: "Ser " },
 ];
 
 // **r_question List**
-export const questions = [
+export const r_questions = [
   //r_tema 1 Egnethet
   { id: "r_q1", theme: "r_tema1", text: "I hvilke grad har området en god økonomisk forutsetning for å realisere prosjektet?" },
   { id: "r_q2", theme: "r_tema1", text: "I hvilke grad kan foretaket generere samfunns- og økonomiske verdier?" },
@@ -65,10 +65,10 @@ export const r_questionMultipliers = {
   r_q25: { Lav: 0.8, Normal: 1.1, Høy: 1.4, "Ikke aktuelt": 1 },
   r_q26: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
   r_q27: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-  r_q27: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 }
+  r_q28: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 }
 };
 // **y_question Data**
-export const themes = [
+export const y_themes = [
   { id: "y_tema1", title: "Egnethet" },
   { id: "y_tema2", title: "Utforming og inngrep" },
   { id: "y_tema3", title: "Natur og miljø" },
