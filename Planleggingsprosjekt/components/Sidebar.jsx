@@ -1,5 +1,5 @@
-import React from "react";
 import FormSelector from "./FormSelector"; // Adjust the path as needed
+import PropTypes from "prop-types";
 
 const Sidebar = ({ selectedForm, onSelectForm }) => {
   return (
@@ -12,6 +12,11 @@ const Sidebar = ({ selectedForm, onSelectForm }) => {
       </div>
     </aside>
   );
+};
+
+Sidebar.propTypes = {
+  selectedForm: PropTypes.any,
+  onSelectForm: PropTypes.func.isRequired,
 };
 
 export default Sidebar;

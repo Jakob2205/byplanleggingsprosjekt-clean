@@ -1,9 +1,9 @@
-name: Deploy site to GitHub Pages
+name: Deploy React app to GitHub Pages
 
 on:
   push:
-    branches: ["reactbranch"]   # kjør når du pusher til main
-  workflow_dispatch:     # lar deg trigge manuelt fra Actions
+    branches: ["reactbranch"]   # kjør på reactbranch
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -20,14 +20,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/jekyll-build-pages@v1
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          source: .
-          destination: ./_site
+          node-version: 20
 
-      - uses: actions/upload-pages-artifact@v3
+      - name: Install deps
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Disable Jekyll
+        run: |
+          mkdir -p dist
+          touch dist/.nojekyll
+        # ⬆️ Vite bruker "dist". Hvis du bruker Create React App, bytt "dist" -> "build".
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: ./_site
+          path: ./dist
+        # ⬆️ Bytt til ./build hvis CRA.
 
   deploy:
     environment:
