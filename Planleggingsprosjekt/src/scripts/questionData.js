@@ -1,5 +1,4 @@
 // **Question Data**
-
 export const themes = [
   { id: "tema1", title: "Egnethet" },
   { id: "tema2", title: "Infrastruktur og samferdsel" },
@@ -136,7 +135,7 @@ export const questionMultipliers = {
   q16: { Lav: 0.6, Normal: 0.8, Høy: 1, "Ikke aktuelt": 1 },
   q17: { Lav: 0.5, Normal: 0.9, Høy: 1.3, "Ikke aktuelt": 1 },
   //Tema 2 Infrastruktur og samferdsel
-  q18: { Lav: 0.7, Normal: 1, Høy: 1.3, "Ikke aktuelt": 1 },
+  q18: { Lav: 0.7, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
   q19: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
   q20: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
   q21: { Lav: 0.7, Normal: 1, Høy: 1.3, "Ikke aktuelt": 1 },
