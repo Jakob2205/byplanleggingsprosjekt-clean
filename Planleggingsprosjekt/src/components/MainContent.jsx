@@ -1,17 +1,31 @@
+// Planleggingsprosjekt/src/components/MainContent.jsx
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import QuestionComponent from "../scripts/QuestionComponent.js";
-// Import data as namespaces since there is no default export
+
+// Datasett
 import * as defaultData from "../scripts/questionData.js";
 import * as boligBebyggelsePlanInData from "../scripts/boligBebyggelsePlanIn.js";
 import * as råstoffUtvinningData from "../scripts/råstoffUtvinning.js";
 import * as råStoffPlanInData from "../scripts/råStoffPlanIn.js";
 
+// Firestore
+import { db } from "../firebase-config";
+import {
+  collection,
+  addDoc,
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+
 console.log("MainContent.jsx file is loaded in the bundle");
 
-const MainContent = ({ updateTotalScore, selectedForm }) => {
-  console.log("MainContent rendering with selectedForm:", selectedForm);
+const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // Select the correct data file based on selectedForm.
+  // Velg datasett
   let formData;
   switch (selectedForm) {
     case "planIn1":
@@ -28,26 +42,48 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
       formData = defaultData;
       break;
   }
-  
-  const { questions, themes, questionMultipliers } = formData;
 
-  // Store all answers in one state using composite keys: `${selectedForm}_${questionId}`
+  // Defensiv destructuring (unngå undefined-crash)
+  const {
+    questions: questionsRaw = [],
+    themes: themesRaw = [],
+  } = formData;
+
+  // 🔧 Finn riktig multiplikator-export uansett navn
+  const resolvedMultipliers =
+    formData.questionMultipliers ||
+    formData.t_questionMultipliers ||
+    formData.r_questionMultipliers ||
+    formData.y_questionMultipliers ||
+    formData.b_questionMultipliers || // legg til flere alias om du har andre filer
+    {};
+
+  // Memoize questions and themes to prevent re-creation on every render
+  const { questions, themes } = useMemo(() => {
+    const { questions: qs = [], themes: thms = [] } = formData;
+    return { questions: qs, themes: thms };
+  }, [formData]);
+
+  // ---- Lokal state ----
   const [answers, setAnswers] = useState({});
+  const [includeInTotal, setIncludeInTotal] = useState({});
+  const [formName, setFormName] = useState("");
+  const instanceId = searchParams.get("instanceId") || null;
 
-  // State to track whether each theme's score is included in the overall total.
-  const [includeInTotal, setIncludeInTotal] = useState(() => {
+  // Reset når template byttes
+  useEffect(() => {
     const defaults = {};
-    themes.forEach((theme) => {
-      defaults[theme.id] = true;
-    });
-    return defaults;
-  });
+    themes.forEach((t) => (defaults[t.id] = true));
+    setIncludeInTotal(defaults);
+    setAnswers({});
+    setFormName("");
+    // ikke rør instanceId i URL – du kan fortsette i samme instans om du vil
+  }, [selectedForm, themes]);
 
-  // Update the score and answered flag for a given question.
+  // Oppdater svar
   const updateQuestionScore = useCallback(
     (questionId, score, answered) => {
       const key = `${selectedForm}_${questionId}`;
-      console.log("updateQuestionScore called:", { key, score, answered, selectedForm });
       setAnswers((prev) => ({
         ...prev,
         [key]: { score, answered },
@@ -56,117 +92,266 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
     [selectedForm]
   );
 
-  // Helper: retrieve the stored answer for a given question.
   const getAnswer = (questionId) => answers[`${selectedForm}_${questionId}`];
 
-  // Helper: Calculate the theme score and active question count.
+  // Tema-score
   const getThemeScore = (themeId) => {
     const themeQuestions = questions.filter((q) => q.theme === themeId);
-    let totalScore = 0;
-    let activeQuestions = 0;
+    let total = 0;
+    let active = 0;
 
     themeQuestions.forEach((q) => {
       const ans = getAnswer(q.id);
       if (ans && ans.answered) {
-        totalScore += ans.score;
-        activeQuestions++;
+        total += ans.score;
+        active++;
       }
     });
 
-    // If fewer than 3 active questions exist in a theme, we return null so that
-    // the theme is not included in the total.
-    if (activeQuestions < 3) {
-      return null;
-    }
-
-    const themeScore = totalScore / activeQuestions;
-    return parseFloat(Math.max(-5, Math.min(themeScore, 5)).toFixed(2));
+    if (active < 3) return null;
+    const score = total / active;
+    return parseFloat(Math.max(-5, Math.min(score, 5)).toFixed(2));
   };
 
-  // Build an object mapping theme IDs to computed theme scores.
   const themeAverageScores = useMemo(() => {
     const scores = {};
-    themes.forEach((theme) => {
-      scores[theme.id] = getThemeScore(theme.id);
+    themes.forEach((t) => {
+      scores[t.id] = getThemeScore(t.id);
     });
-    console.log("themeAverageScores built:", scores);
     return scores;
   }, [answers, themes]);
 
-  // Automatically disable themes with fewer than 3 active questions.
+  // Auto-deaktiver tema < 3 spørsmål (trygg – kun sett state hvis noe endres)
   useEffect(() => {
     setIncludeInTotal((prev) => {
-      const newInclude = { ...prev };
-      themes.forEach((theme) => {
-        if (getThemeScore(theme.id) === null) {
-          newInclude[theme.id] = false;
+      const next = { ...prev };
+
+      themes.forEach((t) => {
+        const score = themeAverageScores[t.id]; // null eller tall
+        if (score === null) {
+          next[t.id] = false;
+        } else if (!(t.id in next)) {
+          // nye tema (ved bytte av template) default til true
+          next[t.id] = true;
         }
       });
-      return newInclude;
+
+      // unngå unødvendig state-oppdatering
+      const same =
+        Object.keys(next).length === Object.keys(prev).length &&
+        Object.keys(next).every((k) => next[k] === prev[k]);
+
+      return same ? prev : next;
     });
   }, [themeAverageScores, themes]);
 
-  // Calculate the overall Totalverdi based on active theme scores.
+  // Totalverdi
   useEffect(() => {
     const activeScores = themes
-      .filter((theme) => includeInTotal[theme.id])
-      .map((theme) => themeAverageScores[theme.id])
-      .filter((score) => score !== null);
-    
-    let overallTotal = 0;
+      .filter((t) => includeInTotal[t.id])
+      .map((t) => themeAverageScores[t.id])
+      .filter((s) => s !== null && typeof s !== "undefined");
+
+    let overall = 0;
     if (activeScores.length > 0) {
-      overallTotal = activeScores.reduce((acc, score) => acc + parseFloat(score), 0) / activeScores.length;
+      overall =
+        activeScores.reduce((acc, s) => acc + parseFloat(s), 0) /
+        activeScores.length;
     }
-    overallTotal = parseFloat(Math.max(-5, Math.min(overallTotal, 5)).toFixed(2));
-    console.log("overallTotal (Totalverdi) being passed to updateTotalScore:", overallTotal);
-    updateTotalScore(overallTotal);
+    overall = parseFloat(Math.max(-5, Math.min(overall, 5)).toFixed(2));
+    updateTotalScore(overall);
   }, [themeAverageScores, includeInTotal, themes, updateTotalScore]);
 
-  // Collapse state for each theme.
+  // Kollaps/inkludering
   const [collapsedThemes, setCollapsedThemes] = useState({});
-  const toggleCollapse = (themeId) => {
-    setCollapsedThemes((prev) => ({
-      ...prev,
-      [themeId]: !prev[themeId],
-    }));
+  const toggleCollapse = (themeId) =>
+    setCollapsedThemes((p) => ({ ...p, [themeId]: !p[themeId] }));
+  const toggleInclude = (themeId) =>
+    setIncludeInTotal((p) => ({ ...p, [themeId]: !p[themeId] }));
+
+  // ==========================
+  // Firestore: lasting/lagring
+  // ==========================
+
+  // Last inn eksisterende instans
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadInstance(id) {
+      try {
+        const snap = await getDoc(doc(db, "forms", id));
+        if (!snap.exists()) return;
+
+        const data = snap.data();
+
+        if (data.formId && data.formId !== selectedForm) {
+          console.warn(
+            `Instansen er laget med formId="${data.formId}", men nå vises "${selectedForm}".`
+          );
+        }
+
+        if (!mounted) return;
+
+        setFormName(data.name || "");
+        setAnswers(data.answers || {});
+        if (data.includeInTotal) {
+          setIncludeInTotal((prev) => ({ ...prev, ...data.includeInTotal }));
+        }
+      } catch (e) {
+        console.error("Kunne ikke laste instans:", e);
+      }
+    }
+
+    if (instanceId) loadInstance(instanceId);
+    return () => {
+      mounted = false;
+    };
+  }, [instanceId, selectedForm]);
+
+  // Lagre (ny / oppdater)
+  const handleSave = async () => {
+    try {
+      if (!userId) {
+        alert("Du må være logget inn for å lagre.");
+        return;
+      }
+
+      if (!instanceId) {
+        const ref = await addDoc(collection(db, "forms"), {
+          userId, // 🔐 nødvendig for reglene
+          formId: selectedForm,
+          name: formName || "Uten navn",
+          answers,
+          includeInTotal,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+        setSearchParams({ instanceId: ref.id });
+        alert("Skjema lagret ✅");
+      } else {
+        await setDoc(
+          doc(db, "forms", instanceId),
+          {
+            // userId ligger allerede på dokumentet; ikke la klienten endre eier
+            name: formName || "Uten navn",
+            answers,
+            includeInTotal,
+            updatedAt: serverTimestamp(),
+          },
+          { merge: true }
+        );
+        alert("Endringer lagret ✅");
+      }
+    } catch (e) {
+      console.error("Feil ved lagring:", e);
+      alert(
+        e?.code === "permission-denied"
+          ? "Manglende rettigheter. Sjekk Firestore-reglene og at du er logget inn."
+          : "Klarte ikke lagre. Se konsoll for detaljer."
+      );
+    }
   };
 
-  // Toggle inclusion of a theme in the overall total.
-  const toggleInclude = (themeId) => {
-    setIncludeInTotal((prev) => ({
-      ...prev,
-      [themeId]: !prev[themeId],
-    }));
+  // Lagre som kopi
+  const handleSaveAsCopy = async () => {
+    try {
+      if (!userId) {
+        alert("Du må være logget inn for å lagre.");
+        return;
+      }
+
+      const ref = await addDoc(collection(db, "forms"), {
+        userId, // 🔐 nødvendig for reglene
+        formId: selectedForm,
+        name: formName ? `${formName} (kopi)` : "Uten navn (kopi)",
+        answers,
+        includeInTotal,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      setSearchParams({ instanceId: ref.id });
+      alert("Kopi lagret ✅");
+    } catch (e) {
+      console.error("Feil ved lagring av kopi:", e);
+      alert(
+        e?.code === "permission-denied"
+          ? "Manglende rettigheter. Sjekk Firestore-reglene og at du er logget inn."
+          : "Klarte ikke lagre kopi. Se konsoll for detaljer."
+      );
+    }
   };
 
   return (
     <main>
+      {/* Verktøylinje */}
+      <div
+        style={{
+          display: "flex",
+          gap: 12,
+          alignItems: "center",
+          padding: "8px 0 16px",
+          borderBottom: "1px solid #ddd",
+          marginBottom: 16,
+        }}
+      >
+        <input
+          type="text"
+          placeholder="Skjemanavn (f.eks. Felt A – høst 2025)"
+          value={formName}
+          onChange={(e) => setFormName(e.target.value)}
+          style={{
+            flex: 1,
+            padding: "8px 10px",
+            border: "1px solid #ccc",
+            borderRadius: 6,
+          }}
+        />
+        <button onClick={handleSave} disabled={!userId}>
+          Lagre
+        </button>
+        <button onClick={handleSaveAsCopy} disabled={!userId}>
+          Lagre som kopi
+        </button>
+        <span style={{ color: "#666", fontSize: 12 }}>
+          ID: {instanceId ? instanceId : "nytt (ikke lagret)"} {userId ? "" : " – (ikke innlogget)"}
+        </span>
+      </div>
+
       {themes.map((theme) => {
-        const themeScore = getThemeScore(theme.id);
-        const isIncluded = includeInTotal[theme.id];
+        const themeScore = themeAverageScores[theme.id];
+        const isIncluded = !!includeInTotal[theme.id];
 
         return (
           <div key={theme.id} className="tema">
             <div className="tema-header">
-              <button className="collapse-button" onClick={() => toggleCollapse(theme.id)}>
+              <button
+                className="collapse-button"
+                onClick={() => toggleCollapse(theme.id)}
+              >
                 {collapsedThemes[theme.id] ? "+" : "-"}
               </button>
               <h2>{theme.title}</h2>
               <div className="temascore-display">
-                {themeScore !== null && <span>Verdi: {themeScore.toFixed(2)}</span>}
+                {themeScore !== null && typeof themeScore !== "undefined" && (
+                  <span>Verdi: {themeScore.toFixed(2)}</span>
+                )}
               </div>
-              {/* Toggle Switch for including/excluding theme from total */}
-              <label className="toggle-switch" htmlFor={`toggle-${theme.id}`} style={{ marginLeft: "10px" }}>
+              <label
+                className="toggle-switch"
+                htmlFor={`toggle-${theme.id}`}
+                style={{ marginLeft: "10px" }}
+              >
                 <input
                   id={`toggle-${theme.id}`}
                   type="checkbox"
                   checked={isIncluded}
                   onChange={() => toggleInclude(theme.id)}
-                  disabled={themeScore === null} // Disable if theme doesn't meet the threshold
+                  disabled={themeScore === null}
                 />
                 <span className="slider" />
               </label>
             </div>
+
             <div
               className="content-section"
               style={{ display: collapsedThemes[theme.id] ? "none" : "block" }}
@@ -178,7 +363,8 @@ const MainContent = ({ updateTotalScore, selectedForm }) => {
                     key={question.id}
                     question={question}
                     updateQuestionScore={updateQuestionScore}
-                    questionMultipliers={questionMultipliers}
+                    // 👇 pass den løste multiplikator-tabellen
+                    questionMultipliers={resolvedMultipliers}
                     storedAnswer={getAnswer(question.id)}
                   />
                 ))}

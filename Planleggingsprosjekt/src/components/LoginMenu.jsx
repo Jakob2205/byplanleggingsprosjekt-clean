@@ -1,7 +1,7 @@
 // components/LoginMenu.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../scripts/firebase-config";
+import { auth } from "../firebase-config";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
 const LoginMenu = () => {

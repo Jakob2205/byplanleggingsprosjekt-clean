@@ -1,51 +1,80 @@
+// Planleggingsprosjekt/src/App.jsx
 import { useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
+
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import MainContent from "./components/MainContent";
 import Footer from "./components/Footer";
+import Login from "./components/Login";
+
 import "./styles/main.css";
 
-function App() {
+// ✅ Only import AuthProvider and useAuth from the context
+import { AuthProvider, useAuth } from "./context/AuthContext";
+
+// ✅ Define the route guard inline (do NOT import it)
+function RequireAuth({ children }) {
+  const { user, initializing } = useAuth();
+  const location = useLocation();
+
+  if (initializing) {
+    return <div style={{ padding: 24, fontFamily: "sans-serif" }}>Laster …</div>;
+  }
+  if (!user) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+  return children;
+}
+
+function MainLayout() {
   const [totalScore, setTotalScore] = useState(0);
-  // Initialize with "default" so the default form data is loaded initially.
   const [selectedForm, setSelectedForm] = useState("default");
-
-  // Update Total Score function that will be passed to MainContent.
-  const updateTotalScore = (score) => {
-    setTotalScore(score);
-  };
-
-  // Handler for changing forms (called from FormSelector in Sidebar)
-  const handleSelectForm = (formId) => {
-    setSelectedForm(formId);
-  };
+  const { user } = useAuth(); // Firebase user
 
   return (
-    <Router>
-      <div className="app-container">
+    <>
+      <Header />
+      <div className="content-wrapper">
+        <Sidebar
+          selectedForm={selectedForm}
+          onSelectForm={setSelectedForm}
+          userId={user?.uid}
+        />
+        <MainContent
+          updateTotalScore={setTotalScore}
+          selectedForm={selectedForm}
+          userId={user?.uid}
+        />
+      </div>
+      <Footer totalScore={totalScore} />
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <Router>
         <Routes>
           <Route
             path="/"
             element={
-              <>
-                <Header onLogout={() => void 0} />
-                <div className="content-wrapper">
-                  <Sidebar selectedForm={selectedForm} onSelectForm={handleSelectForm} />
-                  {/* Do not use a key here to preserve state */}
-                  <MainContent
-                    updateTotalScore={updateTotalScore}
-                    selectedForm={selectedForm}
-                  />
-                </div>
-                <Footer totalScore={totalScore} />
-              </>
+              <RequireAuth>
+                <MainLayout />
+              </RequireAuth>
             }
           />
+          <Route path="/login" element={<Login />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </div>
-    </Router>
+      </Router>
+    </AuthProvider>
   );
 }
-
-export default App;
