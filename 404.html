@@ -1,23 +1,12 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
-    <title>Redirecting...</title>
+    <meta charset="utf-8" />
+    <title>SPA Redirect</title>
     <script type="text/javascript">
-      // This script is a workaround for GitHub Pages' lack of true SPA support.
-      // It captures the intended path from the URL, stores it in sessionStorage,
-      // and then redirects to the index.html file.
-      // The script in index.html will then read this path and use React Router
-      // to display the correct component.
-
-      // Get the path from the URL, e.g., "/byplanleggingsprosjekt-clean/login"
-      const path = window.location.pathname;
-
-      // Store the path in sessionStorage
-      sessionStorage.redirect = path;
-
-      // Redirect to the root of the repository, which serves index.html
-      window.location.href = '/byplanleggingsprosjekt-clean/';
+      const path = sessionStorage.getItem('path');
+      if (path) sessionStorage.removeItem('path');
+      window.location.replace(path || '/byplanleggingsprosjekt-clean/');
     </script>
   </head>
   <body>

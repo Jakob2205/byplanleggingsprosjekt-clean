@@ -5,6 +5,13 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ByPlanleggingsProsjekt</title>
+    <script>
+      const path = window.location.pathname.split('/byplanleggingsprosjekt-clean')[1];
+      if (path && path !== '/') {
+        sessionStorage.setItem('path', window.location.href);
+        window.location.replace('/byplanleggingsprosjekt-clean/404.html');
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
