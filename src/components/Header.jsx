@@ -1,17 +1,15 @@
 // components/Header.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { signOut } from "firebase/auth";
-import { auth } from "../firebase-config";
-import { useAuth } from "../context/AuthContext"; // 👈 import context
+import { useAuth } from "../context/AuthContext";
 
 const Header = () => {
   const navigate = useNavigate();
-  const { user } = useAuth(); // 👈 get current user from context
+  const { user, logout } = useAuth(); // ✅ Get user and logout function from context
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await logout(); // ✅ Use the logout function from context
       console.log("User logged out");
       navigate("/login"); // redirect to login page
     } catch (error) {

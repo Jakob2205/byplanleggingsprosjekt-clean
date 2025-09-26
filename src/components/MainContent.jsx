@@ -188,38 +188,39 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
     };
   }, [instanceId, selectedForm]);
 
-  // Lagre (ny / oppdater)
-  const handleSave = async () => {
+  // ✅ Generic save function to reduce duplication
+  const saveForm = async (isCopy = false) => {
     try {
       if (!userId) {
         alert("Du må være logget inn for å lagre.");
         return;
       }
 
-      if (!instanceId) {
-        const ref = await addDoc(collection(db, "forms"), {
+      const isNew = !instanceId || isCopy;
+      const dataToSave = {
+        name: formName || "Uten navn",
+        answers,
+        includeInTotal,
+        updatedAt: serverTimestamp(),
+      };
+
+      if (isNew) {
+        // Create a new document (either initial save or save as copy)
+        const docPayload = {
+          ...dataToSave,
           userId, // 🔐 nødvendig for reglene
           formId: selectedForm,
-          name: formName || "Uten navn",
-          answers,
-          includeInTotal,
           createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        });
+        };
+        if (isCopy) {
+          docPayload.name = `${docPayload.name} (kopi)`;
+        }
+        const ref = await addDoc(collection(db, "forms"), docPayload);
         setSearchParams({ instanceId: ref.id });
-        alert("Skjema lagret ✅");
+        alert(isCopy ? "Kopi lagret ✅" : "Skjema lagret ✅");
       } else {
-        await setDoc(
-          doc(db, "forms", instanceId),
-          {
-            // userId ligger allerede på dokumentet; ikke la klienten endre eier
-            name: formName || "Uten navn",
-            answers,
-            includeInTotal,
-            updatedAt: serverTimestamp(),
-          },
-          { merge: true }
-        );
+        // Update an existing document
+        await setDoc(doc(db, "forms", instanceId), dataToSave, { merge: true });
         alert("Endringer lagret ✅");
       }
     } catch (e) {
@@ -227,39 +228,16 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
       alert(
         e?.code === "permission-denied"
           ? "Manglende rettigheter. Sjekk Firestore-reglene og at du er logget inn."
-          : "Klarte ikke lagre. Se konsoll for detaljer."
+          : `Klarte ikke lagre${isCopy ? ' kopi' : ''}. Se konsoll for detaljer.`
       );
     }
   };
+
+  // Lagre (ny / oppdater)
+  const handleSave = () => saveForm(false);
 
   // Lagre som kopi
-  const handleSaveAsCopy = async () => {
-    try {
-      if (!userId) {
-        alert("Du må være logget inn for å lagre.");
-        return;
-      }
-
-      const ref = await addDoc(collection(db, "forms"), {
-        userId, // 🔐 nødvendig for reglene
-        formId: selectedForm,
-        name: formName ? `${formName} (kopi)` : "Uten navn (kopi)",
-        answers,
-        includeInTotal,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-      setSearchParams({ instanceId: ref.id });
-      alert("Kopi lagret ✅");
-    } catch (e) {
-      console.error("Feil ved lagring av kopi:", e);
-      alert(
-        e?.code === "permission-denied"
-          ? "Manglende rettigheter. Sjekk Firestore-reglene og at du er logget inn."
-          : "Klarte ikke lagre kopi. Se konsoll for detaljer."
-      );
-    }
-  };
+  const handleSaveAsCopy = () => saveForm(true);
 
   return (
     <main>
