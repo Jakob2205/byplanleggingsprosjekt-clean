@@ -16,22 +16,8 @@ import Login from "./components/Login";
 
 import "./styles/main.css";
 
-// ✅ Only import AuthProvider and useAuth from the context
-import { AuthProvider, useAuth } from "./context/AuthContext";
-
-// ✅ Define the route guard inline (do NOT import it)
-function RequireAuth({ children }) {
-  const { user, initializing } = useAuth();
-  const location = useLocation();
-
-  if (initializing) {
-    return <div style={{ padding: 24, fontFamily: "sans-serif" }}>Laster …</div>;
-  }
-  if (!user) {
-    return <Navigate to="/login" replace state={{ from: location }} />;
-  }
-  return children;
-}
+// ✅ Import everything from the context, including RequireAuth
+import { AuthProvider, useAuth, RequireAuth } from "./context/AuthContext";
 
 function MainLayout() {
   const [totalScore, setTotalScore] = useState(0);

@@ -1,5 +1,5 @@
 {
-  "name": "byplanleggingprosjekt",
+  "name": "byplanleggingprosjekt-clean",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,9 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@firebase/firestore": "^4.7.8",
-    "byplanleggingprosjekt": "file:",
-    "firebase": "^11.3.1",
+    "firebase": "^12.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.2.0"

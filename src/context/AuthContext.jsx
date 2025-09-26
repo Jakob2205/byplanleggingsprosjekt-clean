@@ -1,4 +1,4 @@
-// Planleggingsprosjekt/src/context/AuthContext.jsx
+// src/context/AuthContext.jsx
 import React, { createContext, useContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { auth } from "../firebase-config";

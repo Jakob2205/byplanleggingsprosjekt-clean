@@ -1,5 +1,5 @@
 // src/lib/formInstances.js
-import { auth, db } from "../../firebase-config";
+import { auth, db } from "../firebase-config";
 import {
   collection,
   addDoc,

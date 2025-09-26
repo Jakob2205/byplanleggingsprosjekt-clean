@@ -10,46 +10,26 @@ import * as råstoffUtvinningData from "../scripts/råstoffUtvinning.js";
 import * as råStoffPlanInData from "../scripts/råStoffPlanIn.js";
 
 // Firestore
-import { db } from "../firebase-config";
-import {
-  collection,
-  addDoc,
-  doc,
-  getDoc,
-  setDoc,
-  serverTimestamp,
-} from "firebase/firestore";
+import { db } from "../firebase-config"; // Correct path
+import { collection, addDoc, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 console.log("MainContent.jsx file is loaded in the bundle");
+
+// ✅ Create a map to associate form keys with their data modules.
+const formDataSource = {
+  default: defaultData,
+  planIn1: boligBebyggelsePlanInData,
+  form2: råstoffUtvinningData,
+  planIn2: råStoffPlanInData,
+};
 
 const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Velg datasett
-  let formData;
-  switch (selectedForm) {
-    case "planIn1":
-      formData = boligBebyggelsePlanInData;
-      break;
-    case "form2":
-      formData = råstoffUtvinningData;
-      break;
-    case "planIn2":
-      formData = råStoffPlanInData;
-      break;
-    case "default":
-    default:
-      formData = defaultData;
-      break;
-  }
+  // ✅ Select the data source directly from the map.
+  const formData = formDataSource[selectedForm] || formDataSource.default;
 
-  // Defensiv destructuring (unngå undefined-crash)
-  const {
-    questions: questionsRaw = [],
-    themes: themesRaw = [],
-  } = formData;
-
-  // 🔧 Finn riktig multiplikator-export uansett navn
+  // ✅ Find the correct multiplier export regardless of its name.
   const resolvedMultipliers =
     formData.questionMultipliers ||
     formData.t_questionMultipliers ||
