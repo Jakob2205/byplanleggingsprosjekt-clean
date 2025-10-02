@@ -9,6 +9,8 @@ import {
   where,
   onSnapshot,
   limit,
+  doc,
+  deleteDoc,
 } from "firebase/firestore";
 
 const FORM_LABELS = {
@@ -23,6 +25,7 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
   const [myForms, setMyForms] = useState([]);
   const [loadingList, setLoadingList] = useState(false);
   const [showAll, setShowAll] = useState(false); // 👈 new toggle
+  const [formToDelete, setFormToDelete] = useState(null); // For custom delete confirmation
 
   useEffect(() => {
     if (!userId) {
@@ -75,6 +78,30 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
     setSearchParams({ instanceId: docItem.id }); // load in MainContent
   };
 
+  const requestDeleteForm = (form) => {
+    setFormToDelete(form);
+  };
+
+  const cancelDelete = () => {
+    setFormToDelete(null);
+  };
+
+  const confirmDeleteForm = async () => {
+    if (!formToDelete) return;
+
+    try {
+      await deleteDoc(doc(db, "forms", formToDelete.id));
+      if (searchParams.get("instanceId") === formToDelete.id) {
+        setSearchParams({});
+      }
+    } catch (error) {
+      console.error("Feil ved sletting av skjema:", error);
+      alert("En feil oppstod under sletting av skjemaet.");
+    } finally {
+      setFormToDelete(null); // Lukk popup uansett
+    }
+  };
+
   return (
     <aside className="sidebar">
       <div className="sidebar-top" style={{ padding: 12, borderBottom: "1px solid #ddd" }}>
@@ -120,39 +147,138 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
         {userId && !loadingList && myForms.length > 0 && (
           <ul style={{ listStyle: "none", padding: 0, margin: "8px 0 0" }}>
             {myForms.map((f) => (
-              <li key={f.id} style={{ marginBottom: 8 }}>
-                <button
-                  style={{
-                    width: "100%",
-                    textAlign: "left",
-                    padding: "8px 10px",
-                    border: "1px solid #ccc",
-                    borderRadius: 6,
-                    background: "#fff",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handleOpenForm(f)}
-                  title={`Åpne “${f.name || "Uten navn"}”`}
-                >
-                  <div style={{ fontWeight: 600 }}>
-                    {f.name || "Uten navn"}
-                    {showAll && f.formId ? (
-                      <span style={{ fontWeight: 400, fontSize: 12, color: "#666" }}>
-                        {" "}
-                        — {FORM_LABELS[f.formId] ?? f.formId}
-                      </span>
-                    ) : null}
-                  </div>
-                  <div style={{ fontSize: 12, color: "#666" }}>
-                    Sist endret:{" "}
-                    {f.updatedAt?.toDate
-                      ? f.updatedAt.toDate().toLocaleString()
-                      : "—"}
-                  </div>
-                </button>
+              <li
+                key={f.id}
+                style={{ marginBottom: 8, display: "flex", gap: "4px" }}
+              >
+                <div style={{ flex: 1 }}>
+                  <button
+                    style={{
+                      width: "100%",
+                      textAlign: "left",
+                      padding: "8px 10px",
+                      border: "1px solid #ccc",
+                      borderRadius: "6px 0 0 6px",
+                      background: "#fff",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => handleOpenForm(f)}
+                    title={`Åpne “${f.name || "Uten navn"}”`}
+                  >
+                    <div
+                      style={{
+                        fontWeight: 600,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {f.name || "Uten navn"}
+                      {showAll && f.formId ? (
+                        <span
+                          style={{
+                            fontWeight: 400,
+                            fontSize: 12,
+                            color: "#666",
+                          }}
+                        >
+                          {" "}
+                          — {FORM_LABELS[f.formId] ?? f.formId}
+                        </span>
+                      ) : null}
+                    </div>
+                    <div style={{ fontSize: 12, color: "#666" }}>
+                      Sist endret:{" "}
+                      {f.updatedAt?.toDate
+                        ? f.updatedAt.toDate().toLocaleString()
+                        : "—"}
+                    </div>
+                  </button>
+                </div>
+                <div>
+                  <button
+                    onClick={() => requestDeleteForm(f)}
+                    title={`Slett “${f.name || "Uten navn"}”`}
+                    style={{
+                      height: "100%",
+                      padding: "0 12px",
+                      border: "1px solid #ccc",
+                      borderLeft: "none",
+                      borderRadius: "0 6px 6px 0",
+                      background: "#f9f9f9",
+                      cursor: "pointer",
+                      color: "#c00",
+                    }}
+                  >
+                    🗑️
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
+        )}
+
+        {formToDelete && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}>
+            <div style={{
+              background: 'white',
+              padding: '24px',
+              borderRadius: '8px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              textAlign: 'center',
+              maxWidth: '400px',
+              width: '90%',
+            }}>
+              <h4 style={{ marginTop: 0, marginBottom: '16px' }}>
+                Er du sikker på at du vil slette dokumentet?
+              </h4>
+              <p style={{ marginBottom: '24px', wordBreak: 'break-word' }}>
+                Du er i ferd med å slette "<strong>{formToDelete.name || 'Uten navn'}</strong>". Denne handlingen kan ikke angres.
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '16px' }}>
+                <button
+                  onClick={cancelDelete}
+                  style={{
+                    padding: '10px 20px',
+                    border: '1px solid #ccc',
+                    borderRadius: '6px',
+                    background: '#f0f0f0',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    minWidth: '80px',
+                  }}
+                >
+                  Nei
+                </button>
+                <button
+                  onClick={confirmDeleteForm}
+                  style={{
+                    padding: '10px 20px',
+                    border: '1px solid #c00',
+                    borderRadius: '6px',
+                    background: '#dc3545',
+                    color: 'white',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    minWidth: '80px',
+                  }}
+                >
+                  Ja
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </aside>
