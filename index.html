@@ -5,12 +5,15 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ByPlanleggingsProsjekt</title>
-    <script>
-      const path = window.location.pathname.split('/byplanleggingsprosjekt-clean')[1];
-      if (path && path !== '/') {
-        sessionStorage.setItem('path', window.location.href);
-        window.location.replace('/byplanleggingsprosjekt-clean/404.html');
-      }
+    <script type="text/javascript">
+      (function() {
+        const redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          // Use replaceState to change the URL without a page reload
+          history.replaceState(null, null, redirect);
+        }
+      })();
     </script>
   </head>
   <body>

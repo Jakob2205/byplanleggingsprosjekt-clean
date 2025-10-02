@@ -78,7 +78,13 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
   return (
     <aside className="sidebar">
       <div className="sidebar-top" style={{ padding: 12, borderBottom: "1px solid #ddd" }}>
-        <FormSelector selectedForm={selectedForm} onSelectForm={onSelectForm} />
+        <FormSelector
+          selectedForm={selectedForm}
+          onSelectForm={(formId) => {
+            onSelectForm(formId);
+            setSearchParams({}); // Fjern instanceId fra URL ved mal-bytte
+          }}
+        />
       </div>
 
       <div className="sidebar-bottom" style={{ padding: 12 }}>
