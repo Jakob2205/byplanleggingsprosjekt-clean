@@ -2,41 +2,18 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import QuestionComponent from "../scripts/QuestionComponent.js";
-
-// Datasett
-import * as defaultData from "../scripts/questionData.js";
-import * as boligBebyggelsePlanInData from "../scripts/boligBebyggelsePlanIn.js";
-import * as råstoffUtvinningData from "../scripts/råstoffUtvinning.js";
-import * as råStoffPlanInData from "../scripts/råStoffPlanIn.js";
+import { TEMPLATES } from "../templates";
 
 // Firestore
 import { db } from "../firebase-config"; // Correct path
 import { collection, addDoc, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
-console.log("MainContent.jsx file is loaded in the bundle");
-
-// ✅ Create a map to associate form keys with their data modules.
-const formDataSource = {
-  default: defaultData,
-  planIn1: boligBebyggelsePlanInData,
-  form2: råstoffUtvinningData,
-  planIn2: råStoffPlanInData,
-};
-
 const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // ✅ Select the data source directly from the map.
-  const formData = formDataSource[selectedForm] || formDataSource.default;
+  const formData = TEMPLATES[selectedForm]?.data || TEMPLATES.default.data;
 
-  // ✅ Find the correct multiplier export regardless of its name.
-  const resolvedMultipliers =
-    formData.questionMultipliers ||
-    formData.t_questionMultipliers ||
-    formData.r_questionMultipliers ||
-    formData.y_questionMultipliers ||
-    formData.b_questionMultipliers || // legg til flere alias om du har andre filer
-    {};
+  const resolvedMultipliers = formData.questionMultipliers || {};
 
   // Memoize questions and themes to prevent re-creation on every render
   const { questions, themes } = useMemo(() => {
@@ -53,7 +30,10 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
   // Reset når template byttes
   useEffect(() => {
     const defaults = {};
-    themes.forEach((t) => (defaults[t.id] = true));
+    themes.forEach((t) => {
+      const themeKey = `${selectedForm}_${t.id}`;
+      defaults[themeKey] = true;
+    });
     setIncludeInTotal(defaults);
     setAnswers({});
     setFormName("");
@@ -96,7 +76,8 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
   const themeAverageScores = useMemo(() => {
     const scores = {};
     themes.forEach((t) => {
-      scores[t.id] = getThemeScore(t.id);
+      const themeKey = `${selectedForm}_${t.id}`;
+      scores[themeKey] = getThemeScore(t.id);
     });
     return scores;
   }, [answers, themes]);
@@ -107,12 +88,13 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
       const next = { ...prev };
 
       themes.forEach((t) => {
-        const score = themeAverageScores[t.id]; // null eller tall
+        const themeKey = `${selectedForm}_${t.id}`;
+        const score = themeAverageScores[themeKey]; // null eller tall
         if (score === null) {
-          next[t.id] = false;
-        } else if (!(t.id in next)) {
+          next[themeKey] = false;
+        } else if (!(themeKey in next)) {
           // nye tema (ved bytte av template) default til true
-          next[t.id] = true;
+          next[themeKey] = true;
         }
       });
 
@@ -128,8 +110,9 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
   // Totalverdi
   useEffect(() => {
     const activeScores = themes
-      .filter((t) => includeInTotal[t.id])
-      .map((t) => themeAverageScores[t.id])
+      .map((t) => `${selectedForm}_${t.id}`)
+      .filter((themeKey) => includeInTotal[themeKey])
+      .map((themeKey) => themeAverageScores[themeKey])
       .filter((s) => s !== null && typeof s !== "undefined");
 
     let overall = 0;
@@ -145,9 +128,15 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
   // Kollaps/inkludering
   const [collapsedThemes, setCollapsedThemes] = useState({});
   const toggleCollapse = (themeId) =>
-    setCollapsedThemes((p) => ({ ...p, [themeId]: !p[themeId] }));
+    setCollapsedThemes((p) => {
+      const themeKey = `${selectedForm}_${themeId}`;
+      return { ...p, [themeKey]: !p[themeKey] };
+    });
   const toggleInclude = (themeId) =>
-    setIncludeInTotal((p) => ({ ...p, [themeId]: !p[themeId] }));
+    setIncludeInTotal((p) => {
+      const themeKey = `${selectedForm}_${themeId}`;
+      return { ...p, [themeKey]: !p[themeKey] };
+    });
 
   // ==========================
   // Firestore: lasting/lagring
@@ -277,17 +266,18 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
       </div>
 
       {themes.map((theme) => {
-        const themeScore = themeAverageScores[theme.id];
-        const isIncluded = !!includeInTotal[theme.id];
+        const themeKey = `${selectedForm}_${theme.id}`;
+        const themeScore = themeAverageScores[themeKey];
+        const isIncluded = !!includeInTotal[themeKey];
 
         return (
           <div key={theme.id} className="tema">
             <div className="tema-header">
               <button
                 className="collapse-button"
-                onClick={() => toggleCollapse(theme.id)}
+                onClick={() => toggleCollapse(theme.id)} // Pass local id
               >
-                {collapsedThemes[theme.id] ? "+" : "-"}
+                {collapsedThemes[themeKey] ? "+" : "-"}
               </button>
               <h2>{theme.title}</h2>
               <div className="theme-score">
@@ -297,11 +287,11 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
               </div>
               <label
                 className="toggle-switch"
-                htmlFor={`toggle-${theme.id}`}
+                htmlFor={`toggle-${themeKey}`}
                 style={{ marginLeft: "10px" }}
               >
                 <input
-                  id={`toggle-${theme.id}`}
+                  id={`toggle-${themeKey}`}
                   type="checkbox"
                   checked={isIncluded}
                   onChange={() => toggleInclude(theme.id)}
@@ -313,7 +303,7 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
 
             <div
               className="content-section"
-              style={{ display: collapsedThemes[theme.id] ? "none" : "block" }}
+              style={{ display: collapsedThemes[themeKey] ? "none" : "block" }}
             >
               {questions
                 .filter((q) => q.theme === theme.id)

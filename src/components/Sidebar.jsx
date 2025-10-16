@@ -11,13 +11,7 @@ import {
   doc,
   deleteDoc,
 } from "firebase/firestore";
-
-const FORM_LABELS = {
-  default: "Råstoffplan",
-  planIn1: "Boligbebyggelse planinitiativ",
-  form2: "Råstoffutvinning førstegangsbehandling",
-  planIn2: "Råstoff planinitiativ",
-};
+import { TEMPLATES } from "../templates";
 
 const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -116,9 +110,9 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
           }}
           style={{ width: '100%', padding: '8px', fontSize: '16px', borderRadius: '6px', border: '1px solid #ccc' }}
         >
-          {Object.entries(FORM_LABELS).map(([formId, label]) => (
-            <option key={formId} value={formId}>
-              {label}
+          {Object.values(TEMPLATES).map(({ key, title }) => (
+            <option key={key} value={key}>
+              {title}
             </option>
           ))}
         </select>
@@ -136,7 +130,7 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
         </button>
       </div>
 
-      {isMyFormsOpen && <div className="sidebar-bottom" style={{ padding: 12, display: 'flex', flexDirection: 'column', overflow: 'hidden', flexGrow: 1 }}>
+      {isMyFormsOpen && <div className="sidebar-bottom" style={{ padding: "0 12px 12px", display: 'flex', flexDirection: 'column', flexGrow: 1, minHeight: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <label style={{ fontSize: 12, color: "#444" }}>
             <input
@@ -161,11 +155,11 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
           <div style={{ color: "#666", fontSize: 14, marginTop: 8 }}>
             {showAll
               ? "Ingen lagrede skjema."
-              : `Ingen lagrede skjema for “${FORM_LABELS[selectedForm] ?? selectedForm}”.`}
+              : `Ingen lagrede skjema for “${TEMPLATES[selectedForm]?.title ?? selectedForm}”.`}
           </div>
         )}
 
-        <div className="form-list-container">
+        <div className="form-list-container" style={{ overflowY: 'auto', flex: 1 }}>
           <ul style={{ listStyle: "none", padding: 0, margin: "8px 0 0" }}>
             {myForms.map((f) => (
               <li
@@ -203,8 +197,7 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
                             color: "#666",
                           }}
                         >
-                          {" "}
-                          — {FORM_LABELS[f.formId] ?? f.formId}
+                          {" "}— {TEMPLATES[f.formId]?.title ?? f.formId}
                         </span>
                       ) : null}
                     </div>

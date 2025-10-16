@@ -1,7 +1,7 @@
 // **r_question Data**
 export const themes = [
-  { id: "t1", title: "Egnethet" },
-  { id: "t2", title: "Ser " },
+  { id: "t1", title: "Testing" },
+  { id: "t2", title: "Yehaaw " },
 ];
 
 // **r_question List**
