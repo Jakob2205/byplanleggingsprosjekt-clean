@@ -1,10 +1,6 @@
 @import "./header.css";
-@import "./sidebar.css";
-@import "./mainContent.css";
 @import "./questionComponent.css";
 @import "./footer.css";
-@import "./themes.css";
-@import "./layout.css";
 
 
 /* Basic Reset */
@@ -13,11 +9,4 @@
     padding: 0;
     box-sizing: border-box;
     font-family: Arial, sans-serif;
-}
-
-body {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    padding-top: 60px;
 }

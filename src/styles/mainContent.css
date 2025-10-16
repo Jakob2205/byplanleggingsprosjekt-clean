@@ -1,21 +1,3 @@
-/* 📌 Toolbar above the themes */
-.form-toolbar {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    padding: 8px 0 16px;
-    border-bottom: 1px solid #ddd;
-    margin-bottom: 16px;
-    flex-wrap: wrap; /* ✅ makes buttons/input wrap on small screens */
-}
-
-.form-toolbar input[type="text"] {
-    flex: 1;
-    min-width: 260px;
-    padding: 8px 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-}
 
 .form-toolbar button {
     padding: 6px 12px;

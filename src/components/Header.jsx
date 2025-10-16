@@ -1,40 +1,28 @@
-// components/Header.jsx
+// src/components/Header.jsx
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import "../styles/header.css";
 
 const Header = () => {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth(); // ✅ Get user and logout function from context
+  const { user, logout } = useAuth();
 
   const handleLogout = async () => {
     try {
       await logout(); // ✅ Use the logout function from context
       console.log("User logged out");
-      navigate("/login"); // redirect to login page
     } catch (error) {
       console.error("Logout error:", error.message);
       alert(`Error: ${error.message}`);
     }
   };
-
   return (
     <header className="header-container">
-      <h1>Plansikt</h1>
-
-      <div className="tabs">
-        <div>Casestudie</div>
-        <div>Planinitiativ</div>
-        <div>Førstegangsbehandling</div>
-        <div>Politisk skjema</div>
-        <div>Medvirkningsskjema</div>
-        <div>Sluttbehandling</div>
-      </div>
+      <h1>Plansikt Casestudie</h1>
 
       {/* Show logout button only if logged in */}
       {user && (
         <button className="logout-button" onClick={handleLogout}>
-          Logout
+          Logg ut
         </button>
       )}
     </header>

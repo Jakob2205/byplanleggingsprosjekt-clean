@@ -15,6 +15,7 @@ import Footer from "./components/Footer";
 import Login from "./components/Login";
 
 import "./styles/main.css";
+import "./styles/app.css";
 
 // ✅ Import everything from the context, including RequireAuth
 import { AuthProvider, useAuth, RequireAuth } from "./context/AuthContext";
@@ -25,22 +26,24 @@ function MainLayout() {
   const { user } = useAuth(); // Firebase user
 
   return (
-    <>
-      <Header />
-      <div className="content-wrapper">
+    <div className="app-container">
+      <div className="header-area">
+        <Header />
+      </div>
+      <div className="sidebar-area">
         <Sidebar
           selectedForm={selectedForm}
           onSelectForm={setSelectedForm}
           userId={user?.uid}
         />
-        <MainContent
-          updateTotalScore={setTotalScore}
-          selectedForm={selectedForm}
-          userId={user?.uid}
-        />
       </div>
-      <Footer totalScore={totalScore} />
-    </>
+      <div className="main-content-area">
+        <MainContent updateTotalScore={setTotalScore} selectedForm={selectedForm} userId={user?.uid} />
+      </div>
+      <div className="footer-area">
+        <Footer totalScore={totalScore} />
+      </div>
+    </div>
   );
 }
 

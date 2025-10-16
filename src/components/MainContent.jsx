@@ -271,7 +271,8 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
           Lagre som kopi
         </button>
         <span style={{ color: "#666", fontSize: 12 }}>
-          ID: {instanceId ? instanceId : "nytt (ikke lagret)"} {userId ? "" : " – (ikke innlogget)"}
+          ID: {instanceId ? instanceId : "nytt (ikke lagret)"}{" "}
+          {userId ? "" : " – (ikke innlogget)"}
         </span>
       </div>
 

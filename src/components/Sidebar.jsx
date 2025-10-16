@@ -1,7 +1,6 @@
 // src/components/Sidebar.jsx
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import FormSelector from "./FormSelector";
 import { db } from "../firebase-config";
 import {
   collection,
@@ -14,7 +13,7 @@ import {
 } from "firebase/firestore";
 
 const FORM_LABELS = {
-  default: "Standard skjema",
+  default: "Råstoffplan",
   planIn1: "Boligbebyggelse planinitiativ",
   form2: "Råstoffutvinning førstegangsbehandling",
   planIn2: "Råstoff planinitiativ",
@@ -25,6 +24,7 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
   const [myForms, setMyForms] = useState([]);
   const [loadingList, setLoadingList] = useState(false);
   const [showAll, setShowAll] = useState(false); // 👈 new toggle
+  const [isMyFormsOpen, setIsMyFormsOpen] = useState(true);
   const [formToDelete, setFormToDelete] = useState(null); // For custom delete confirmation
 
   useEffect(() => {
@@ -105,16 +105,38 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
   return (
     <aside className="sidebar">
       <div className="sidebar-top" style={{ padding: 12, borderBottom: "1px solid #ddd" }}>
-        <FormSelector
-          selectedForm={selectedForm}
-          onSelectForm={(formId) => {
+        <label htmlFor="form-selector" style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px' }}>Velg mal</label>
+        <select
+          id="form-selector"
+          value={selectedForm}
+          onChange={(e) => {
+            const formId = e.target.value;
             onSelectForm(formId);
             setSearchParams({}); // Fjern instanceId fra URL ved mal-bytte
           }}
-        />
+          style={{ width: '100%', padding: '8px', fontSize: '16px', borderRadius: '6px', border: '1px solid #ccc' }}
+        >
+          {Object.entries(FORM_LABELS).map(([formId, label]) => (
+            <option key={formId} value={formId}>
+              {label}
+            </option>
+          ))}
+        </select>
       </div>
 
-      <div className="sidebar-bottom" style={{ padding: 12 }}>
+      <div className="sidebar-section" style={{ padding: "12px", borderBottom: "1px solid #ddd" }}>
+        <button 
+          onClick={() => setIsMyFormsOpen(!isMyFormsOpen)}
+          style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '16px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+        >
+          Mine Skjema
+          <span style={{ transform: isMyFormsOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }}>
+            ▶
+          </span>
+        </button>
+      </div>
+
+      {isMyFormsOpen && <div className="sidebar-bottom" style={{ padding: 12, display: 'flex', flexDirection: 'column', overflow: 'hidden', flexGrow: 1 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <h3 style={{ margin: 0, flex: 1 }}>Mine skjema</h3>
           <label style={{ fontSize: 12, color: "#444" }}>
@@ -144,7 +166,7 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
           </div>
         )}
 
-        {userId && !loadingList && myForms.length > 0 && (
+        <div className="form-list-container">
           <ul style={{ listStyle: "none", padding: 0, margin: "8px 0 0" }}>
             {myForms.map((f) => (
               <li
@@ -216,7 +238,7 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
               </li>
             ))}
           </ul>
-        )}
+        </div>
 
         {formToDelete && (
           <div style={{
@@ -280,7 +302,7 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
             </div>
           </div>
         )}
-      </div>
+      </div>}
     </aside>
   );
 };

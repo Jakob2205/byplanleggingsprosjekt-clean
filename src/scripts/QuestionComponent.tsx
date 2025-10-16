@@ -81,35 +81,46 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
   return (
     <div className="question-group">
       <p>{question.text}</p>
-      <div className="rating">
-        <div className="rating-group">
-          <span>Prioritet:</span>
-          {["Lav", "Normal", "Høy", "Ikke aktuelt"].map((priority) => (
-            <button
-              key={priority}
-              className={`priority-button ${
-                selectedPriority === priority ? "active" : ""
-              }`}
-              onClick={() => handlePriorityClick(priority)}
-            >
-              {priority}
-            </button>
-          ))}
+      <div className="question-controls">
+        <div className="rating-container">
+          <div className="rating-group priority-group">
+            <span>Prioritet:</span>
+            <ul>
+              {["Lav", "Normal", "Høy", "Ikke aktuelt"].map((priority) => (
+                <li
+                  key={priority}
+                  className={selectedPriority === priority ? "active" : ""}
+                  onClick={() => handlePriorityClick(priority)}
+                >
+                  {priority}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="rating-group value-group">
+            <span>Verdi:</span>
+            <ul>
+              {[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5].map((value) => (
+                <li
+                  key={value}
+                  className={rawValue === value ? "active" : ""}
+                  onClick={() => handleValueClick(value)}
+                >
+                  {value}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-        <div className="rating-group">
-          <span>Verdi:</span>
-          {[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5].map((value) => (
-            <button
-              key={value}
-              className={`value-button ${rawValue === value ? "active" : ""}`}
-              onClick={() => handleValueClick(value)}
-            >
-              {value}
-            </button>
-          ))}
-        </div>
+        <textarea
+          placeholder="Begrunnelse:"
+          style={{
+            width: '200px',
+            height: '80px',
+            marginTop: '10px'
+          }}
+        ></textarea>
       </div>
-      <textarea placeholder="Begrunnelse:"></textarea>
     </div>
   );
 };
