@@ -138,7 +138,6 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
 
       {isMyFormsOpen && <div className="sidebar-bottom" style={{ padding: 12, display: 'flex', flexDirection: 'column', overflow: 'hidden', flexGrow: 1 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <h3 style={{ margin: 0, flex: 1 }}>Mine skjema</h3>
           <label style={{ fontSize: 12, color: "#444" }}>
             <input
               type="checkbox"
