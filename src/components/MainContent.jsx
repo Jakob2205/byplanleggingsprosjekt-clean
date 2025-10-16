@@ -290,7 +290,7 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
                 {collapsedThemes[theme.id] ? "+" : "-"}
               </button>
               <h2>{theme.title}</h2>
-              <div className="temascore-display">
+              <div className="theme-score">
                 {themeScore !== null && typeof themeScore !== "undefined" && (
                   <span>Verdi: {themeScore.toFixed(2)}</span>
                 )}

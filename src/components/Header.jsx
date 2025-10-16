@@ -17,7 +17,16 @@ const Header = () => {
   };
   return (
     <header className="header-container">
-      <h1>Plansikt Casestudie</h1>
+      <h1>Plansikt</h1>
+
+      <div className="tabs">
+        <div>Casestudie</div>
+        <div>Planinitiativ</div>
+        <div>Førstegangsbehandling</div>
+        <div>Politisk skjema</div>
+        <div>Medvirkningsskjema</div>
+        <div>Sluttbehandling</div>
+      </div>
 
       {/* Show logout button only if logged in */}
       {user && (
