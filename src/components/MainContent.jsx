@@ -110,7 +110,7 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
     return () => {
       mounted = false;
     };
-  }, [instanceId, selectedForm]);
+  }, [planInstanceId, instanceId, selectedForm, setSearchParams]);
 
   // Generic save function to reduce duplication
   const saveForm = async (isCopy = false) => {

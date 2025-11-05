@@ -9,6 +9,7 @@ import {
   where,
   onSnapshot,
   limit,
+  getDocs,
   doc,
   deleteDoc,
   writeBatch,
@@ -21,7 +22,7 @@ const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
   const [myForms, setMyForms] = useState([]);
   const [loadingList, setLoadingList] = useState(false);
   const [isMyPlansOpen, setIsMyPlansOpen] = useState(true);
-  const [formToDelete, setFormToDelete] = useState(null); // For custom delete confirmation
+  const [planToDelete, setPlanToDelete] = useState(null); // For custom delete confirmation
 
   // A flat map of all templates for easy lookup by key.
   const ALL_TEMPLATES = useMemo(() =>
@@ -97,27 +98,40 @@ const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
     setSearchParams({ planInstanceId, formId: planTemplate.forms[0].key });
   };
 
-  const requestDeleteForm = (form) => {
-    setFormToDelete(form);
+  const requestDeletePlan = (plan) => {
+    setPlanToDelete(plan);
   };
 
   const cancelDelete = () => {
-    setFormToDelete(null);
+    setPlanToDelete(null);
   };
 
-  const confirmDeleteForm = async () => {
-    if (!formToDelete) return;
+  const confirmDeletePlan = async () => {
+    if (!planToDelete || !userId) return;
 
     try {
-      await deleteDoc(doc(db, "forms", formToDelete.id));
-      if (searchParams.get("instanceId") === formToDelete.id) {
+      const batch = writeBatch(db);
+      const q = query(collection(db, "forms"), where("planInstanceId", "==", planToDelete.planInstanceId), where("userId", "==", userId));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        console.warn("No forms found for plan to delete:", planToDelete.planInstanceId);
+      }
+
+      querySnapshot.forEach(doc => {
+        batch.delete(doc.ref);
+      });
+
+      await batch.commit();
+
+      if (searchParams.get("planInstanceId") === planToDelete.planInstanceId) {
         setSearchParams({});
       }
     } catch (error) {
-      console.error("Feil ved sletting av skjema:", error);
-      alert("En feil oppstod under sletting av skjemaet.");
+      console.error("Feil ved sletting av plan:", error);
+      alert("En feil oppstod under sletting av planen.");
     } finally {
-      setFormToDelete(null); // Lukk popup uansett
+      setPlanToDelete(null); // Lukk popup uansett
     }
   };
 
@@ -213,7 +227,7 @@ const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
                 </div>
                 <div>
                   <button
-                    // onClick={() => requestDeleteForm(f)} // TODO: Implement plan deletion
+                    onClick={() => requestDeletePlan(plan)}
                     title={`Slett “${plan.name}”`}
                     style={{
                       height: "100%",
@@ -234,7 +248,7 @@ const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
           </ul>
         </div>
 
-        {formToDelete && (
+        {planToDelete && (
           <div style={{
             position: 'fixed',
             top: 0,
@@ -260,7 +274,7 @@ const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
                 Er du sikker på at du vil slette dokumentet?
               </h4>
               <p style={{ marginBottom: '24px', wordBreak: 'break-word' }}>
-                Du er i ferd med å slette "<strong>{formToDelete.name || 'Uten navn'}</strong>". Denne handlingen kan ikke angres.
+                Du er i ferd med å slette "<strong>{planToDelete.name || 'Uten navn'}</strong>". Denne handlingen kan ikke angres.
               </p>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '16px' }}>
                 <button
@@ -278,7 +292,7 @@ const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
                   Nei
                 </button>
                 <button
-                  onClick={confirmDeleteForm}
+                  onClick={confirmDeletePlan}
                   style={{
                     padding: '10px 20px',
                     border: '1px solid #c00',
