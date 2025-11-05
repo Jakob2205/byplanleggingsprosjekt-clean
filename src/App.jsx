@@ -7,6 +7,7 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
@@ -16,29 +17,37 @@ import Login from "./components/Login";
 
 import "./styles/main.css";
 import "./styles/app.css";
+import { PLAN_TEMPLATES } from "./components/plan-templates";
 
 // ✅ Import everything from the context, including RequireAuth
 import { AuthProvider, useAuth, RequireAuth } from "./context/AuthContext";
 
 function MainLayout() {
   const [totalScore, setTotalScore] = useState(0);
-  const [selectedForm, setSelectedForm] = useState("default");
+  const [selectedPlan, setSelectedPlan] = useState(Object.keys(PLAN_TEMPLATES)[0] || "");
   const { user } = useAuth(); // Firebase user
+  const [searchParams] = useSearchParams();
+
+  const formId = searchParams.get("formId");
 
   return (
     <div className="app-container">
       <div className="header-area">
-        <Header />
+        <Header selectedPlanKey={selectedPlan} />
       </div>
       <div className="sidebar-area">
         <Sidebar
-          selectedForm={selectedForm}
-          onSelectForm={setSelectedForm}
+          selectedPlan={selectedPlan}
+          onSelectPlan={setSelectedPlan}
           userId={user?.uid}
         />
       </div>
       <div className="main-content-area">
-        <MainContent updateTotalScore={setTotalScore} selectedForm={selectedForm} userId={user?.uid} />
+        <MainContent
+          updateTotalScore={setTotalScore}
+          selectedForm={formId} // Pass formId from URL to MainContent
+          userId={user?.uid}
+        />
       </div>
       <div className="footer-area">
         <Footer totalScore={totalScore} />

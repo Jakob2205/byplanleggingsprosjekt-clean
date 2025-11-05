@@ -1,17 +1,30 @@
 // Planleggingsprosjekt/src/components/MainContent.jsx
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import QuestionComponent from "../scripts/QuestionComponent.js";
 import { TEMPLATES } from "../templates";
 
 // Firestore
 import { db } from "../firebase-config"; // Correct path
-import { collection, addDoc, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+  query,
+  where,
+  getDocs,
+  writeBatch,
+} from "firebase/firestore";
 
 const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const formData = TEMPLATES[selectedForm]?.data || TEMPLATES.default.data;
+  const formTemplate = TEMPLATES[selectedForm];
+
+  // This part of your code seems to be from an older structure. I'll adapt it.
+  const formData = formTemplate || { temaer: [], questions: [] };
 
   const resolvedMultipliers = formData.questionMultipliers || {};
 
@@ -23,120 +36,23 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
 
   // ---- Lokal state ----
   const [answers, setAnswers] = useState({});
-  const [includeInTotal, setIncludeInTotal] = useState({});
   const [formName, setFormName] = useState("");
-  const instanceId = searchParams.get("instanceId") || null;
+  const [loading, setLoading] = useState(false);
+
+  const planInstanceId = searchParams.get("planInstanceId");
+  const instanceId = searchParams.get("instanceId");
 
   // Reset når template byttes
   useEffect(() => {
     const defaults = {};
-    themes.forEach((t) => {
+    (themes || []).forEach((t) => {
       const themeKey = `${selectedForm}_${t.id}`;
       defaults[themeKey] = true;
     });
-    setIncludeInTotal(defaults);
     setAnswers({});
     setFormName("");
     // ikke rør instanceId i URL – du kan fortsette i samme instans om du vil
-  }, [selectedForm, themes]);
-
-  // Oppdater svar
-  const updateQuestionScore = useCallback(
-    (questionId, score, answered) => {
-      const key = `${selectedForm}_${questionId}`;
-      setAnswers((prev) => ({
-        ...prev,
-        [key]: { score, answered },
-      }));
-    },
-    [selectedForm]
-  );
-
-  const getAnswer = (questionId) => answers[`${selectedForm}_${questionId}`];
-
-  // Tema-score
-  const getThemeScore = (themeId) => {
-    const themeQuestions = questions.filter((q) => q.theme === themeId);
-    let total = 0;
-    let active = 0;
-
-    themeQuestions.forEach((q) => {
-      const ans = getAnswer(q.id);
-      if (ans && ans.answered) {
-        total += ans.score;
-        active++;
-      }
-    });
-
-    if (active < 3) return null;
-    const score = total / active;
-    return parseFloat(Math.max(-5, Math.min(score, 5)).toFixed(2));
-  };
-
-  const themeAverageScores = useMemo(() => {
-    const scores = {};
-    themes.forEach((t) => {
-      const themeKey = `${selectedForm}_${t.id}`;
-      scores[themeKey] = getThemeScore(t.id);
-    });
-    return scores;
-  }, [answers, themes]);
-
-  // Auto-deaktiver tema < 3 spørsmål (trygg – kun sett state hvis noe endres)
-  useEffect(() => {
-    setIncludeInTotal((prev) => {
-      const next = { ...prev };
-
-      themes.forEach((t) => {
-        const themeKey = `${selectedForm}_${t.id}`;
-        const score = themeAverageScores[themeKey]; // null eller tall
-        if (score === null) {
-          next[themeKey] = false;
-        } else if (!(themeKey in next)) {
-          // nye tema (ved bytte av template) default til true
-          next[themeKey] = true;
-        }
-      });
-
-      // unngå unødvendig state-oppdatering
-      const same =
-        Object.keys(next).length === Object.keys(prev).length &&
-        Object.keys(next).every((k) => next[k] === prev[k]);
-
-      return same ? prev : next;
-    });
-  }, [themeAverageScores, themes]);
-
-  // Totalverdi
-  useEffect(() => {
-    const activeScores = themes
-      .map((t) => `${selectedForm}_${t.id}`)
-      .filter((themeKey) => includeInTotal[themeKey])
-      .map((themeKey) => themeAverageScores[themeKey])
-      .filter((s) => s !== null && typeof s !== "undefined");
-
-    let overall = 0;
-    if (activeScores.length > 0) {
-      overall =
-        activeScores.reduce((acc, s) => acc + parseFloat(s), 0) /
-        activeScores.length;
-    }
-    overall = parseFloat(Math.max(-5, Math.min(overall, 5)).toFixed(2));
-    updateTotalScore(overall);
-  }, [themeAverageScores, includeInTotal, themes, updateTotalScore]);
-
-  // Kollaps/inkludering
-  const [collapsedThemes, setCollapsedThemes] = useState({});
-  const toggleCollapse = (themeId) =>
-    setCollapsedThemes((p) => {
-      const themeKey = `${selectedForm}_${themeId}`;
-      return { ...p, [themeKey]: !p[themeKey] };
-    });
-  const toggleInclude = (themeId) =>
-    setIncludeInTotal((p) => {
-      const themeKey = `${selectedForm}_${themeId}`;
-      return { ...p, [themeKey]: !p[themeKey] };
-    });
+  }, [selectedForm]);
 
   // ==========================
   // Firestore: lasting/lagring
@@ -146,29 +62,48 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
   useEffect(() => {
     let mounted = true;
 
-    async function loadInstance(id) {
+    async function loadInstance() {
+      if (!planInstanceId) {
+        setFormName("");
+        setAnswers({});
+        return;
+      }
+      setLoading(true);
       try {
-        const snap = await getDoc(doc(db, "forms", id));
-        if (!snap.exists()) return;
+        // Find the specific form document for the current plan instance and formId
+        const q = query(
+          collection(db, "forms"),
+          where("planInstanceId", "==", planInstanceId),
+          where("formId", "==", selectedForm)
+        );
+        const querySnapshot = await getDocs(q);
 
-        const data = snap.data();
+        if (!querySnapshot.empty) {
+          const formDoc = querySnapshot.docs[0];
+          const data = formDoc.data();
 
-        if (data.formId && data.formId !== selectedForm) {
-          console.warn(
-            `Instansen er laget med formId="${data.formId}", men nå vises "${selectedForm}".`
+          if (!mounted) return;
+
+          setFormName(data.name || "Uten navn");
+          setAnswers(data.answers || {});
+
+          // Update URL to include the correct instanceId for this form
+          setSearchParams(
+            (prev) => {
+              prev.set("instanceId", formDoc.id);
+              return prev;
+            },
+            { replace: true }
           );
-        }
-
-        if (!mounted) return;
-
-        setFormName(data.name || "");
-        setAnswers(data.answers || {});
-        if (data.includeInTotal) {
-          setIncludeInTotal((prev) => ({ ...prev, ...data.includeInTotal }));
+        } else {
+          // Handle case where form for this plan doesn't exist (should not happen with new logic)
+          setFormName("Ny plan");
+          setAnswers({});
         }
       } catch (e) {
         console.error("Kunne ikke laste instans:", e);
       }
+      setLoading(false);
     }
 
     if (instanceId) loadInstance(instanceId);
@@ -177,10 +112,10 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
     };
   }, [instanceId, selectedForm]);
 
-  // ✅ Generic save function to reduce duplication
+  // Generic save function to reduce duplication
   const saveForm = async (isCopy = false) => {
     try {
-      if (!userId) {
+      if (!userId || !planInstanceId) {
         alert("Du må være logget inn for å lagre.");
         return;
       }
@@ -189,27 +124,29 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
       const dataToSave = {
         name: formName || "Uten navn",
         answers,
-        includeInTotal,
         updatedAt: serverTimestamp(),
       };
 
       if (isNew) {
-        // Create a new document (either initial save or save as copy)
-        const docPayload = {
-          ...dataToSave,
-          userId, // 🔐 nødvendig for reglene
-          formId: selectedForm,
-          createdAt: serverTimestamp(),
-        };
-        if (isCopy) {
-          docPayload.name = `${docPayload.name} (kopi)`;
-        }
-        const ref = await addDoc(collection(db, "forms"), docPayload);
-        setSearchParams({ instanceId: ref.id });
-        alert(isCopy ? "Kopi lagret ✅" : "Skjema lagret ✅");
+        // This logic path should ideally not be hit with the new "plan instance" creation model.
+        // Saving should always be an update.
+        alert("Kan ikke lagre et nytt skjema direkte. Opprett en ny plan først.");
       } else {
         // Update an existing document
+        const batch = writeBatch(db);
+
+        // Update the name for all forms in the same plan instance
+        const q = query(collection(db, "forms"), where("planInstanceId", "==", planInstanceId));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach(doc => {
+          batch.update(doc.ref, { name: formName || "Uten navn" });
+        });
+
+        // Update the current form's answers
         await setDoc(doc(db, "forms", instanceId), dataToSave, { merge: true });
+
+        // Commit all updates
+        await batch.commit();
         alert("Endringer lagret ✅");
       }
     } catch (e) {
@@ -227,6 +164,23 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
 
   // Lagre som kopi
   const handleSaveAsCopy = () => saveForm(true);
+
+  const handleAnswerChange = (questionId, value) => {
+    setAnswers((prev) => ({ ...prev, [questionId]: value }));
+  };
+
+  if (!selectedForm || !formTemplate) {
+    return (
+      <main style={{ padding: '20px' }}>
+        <h2>Velkommen</h2>
+        <p>Velg en plan og et skjema fra menyen til venstre for å begynne.</p>
+      </main>
+    );
+  }
+
+  if (loading) {
+    return <main style={{ padding: '20px' }}>Laster skjema...</main>;
+  }
 
   return (
     <main>
@@ -265,62 +219,30 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
         </span>
       </div>
 
-      {themes.map((theme) => {
-        const themeKey = `${selectedForm}_${theme.id}`;
-        const themeScore = themeAverageScores[themeKey];
-        const isIncluded = !!includeInTotal[themeKey];
+      <h2>{formTemplate.title}</h2>
 
-        return (
-          <div key={theme.id} className="tema">
-            <div className="tema-header">
-              <button
-                className="collapse-button"
-                onClick={() => toggleCollapse(theme.id)} // Pass local id
-              >
-                {collapsedThemes[themeKey] ? "+" : "-"}
-              </button>
-              <h2>{theme.title}</h2>
-              <div className="theme-score">
-                {themeScore !== null && typeof themeScore !== "undefined" && (
-                  <span>Verdi: {themeScore.toFixed(2)}</span>
-                )}
-              </div>
-              <label
-                className="toggle-switch"
-                htmlFor={`toggle-${themeKey}`}
-                style={{ marginLeft: "10px" }}
-              >
-                <input
-                  id={`toggle-${themeKey}`}
-                  type="checkbox"
-                  checked={isIncluded}
-                  onChange={() => toggleInclude(theme.id)}
-                  disabled={themeScore === null}
-                />
-                <span className="slider" />
-              </label>
+      {formTemplate.temaer.map((tema) => (
+        <div key={tema.id} className="tema" style={{ marginBottom: '2rem', border: '1px solid #eee', padding: '1rem' }}>
+          <h3>{tema.title}</h3>
+          {tema.questions.map((question) => (
+            <div key={question.id} style={{ margin: '1rem 0' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem' }}>{question.text}</label>
+              {question.type === 'text' && (
+                <input type="text" value={answers[question.id] || ''} onChange={(e) => handleAnswerChange(question.id, e.target.value)} style={{ width: '100%', padding: '8px' }} />
+              )}
+              {question.type === 'textarea' && (
+                <textarea value={answers[question.id] || ''} onChange={(e) => handleAnswerChange(question.id, e.target.value)} style={{ width: '100%', padding: '8px', minHeight: '80px' }} />
+              )}
+              {question.type === 'boolean' && (
+                <div>
+                  <label><input type="radio" name={question.id} checked={answers[question.id] === true} onChange={() => handleAnswerChange(question.id, true)} /> Ja</label>
+                  <label style={{ marginLeft: '1rem' }}><input type="radio" name={question.id} checked={answers[question.id] === false} onChange={() => handleAnswerChange(question.id, false)} /> Nei</label>
+                </div>
+              )}
             </div>
-
-            <div
-              className="content-section"
-              style={{ display: collapsedThemes[themeKey] ? "none" : "block" }}
-            >
-              {questions
-                .filter((q) => q.theme === theme.id)
-                .map((question) => (
-                  <QuestionComponent
-                    key={question.id}
-                    question={question}
-                    updateQuestionScore={updateQuestionScore}
-                    // 👇 pass den løste multiplikator-tabellen
-                    questionMultipliers={resolvedMultipliers}
-                    storedAnswer={getAnswer(question.id)}
-                  />
-                ))}
-            </div>
-          </div>
-        );
-      })}
+          ))}
+        </div>
+      ))}
     </main>
   );
 };

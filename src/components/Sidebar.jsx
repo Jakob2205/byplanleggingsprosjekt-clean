@@ -1,6 +1,7 @@
 // src/components/Sidebar.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
+import { v4 as uuidv4 } from 'uuid';
 import { db } from "../firebase-config";
 import {
   collection,
@@ -10,16 +11,22 @@ import {
   limit,
   doc,
   deleteDoc,
+  writeBatch,
+  serverTimestamp,
 } from "firebase/firestore";
-import { TEMPLATES } from "../templates";
+import { PLAN_TEMPLATES } from "./plan-templates";
 
-const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
+const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [myForms, setMyForms] = useState([]);
   const [loadingList, setLoadingList] = useState(false);
-  const [showAll, setShowAll] = useState(false); // 👈 new toggle
-  const [isMyFormsOpen, setIsMyFormsOpen] = useState(true);
+  const [isMyPlansOpen, setIsMyPlansOpen] = useState(true);
   const [formToDelete, setFormToDelete] = useState(null); // For custom delete confirmation
+
+  // A flat map of all templates for easy lookup by key.
+  const ALL_TEMPLATES = useMemo(() =>
+    Object.values(PLAN_TEMPLATES).flatMap(plan => plan.forms).reduce((acc, form) => ({ ...acc, [form.key]: form }), {}),
+  []);
 
   useEffect(() => {
     if (!userId) {
@@ -31,29 +38,27 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
 
     // Build query
     const base = collection(db, "forms");
-    let q;
-    if (showAll) {
-      // All my forms (no template filter)
-      q = query(
-        base,
-        where("userId", "==", userId),
-        limit(50)
-      );
-    } else {
-      // Only my forms for the selected template
-      q = query(
-        base,
-        where("userId", "==", userId),
-        where("formId", "==", selectedForm),
-        limit(50)
-      );
-    }
+    const q = query(
+      base,
+      where("userId", "==", userId),
+      where("planTemplateKey", "==", selectedPlan),
+      limit(50)
+    );
 
     const unsub = onSnapshot(
       q,
       (snap) => {
         const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-        setMyForms(items);
+        // Group forms by planInstanceId
+        const plans = items.reduce((acc, form) => {
+          const { planInstanceId, name } = form;
+          if (!acc[planInstanceId]) {
+            acc[planInstanceId] = { planInstanceId, name: name || "Uten navn", forms: [] };
+          }
+          acc[planInstanceId].forms.push(form);
+          return acc;
+        }, {});
+        setMyForms(Object.values(plans));
         setLoadingList(false);
       },
       (err) => {
@@ -63,13 +68,33 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
     );
 
     return () => unsub();
-  }, [userId, selectedForm, showAll]);
+  }, [userId, selectedPlan]);
 
-  const handleOpenForm = (docItem) => {
-    if (docItem.formId && docItem.formId !== selectedForm) {
-      onSelectForm(docItem.formId); // switch template to match
-    }
-    setSearchParams({ instanceId: docItem.id }); // load in MainContent
+  const handleNewPlan = async () => {
+    if (!userId) return;
+
+    const planTemplate = PLAN_TEMPLATES[selectedPlan];
+    if (!planTemplate) return;
+
+    const planInstanceId = uuidv4();
+    const batch = writeBatch(db);
+    const now = serverTimestamp();
+
+    planTemplate.forms.forEach(formTemplate => {
+      const newFormRef = doc(collection(db, "forms"));
+      batch.set(newFormRef, {
+        userId,
+        formId: formTemplate.key,
+        planInstanceId,
+        planTemplateKey: selectedPlan,
+        name: "Ny plan",
+        createdAt: now,
+        updatedAt: now,
+      });
+    });
+
+    await batch.commit();
+    setSearchParams({ planInstanceId, formId: planTemplate.forms[0].key });
   };
 
   const requestDeleteForm = (form) => {
@@ -96,21 +121,23 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
     }
   };
 
+  const currentPlan = PLAN_TEMPLATES[selectedPlan];
+
   return (
     <aside className="sidebar">
       <div className="sidebar-top" style={{ padding: 12, borderBottom: "1px solid #ddd" }}>
-        <label htmlFor="form-selector" style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px' }}>Velg mal</label>
+        <label htmlFor="plan-selector" style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px' }}>Velg Plan</label>
         <select
-          id="form-selector"
-          value={selectedForm}
+          id="plan-selector"
+          value={selectedPlan}
           onChange={(e) => {
-            const formId = e.target.value;
-            onSelectForm(formId);
+            const planId = e.target.value;
+            onSelectPlan(planId);
             setSearchParams({}); // Fjern instanceId fra URL ved mal-bytte
           }}
           style={{ width: '100%', padding: '8px', fontSize: '16px', borderRadius: '6px', border: '1px solid #ccc' }}
         >
-          {Object.values(TEMPLATES).map(({ key, title }) => (
+          {Object.values(PLAN_TEMPLATES).map(({ key, title }) => (
             <option key={key} value={key}>
               {title}
             </option>
@@ -118,31 +145,25 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
         </select>
       </div>
 
+      <div className="sidebar-section" style={{ padding: "12px" }}>
+        <button onClick={handleNewPlan} style={{ width: '100%', padding: '10px', fontSize: '16px', background: '#28a745', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>
+          + Ny Plan
+        </button>
+      </div>
+
       <div className="sidebar-section" style={{ padding: "12px", borderBottom: "1px solid #ddd" }}>
         <button 
-          onClick={() => setIsMyFormsOpen(!isMyFormsOpen)}
+          onClick={() => setIsMyPlansOpen(!isMyPlansOpen)}
           style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '16px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
-          Mine Skjema
-          <span style={{ transform: isMyFormsOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }}>
+          Mine Planer
+          <span style={{ transform: isMyPlansOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }}>
             ▶
           </span>
         </button>
       </div>
 
-      {isMyFormsOpen && <div className="sidebar-bottom" style={{ padding: "0 12px 12px", display: 'flex', flexDirection: 'column', flexGrow: 1, minHeight: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <label style={{ fontSize: 12, color: "#444" }}>
-            <input
-              type="checkbox"
-              checked={showAll}
-              onChange={(e) => setShowAll(e.target.checked)}
-              style={{ marginRight: 6 }}
-            />
-            Vis alle mine skjema
-          </label>
-        </div>
-
+      {isMyPlansOpen && <div className="sidebar-bottom" style={{ padding: "0 12px 12px", display: 'flex', flexDirection: 'column', flexGrow: 1, minHeight: 0 }}>
         {!userId && (
           <div style={{ color: "#666", fontSize: 14, marginTop: 8 }}>
             Du er ikke logget inn ennå. (Vi logger inn anonymt automatisk.)
@@ -153,17 +174,15 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
 
         {userId && !loadingList && myForms.length === 0 && (
           <div style={{ color: "#666", fontSize: 14, marginTop: 8 }}>
-            {showAll
-              ? "Ingen lagrede skjema."
-              : `Ingen lagrede skjema for “${TEMPLATES[selectedForm]?.title ?? selectedForm}”.`}
+            {`Ingen lagrede planer for “${currentPlan?.title ?? selectedPlan}”.`}
           </div>
         )}
 
         <div className="form-list-container" style={{ overflowY: 'auto', flex: 1 }}>
           <ul style={{ listStyle: "none", padding: 0, margin: "8px 0 0" }}>
-            {myForms.map((f) => (
+            {myForms.map((plan) => (
               <li
-                key={f.id}
+                key={plan.planInstanceId}
                 style={{ marginBottom: 8, display: "flex", gap: "4px" }}
               >
                 <div style={{ flex: 1 }}>
@@ -177,8 +196,8 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
                       background: "#fff",
                       cursor: "pointer",
                     }}
-                    onClick={() => handleOpenForm(f)}
-                    title={`Åpne “${f.name || "Uten navn"}”`}
+                    onClick={() => setSearchParams({ planInstanceId: plan.planInstanceId, formId: plan.forms[0].formId })}
+                    title={`Åpne “${plan.name}”`}
                   >
                     <div
                       style={{
@@ -188,31 +207,14 @@ const Sidebar = ({ selectedForm, onSelectForm, userId }) => {
                         textOverflow: "ellipsis",
                       }}
                     >
-                      {f.name || "Uten navn"}
-                      {showAll && f.formId ? (
-                        <span
-                          style={{
-                            fontWeight: 400,
-                            fontSize: 12,
-                            color: "#666",
-                          }}
-                        >
-                          {" "}— {TEMPLATES[f.formId]?.title ?? f.formId}
-                        </span>
-                      ) : null}
-                    </div>
-                    <div style={{ fontSize: 12, color: "#666" }}>
-                      Sist endret:{" "}
-                      {f.updatedAt?.toDate
-                        ? f.updatedAt.toDate().toLocaleString()
-                        : "—"}
+                      {plan.name}
                     </div>
                   </button>
                 </div>
                 <div>
                   <button
-                    onClick={() => requestDeleteForm(f)}
-                    title={`Slett “${f.name || "Uten navn"}”`}
+                    // onClick={() => requestDeleteForm(f)} // TODO: Implement plan deletion
+                    title={`Slett “${plan.name}”`}
                     style={{
                       height: "100%",
                       padding: "0 12px",

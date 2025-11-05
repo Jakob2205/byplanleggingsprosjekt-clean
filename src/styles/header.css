@@ -20,21 +20,27 @@
     gap: 3px;
     flex-wrap: nowrap;
     margin-left: auto;
-    margin-right: auto;
+    margin-right: auto; /* Center the tabs container */
 }
 
-/* 📌 Individual tab */
-.tabs div {
+/* 📌 Individual tab button */
+.tabs .tab-button {
     padding: 4px 10px;
     border: 1px solid #000;
     background-color: #d3d3d3;
     cursor: pointer;
     font-size: 12px;
     white-space: nowrap;
+    border-radius: 4px;
 }
 
-.tabs div:hover {
+.tabs .tab-button:hover {
     background-color: #bbb;
+}
+
+.tabs .tab-button.active {
+    background-color: #a0a0a0;
+    font-weight: bold;
 }
 
 /* 📌 Logout Button */
@@ -46,6 +52,9 @@
     color: white;
     cursor: pointer;
     margin-left: auto;
+}
+.header-actions {
+    margin-left: auto; /* Push logout button to the right */
 }
 
 .logout-button:hover {
