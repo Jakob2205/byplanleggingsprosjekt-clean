@@ -1,7 +1,6 @@
 // Planleggingsprosjekt/src/components/MainContent.jsx
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { TEMPLATES } from "../templates";
 
 // Firestore
 import { db } from "../firebase-config"; // Correct path
@@ -17,11 +16,19 @@ import {
   getDocs,
   writeBatch,
 } from "firebase/firestore";
+import { PLAN_TEMPLATES } from "./plan-templates";
 
 const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const formTemplate = TEMPLATES[selectedForm];
+  const formTemplate = useMemo(() => {
+    if (!selectedForm) return null;
+    for (const planKey in PLAN_TEMPLATES) {
+      const form = PLAN_TEMPLATES[planKey].forms.find(f => f.key === selectedForm);
+      if (form) return form;
+    }
+    return null;
+  }, [selectedForm]);
 
   // This part of your code seems to be from an older structure. I'll adapt it.
   const formData = formTemplate || { temaer: [], questions: [] };
@@ -74,6 +81,7 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
         const q = query(
           collection(db, "forms"),
           where("planInstanceId", "==", planInstanceId),
+          where("userId", "==", userId),
           where("formId", "==", selectedForm)
         );
         const querySnapshot = await getDocs(q);
@@ -106,11 +114,11 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
       setLoading(false);
     }
 
-    if (instanceId) loadInstance(instanceId);
+    if (userId) loadInstance();
     return () => {
       mounted = false;
     };
-  }, [planInstanceId, instanceId, selectedForm, setSearchParams]);
+  }, [planInstanceId, selectedForm, userId, setSearchParams]);
 
   // Generic save function to reduce duplication
   const saveForm = async (isCopy = false) => {

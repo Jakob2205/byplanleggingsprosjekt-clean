@@ -43,6 +43,11 @@
     font-weight: bold;
 }
 
+.tabs .tab-button:disabled {
+    background-color: #e9ecef;
+    color: #adb5bd;
+    cursor: not-allowed;
+}
 /* 📌 Logout Button */
 .logout-button {
     padding: 5px 10px;

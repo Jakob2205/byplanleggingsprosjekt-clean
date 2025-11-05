@@ -39,6 +39,7 @@ const Header = ({ selectedPlanKey }) => {
               key={form.key}
               className={`tab-button ${form.key === activeFormId ? "active" : ""}`}
               onClick={() => handleFormSelect(form.key)}
+              disabled={!planInstanceId}
             >
               {form.title}
             </button>
