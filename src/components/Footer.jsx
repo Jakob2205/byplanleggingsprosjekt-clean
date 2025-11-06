@@ -1,40 +1,19 @@
 // components/Footer.jsx
-import React, { useState } from "react";
+import React from 'react';
 
-const Footer = ({ totalScore }) => {
-  // Local state to control whether the footer content is collapsed.
-  const [collapsed, setCollapsed] = useState(false);
+const Footer = ({ formScores, planTemplate }) => {
+  const totalScore = Object.values(formScores).reduce((sum, score) => sum + (score || 0), 0);
 
   return (
-    <footer className="footer-container">
-      {/* Toggle button to collapse/expand the footer */}
-      <div className="footer-toggle">
-        <button onClick={() => setCollapsed(!collapsed)}>
-          {collapsed ? "Expand Footer" : "Collapse Footer"}
-        </button>
+    <footer style={{ padding: '12px', borderTop: '1px solid #ddd', background: '#f8f8f8', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+      <div style={{ fontWeight: 'bold' }}>
+        Totalverdi: {totalScore.toFixed(2)}
       </div>
-      {!collapsed && (
-        <>
-          <div className="footer-row">
-            <button className="footer-box export-pdf"></button>
-            <div className="footer-box planinitiatv">Planinitiativ - x,xx</div>
-            <div className="footer-box horingsinnpill">Høringsinnspill - x,xx</div>
-            <div className="footer-box totalverdi">
-              Totalverdi: <span>{totalScore}</span>
-            </div>
-          </div>
-          <div className="footer-row">
-            <button className="footer-box export-word"></button>
-            <div className="footer-box forstegangsbehandling">
-              Førstegangsbehandling - x,xx
-            </div>
-            <div className="footer-box sluttbehandling">
-              Sluttbehandling - x,xx
-            </div>
-            <button className="footer-box import-sosi"></button>
-          </div>
-        </>
-      )}
+      {planTemplate?.forms.map(form => (
+        <div key={form.key}>
+          {form.title}: {(formScores[form.key] || 0).toFixed(2)}
+        </div>
+      ))}
     </footer>
   );
 };

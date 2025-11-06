@@ -1,7 +1,6 @@
 // Planleggingsprosjekt/src/components/MainContent.jsx
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-
 // Firestore
 import { db } from "../firebase-config"; // Correct path
 import {
@@ -18,6 +17,54 @@ import {
 } from "firebase/firestore";
 import { PLAN_TEMPLATES } from "./plan-templates";
 
+const ScoringQuestion = ({ question, onAnswer, answer, onPriorityChange, priority }) => {
+  const { id, text } = question;
+  const answerOptions = Array.from({ length: 11 }, (_, i) => i - 5); // -5 to 5
+  const priorityOptions = [
+    { label: "Lav", value: "Lav" },
+    { label: "Medium", value: "Medium" },
+    { label: "Høy", value: "Høy" },
+    { label: "Ikke aktuell", value: "Ikke aktuell" },
+  ];
+
+  return (
+    <div style={{ border: '1px solid #ccc', padding: '10px', margin: '10px 0' }}>
+      <p>{text}</p>
+      <div>
+        {answerOptions.map((value) => (
+          <label key={value} style={{ marginRight: '10px' }}>
+            <input
+              type="radio"
+              name={`answer-${id}`}
+              value={value}
+              checked={answer === value}
+              onChange={() => onAnswer(id, value)}
+            />
+            {value}
+          </label>
+        ))}
+      </div>
+      <div style={{ marginTop: '5px' }}>
+        <label>
+          Prioritet:
+          {priorityOptions.map((opt) => (
+            <label key={opt.value} style={{ marginLeft: '10px' }}>
+              <input
+                type="radio"
+                name={`priority-${id}`}
+                value={opt.value}
+                checked={priority === opt.value}
+                onChange={() => onPriorityChange(id, opt.value)}
+              />
+              {opt.label}
+            </label>
+          ))}
+        </label>
+      </div>
+    </div>
+  );
+};
+
 const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -30,19 +77,22 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
     return null;
   }, [selectedForm]);
 
-  // This part of your code seems to be from an older structure. I'll adapt it.
-  const formData = formTemplate || { temaer: [], questions: [] };
-
-  const resolvedMultipliers = formData.questionMultipliers || {};
-
-  // Memoize questions and themes to prevent re-creation on every render
   const { questions, themes } = useMemo(() => {
-    const { questions: qs = [], themes: thms = [] } = formData;
+    const { questions: qs = [], themes: thms = [] } = formTemplate || {};
     return { questions: qs, themes: thms };
-  }, [formData]);
+  }, [formTemplate]);
+
+  const temaer = useMemo(() => {
+    return themes.map(theme => ({
+      ...theme,
+      questions: questions.filter(q => q.theme === theme.id)
+    }));
+  }, [themes, questions]);
 
   // ---- Lokal state ----
   const [answers, setAnswers] = useState({});
+  const [collapsedThemes, setCollapsedThemes] = useState({});
+  const [includeInTotal, setIncludeInTotal] = useState({});
   const [formName, setFormName] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -51,15 +101,104 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
 
   // Reset når template byttes
   useEffect(() => {
-    const defaults = {};
-    (themes || []).forEach((t) => {
-      const themeKey = `${selectedForm}_${t.id}`;
-      defaults[themeKey] = true;
-    });
     setAnswers({});
     setFormName("");
+    setIncludeInTotal({});
+    setCollapsedThemes({});
     // ikke rør instanceId i URL – du kan fortsette i samme instans om du vil
   }, [selectedForm]);
+
+  const handleAnswerChange = useCallback((questionId, score) => {
+    setAnswers(prev => ({
+      ...prev,
+      [questionId]: { ...prev[questionId], score }
+    }));
+  }, []);
+
+  const handlePriorityChange = useCallback((questionId, priority) => {
+    setAnswers(prev => ({
+      ...prev,
+      [questionId]: { ...prev[questionId], priority }
+    }));
+  }, []);
+
+  const getThemeScore = useCallback((theme) => {
+    let total = 0;
+    let answeredQuestions = 0;
+
+    theme.questions.forEach(q => {
+      const answerData = answers[q.id];
+      if (answerData && answerData.score !== undefined) {
+        answeredQuestions++; // This seems to be always 1 if answered.
+        const priority = answerData.priority || "Normal";
+        const multiplier = formTemplate.priorityMultipliers[priority] || 1;
+        total += answerData.score * multiplier;
+      }
+    });
+
+    if (answeredQuestions < 3) return null;
+
+    const score = total / answeredQuestions;
+    return parseFloat(Math.max(-5, Math.min(score, 5)).toFixed(2));
+  }, [answers, formTemplate]);
+
+  const themeAverageScores = useMemo(() => {
+    const scores = {};
+    (temaer || []).forEach((t) => {
+      const themeKey = `${selectedForm}_${t.id}`;
+      scores[themeKey] = getThemeScore(t);
+    });
+    return scores;
+  }, [temaer, getThemeScore, selectedForm]);
+
+  // Auto-deaktiver tema < 3 spørsmål (trygg – kun sett state hvis noe endres)
+  useEffect(() => {
+    setIncludeInTotal((prev) => {
+      const next = { ...prev };
+
+      (temaer || []).forEach((t) => {
+        const themeKey = `${selectedForm}_${t.id}`;
+        const score = themeAverageScores[themeKey]; // null eller tall
+        if (score === null) {
+          next[themeKey] = false;
+        } else if (!(themeKey in next)) {
+          next[themeKey] = true;
+        }
+      });
+
+      const same =
+        Object.keys(next).length === Object.keys(prev).length &&
+        Object.keys(next).every((k) => next[k] === prev[k]);
+
+      return same ? prev : next;
+    });
+  }, [themeAverageScores, temaer, selectedForm]);
+
+  // Totalverdi
+  useEffect(() => {
+    const activeScores = (temaer || [])
+      .map((t) => `${selectedForm}_${t.id}`)
+      .filter((themeKey) => includeInTotal[themeKey])
+      .map((themeKey) => themeAverageScores[themeKey])
+      .filter((s) => s !== null && typeof s !== "undefined");
+
+    let overall = 0;
+    if (activeScores.length > 0) {
+      overall = activeScores.reduce((acc, s) => acc + parseFloat(s), 0) / activeScores.length;
+    }
+    updateTotalScore(selectedForm, parseFloat(Math.max(-5, Math.min(overall, 5)).toFixed(2)));
+  }, [themeAverageScores, includeInTotal, temaer, updateTotalScore, selectedForm]);
+
+  const toggleCollapse = (themeId) =>
+    setCollapsedThemes((p) => {
+      const themeKey = `${selectedForm}_${themeId}`;
+      return { ...p, [themeKey]: !p[themeKey] };
+    });
+  const toggleInclude = (themeId) =>
+    setIncludeInTotal((p) => {
+      const themeKey = `${selectedForm}_${themeId}`;
+      return { ...p, [themeKey]: !p[themeKey] };
+    });
 
   // ==========================
   // Firestore: lasting/lagring
@@ -73,6 +212,7 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
       if (!planInstanceId) {
         setFormName("");
         setAnswers({});
+        setIncludeInTotal({});
         return;
       }
       setLoading(true);
@@ -94,6 +234,7 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
 
           setFormName(data.name || "Uten navn");
           setAnswers(data.answers || {});
+          setIncludeInTotal(data.includeInTotal || {});
 
           // Update URL to include the correct instanceId for this form
           setSearchParams(
@@ -107,6 +248,7 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
           // Handle case where form for this plan doesn't exist (should not happen with new logic)
           setFormName("Ny plan");
           setAnswers({});
+          setIncludeInTotal({});
         }
       } catch (e) {
         console.error("Kunne ikke laste instans:", e);
@@ -114,7 +256,7 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
       setLoading(false);
     }
 
-    if (userId) loadInstance();
+    if (userId && selectedForm) loadInstance();
     return () => {
       mounted = false;
     };
@@ -132,6 +274,7 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
       const dataToSave = {
         name: formName || "Uten navn",
         answers,
+        includeInTotal,
         updatedAt: serverTimestamp(),
       };
 
@@ -172,10 +315,6 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
 
   // Lagre som kopi
   const handleSaveAsCopy = () => saveForm(true);
-
-  const handleAnswerChange = (questionId, value) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: value }));
-  };
 
   if (!selectedForm || !formTemplate) {
     return (
@@ -229,28 +368,53 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
 
       <h2>{formTemplate.title}</h2>
 
-      {formTemplate.temaer.map((tema) => (
-        <div key={tema.id} className="tema" style={{ marginBottom: '2rem', border: '1px solid #eee', padding: '1rem' }}>
-          <h3>{tema.title}</h3>
-          {tema.questions.map((question) => (
-            <div key={question.id} style={{ margin: '1rem 0' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem' }}>{question.text}</label>
-              {question.type === 'text' && (
-                <input type="text" value={answers[question.id] || ''} onChange={(e) => handleAnswerChange(question.id, e.target.value)} style={{ width: '100%', padding: '8px' }} />
-              )}
-              {question.type === 'textarea' && (
-                <textarea value={answers[question.id] || ''} onChange={(e) => handleAnswerChange(question.id, e.target.value)} style={{ width: '100%', padding: '8px', minHeight: '80px' }} />
-              )}
-              {question.type === 'boolean' && (
-                <div>
-                  <label><input type="radio" name={question.id} checked={answers[question.id] === true} onChange={() => handleAnswerChange(question.id, true)} /> Ja</label>
-                  <label style={{ marginLeft: '1rem' }}><input type="radio" name={question.id} checked={answers[question.id] === false} onChange={() => handleAnswerChange(question.id, false)} /> Nei</label>
-                </div>
-              )}
+      {temaer.map((theme) => {
+        const themeKey = `${selectedForm}_${theme.id}`;
+        const themeScore = themeAverageScores[themeKey];
+        const isIncluded = !!includeInTotal[themeKey];
+
+        return (
+          <div key={theme.id} className="tema">
+            <div className="tema-header">
+              <button
+                className="collapse-button"
+                onClick={() => toggleCollapse(theme.id)}
+              >
+                {collapsedThemes[themeKey] ? "+" : "-"}
+              </button>
+              <h2>{theme.title}</h2>
+              <div className="theme-score">
+                {themeScore !== null && typeof themeScore !== "undefined" && (
+                  <span>Verdi: {themeScore.toFixed(2)}</span>
+                )}
+              </div>
+              <label
+                className="toggle-switch"
+                htmlFor={`toggle-${themeKey}`}
+                style={{ marginLeft: "10px" }}
+              >
+                <input
+                  id={`toggle-${themeKey}`}
+                  type="checkbox"
+                  checked={isIncluded}
+                  onChange={() => toggleInclude(theme.id)}
+                  disabled={themeScore === null}
+                />
+                <span className="slider" />
+              </label>
             </div>
-          ))}
-        </div>
-      ))}
+
+            <div
+              className="content-section"
+              style={{ display: collapsedThemes[themeKey] ? "none" : "block" }}
+            >
+              {theme.questions.map((question) => (
+                  <ScoringQuestion key={question.id} question={question} onAnswer={handleAnswerChange} answer={answers[question.id]?.score} onPriorityChange={handlePriorityChange} priority={answers[question.id]?.priority} />
+                ))}
+            </div>
+          </div>
+        );
+      })}
     </main>
   );
 };

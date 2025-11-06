@@ -1,5 +1,5 @@
 // Planleggingsprosjekt/src/App.jsx
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -23,7 +23,14 @@ import { PLAN_TEMPLATES } from "./components/plan-templates";
 import { AuthProvider, useAuth, RequireAuth } from "./context/AuthContext";
 
 function MainLayout() {
-  const [totalScore, setTotalScore] = useState(0);
+  const [formScores, setFormScores] = useState({});
+  const updateTotalScore = useCallback((formId, score) => {
+    setFormScores(prev => {
+      // Only update if the score is different to prevent re-renders
+      if (prev[formId] === score) return prev;
+      return { ...prev, [formId]: score };
+    });
+  }, []);
   const [selectedPlan, setSelectedPlan] = useState(Object.keys(PLAN_TEMPLATES)[0] || "");
   const { user } = useAuth(); // Firebase user
   const [searchParams] = useSearchParams();
@@ -44,13 +51,13 @@ function MainLayout() {
       </div>
       <div className="main-content-area">
         <MainContent
-          updateTotalScore={setTotalScore}
+          updateTotalScore={updateTotalScore}
           selectedForm={formId} // Pass formId from URL to MainContent
           userId={user?.uid}
         />
       </div>
       <div className="footer-area">
-        <Footer totalScore={totalScore} />
+        <Footer formScores={formScores} planTemplate={PLAN_TEMPLATES[selectedPlan]} />
       </div>
     </div>
   );
