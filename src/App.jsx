@@ -62,18 +62,29 @@ function MainLayout() {
   const formId = searchParams.get("formId");
 
   return (
-    <div className="app-container">
-      <div className="header-area">
+    <div className="app-container" style={{
+      display: 'grid',
+      gridTemplateColumns: '250px 1fr',
+      gridTemplateRows: 'auto 1fr auto',
+      gridTemplateAreas: `
+        "header header"
+        "sidebar main"
+        "sidebar footer"
+      `,
+      height: '100vh',
+      overflow: 'hidden'
+    }}>
+      <div className="header-area" style={{ gridArea: 'header' }}>
         <Header selectedPlanKey={selectedPlan} />
       </div>
-      <div className="sidebar-area">
+      <div className="sidebar-area" style={{ gridArea: 'sidebar', overflowY: 'auto' }}>
         <Sidebar
           selectedPlan={selectedPlan}
           onSelectPlan={setSelectedPlan}
           userId={user?.uid}
         />
       </div>
-      <div className="main-content-area">
+      <div className="main-content-area" style={{ gridArea: 'main', overflowY: 'auto', padding: '20px' }}>
         <MainContent
           selectedForm={formId} // Pass formId from URL to MainContent
           userId={user?.uid}
@@ -85,7 +96,7 @@ function MainLayout() {
           setInitialFormData={setInitialFormData}
         />
       </div>
-      <div className="footer-area">
+      <div className="footer-area" style={{ gridArea: 'footer' }}>
         <Footer formScores={planData.scores} planTemplate={PLAN_TEMPLATES[selectedPlan]} />
       </div>
     </div>

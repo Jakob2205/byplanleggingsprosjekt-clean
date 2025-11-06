@@ -1,8 +1,6 @@
 @import "./header.css";
 @import "./questionComponent.css";
 @import "./footer.css";
-
-
 /* Basic Reset */
 * {
     margin: 0;

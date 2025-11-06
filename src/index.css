@@ -11,7 +11,6 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  padding-top: 60px; /* Space for the header */
 }
 
 /* Utility Classes */

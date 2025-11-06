@@ -300,6 +300,7 @@ const MainContent = ({
         answers,
         includeInTotal,
         updatedAt: serverTimestamp(),
+        userId: userId,
       };
 
       if (isNew) {
@@ -311,7 +312,11 @@ const MainContent = ({
         const batch = writeBatch(db);
 
         // Update the name for all forms in the same plan instance
-        const q = query(collection(db, "forms"), where("planInstanceId", "==", planInstanceId));
+        const q = query(
+          collection(db, "forms"),
+          where("planInstanceId", "==", planInstanceId),
+          where("userId", "==", userId)
+        );
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach(doc => {
           batch.update(doc.ref, { name: formName || "Uten navn" });
