@@ -1,5 +1,5 @@
 // Planleggingsprosjekt/src/App.jsx
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -23,17 +23,41 @@ import { PLAN_TEMPLATES } from "./components/plan-templates";
 import { AuthProvider, useAuth, RequireAuth } from "./context/AuthContext";
 
 function MainLayout() {
-  const [formScores, setFormScores] = useState({});
-  const updateTotalScore = useCallback((formId, score) => {
-    setFormScores(prev => {
-      // Only update if the score is different to prevent re-renders
-      if (prev[formId] === score) return prev;
-      return { ...prev, [formId]: score };
-    });
-  }, []);
   const [selectedPlan, setSelectedPlan] = useState(Object.keys(PLAN_TEMPLATES)[0] || "");
   const { user } = useAuth(); // Firebase user
   const [searchParams] = useSearchParams();
+  const planInstanceId = searchParams.get("planInstanceId");
+
+  // Lifted state for all forms within a plan instance
+  const [planData, setPlanData] = useState({
+    scores: {},
+    answers: {},
+    formNames: {},
+    includeInTotals: {},
+  });
+
+  // Reset plan data when the plan instance changes
+  useEffect(() => {
+    setPlanData({
+      scores: {},
+      answers: {},
+      formNames: {},
+      includeInTotals: {},
+    });
+  }, [planInstanceId]);
+
+  const updateFormState = useCallback((formId, newState) => {
+    setPlanData(prev => ({
+      scores: { ...prev.scores, ...newState.score && { [formId]: newState.score } },
+      answers: { ...prev.answers, ...newState.answers && { [formId]: newState.answers } },
+      formNames: { ...prev.formNames, ...newState.formName && { [formId]: newState.formName } },
+      includeInTotals: { ...prev.includeInTotals, ...newState.includeInTotal && { [formId]: newState.includeInTotal } },
+    }));
+  }, []);
+
+  const setInitialFormData = useCallback((formId, data) => {
+    updateFormState(formId, data);
+  }, [updateFormState]);
 
   const formId = searchParams.get("formId");
 
@@ -51,13 +75,18 @@ function MainLayout() {
       </div>
       <div className="main-content-area">
         <MainContent
-          updateTotalScore={updateTotalScore}
           selectedForm={formId} // Pass formId from URL to MainContent
           userId={user?.uid}
+          // Pass lifted state and handlers down
+          answers={planData.answers[formId]}
+          formName={planData.formNames[formId]}
+          includeInTotal={planData.includeInTotals[formId]}
+          updateFormState={updateFormState}
+          setInitialFormData={setInitialFormData}
         />
       </div>
       <div className="footer-area">
-        <Footer formScores={formScores} planTemplate={PLAN_TEMPLATES[selectedPlan]} />
+        <Footer formScores={planData.scores} planTemplate={PLAN_TEMPLATES[selectedPlan]} />
       </div>
     </div>
   );

@@ -2,9 +2,9 @@
 
 // --- Priority Multipliers ---
 const priorityMultipliers = {
-  Lav: 0.8,
-  Normal: 1.0,
-  Høy: 1.2,
+  "Lav": 0.8,
+  "Medium": 1.2,
+  "Høy": 1.5,
   "Ikke aktuell": 0, // Will result in a score of 0
 };
 

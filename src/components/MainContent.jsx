@@ -17,7 +17,7 @@ import {
 } from "firebase/firestore";
 import { PLAN_TEMPLATES } from "./plan-templates";
 
-const ScoringQuestion = ({ question, onAnswer, answer, onPriorityChange, priority }) => {
+const ScoringQuestion = ({ question, onAnswer, answer, onPriorityChange, priority, onCommentChange, comment }) => {
   const { id, text } = question;
   const answerOptions = Array.from({ length: 11 }, (_, i) => i - 5); // -5 to 5
   const priorityOptions = [
@@ -30,20 +30,6 @@ const ScoringQuestion = ({ question, onAnswer, answer, onPriorityChange, priorit
   return (
     <div style={{ border: '1px solid #ccc', padding: '10px', margin: '10px 0' }}>
       <p>{text}</p>
-      <div>
-        {answerOptions.map((value) => (
-          <label key={value} style={{ marginRight: '10px' }}>
-            <input
-              type="radio"
-              name={`answer-${id}`}
-              value={value}
-              checked={answer === value}
-              onChange={() => onAnswer(id, value)}
-            />
-            {value}
-          </label>
-        ))}
-      </div>
       <div style={{ marginTop: '5px' }}>
         <label>
           Prioritet:
@@ -61,11 +47,48 @@ const ScoringQuestion = ({ question, onAnswer, answer, onPriorityChange, priorit
           ))}
         </label>
       </div>
+      <div style={{ display: 'flex', marginTop: '15px' }}>
+        {answerOptions.map((value) => (
+          <label key={value} style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            marginRight: '20px', 
+            cursor: 'pointer' 
+          }}>
+            {value}
+            <input
+              type="radio"
+              name={`answer-${id}`}
+              value={value}
+              checked={answer === value}
+              onChange={() => onAnswer(id, value)}
+              style={{ marginTop: '5px' }}
+            />
+          </label>
+        ))}
+      </div>
+      <div style={{ marginTop: '10px' }}>
+        <textarea
+          placeholder="Kommentar..."
+          value={comment || ''}
+          onChange={(e) => onCommentChange(id, e.target.value)}
+          style={{ width: '100%', minHeight: '40px', border: '1px solid #ddd', borderRadius: '4px', padding: '5px' }}
+        />
+      </div>
     </div>
   );
 };
 
-const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
+const MainContent = ({
+  selectedForm,
+  userId,
+  answers,
+  formName,
+  includeInTotal,
+  updateFormState,
+  setInitialFormData,
+}) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const formTemplate = useMemo(() => {
@@ -90,47 +113,49 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
   }, [themes, questions]);
 
   // ---- Lokal state ----
-  const [answers, setAnswers] = useState({});
   const [collapsedThemes, setCollapsedThemes] = useState({});
-  const [includeInTotal, setIncludeInTotal] = useState({});
-  const [formName, setFormName] = useState("");
   const [loading, setLoading] = useState(false);
 
   const planInstanceId = searchParams.get("planInstanceId");
   const instanceId = searchParams.get("instanceId");
 
-  // Reset når template byttes
-  useEffect(() => {
-    setAnswers({});
-    setFormName("");
-    setIncludeInTotal({});
-    setCollapsedThemes({});
-    // ikke rør instanceId i URL – du kan fortsette i samme instans om du vil
-  }, [selectedForm]);
-
   const handleAnswerChange = useCallback((questionId, score) => {
-    setAnswers(prev => ({
-      ...prev,
-      [questionId]: { ...prev[questionId], score }
-    }));
-  }, []);
+    const newAnswers = {
+      ...(answers || {}),
+      [questionId]: { ...(answers || {})[questionId], score },
+    };
+    updateFormState(selectedForm, { answers: newAnswers });
+  }, [answers, updateFormState, selectedForm]);
 
   const handlePriorityChange = useCallback((questionId, priority) => {
-    setAnswers(prev => ({
-      ...prev,
-      [questionId]: { ...prev[questionId], priority }
-    }));
-  }, []);
+    const newAnswers = {
+      ...(answers || {}),
+      [questionId]: { ...(answers || {})[questionId], priority },
+    };
+    updateFormState(selectedForm, { answers: newAnswers });
+  }, [answers, updateFormState, selectedForm]);
+
+  const handleCommentChange = useCallback((questionId, comment) => {
+    const newAnswers = {
+      ...(answers || {}),
+      [questionId]: { ...(answers || {})[questionId], comment },
+    };
+    updateFormState(selectedForm, { answers: newAnswers });
+  }, [answers, updateFormState, selectedForm]);
+
+  const handleNameChange = (e) => {
+    updateFormState(selectedForm, { formName: e.target.value });
+  };
 
   const getThemeScore = useCallback((theme) => {
     let total = 0;
     let answeredQuestions = 0;
 
     theme.questions.forEach(q => {
-      const answerData = answers[q.id];
-      if (answerData && answerData.score !== undefined) {
+      const answerData = answers?.[q.id];
+      if (answers && answerData && answerData.score !== undefined) {
         answeredQuestions++; // This seems to be always 1 if answered.
-        const priority = answerData.priority || "Normal";
+        const priority = answerData.priority || "Medium";
         const multiplier = formTemplate.priorityMultipliers[priority] || 1;
         total += answerData.score * multiplier;
       }
@@ -153,41 +178,41 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
 
   // Auto-deaktiver tema < 3 spørsmål (trygg – kun sett state hvis noe endres)
   useEffect(() => {
-    setIncludeInTotal((prev) => {
-      const next = { ...prev };
+    const currentInclude = includeInTotal || {};
+    const next = { ...currentInclude };
+    let changed = false;
 
-      (temaer || []).forEach((t) => {
-        const themeKey = `${selectedForm}_${t.id}`;
-        const score = themeAverageScores[themeKey]; // null eller tall
-        if (score === null) {
-          next[themeKey] = false;
-        } else if (!(themeKey in next)) {
-          next[themeKey] = true;
-        }
-      });
-
-      const same =
-        Object.keys(next).length === Object.keys(prev).length &&
-        Object.keys(next).every((k) => next[k] === prev[k]);
-
-      return same ? prev : next;
+    (temaer || []).forEach((t) => {
+      const themeKey = `${selectedForm}_${t.id}`;
+      const score = themeAverageScores[themeKey]; // null eller tall
+      if (score === null && currentInclude[themeKey] !== false) {
+        next[themeKey] = false;
+        changed = true;
+      } else if (score !== null && !(themeKey in currentInclude)) {
+        next[themeKey] = true;
+        changed = true;
+      }
     });
-  }, [themeAverageScores, temaer, selectedForm]);
+
+    if (changed) {
+      updateFormState(selectedForm, { includeInTotal: next });
+    }
+  }, [themeAverageScores, temaer, selectedForm, includeInTotal, updateFormState]);
 
   // Totalverdi
   useEffect(() => {
     const activeScores = (temaer || [])
       .map((t) => `${selectedForm}_${t.id}`)
-      .filter((themeKey) => includeInTotal[themeKey])
+      .filter((themeKey) => includeInTotal?.[themeKey])
       .map((themeKey) => themeAverageScores[themeKey])
-      .filter((s) => s !== null && typeof s !== "undefined");
+      .filter((s) => s !== null && s !== undefined);
 
     let overall = 0;
     if (activeScores.length > 0) {
       overall = activeScores.reduce((acc, s) => acc + parseFloat(s), 0) / activeScores.length;
     }
-    updateTotalScore(selectedForm, parseFloat(Math.max(-5, Math.min(overall, 5)).toFixed(2)));
-  }, [themeAverageScores, includeInTotal, temaer, updateTotalScore, selectedForm]);
+    updateFormState(selectedForm, { score: parseFloat(Math.max(-5, Math.min(overall, 5)).toFixed(2)) });
+  }, [themeAverageScores, includeInTotal, temaer, updateFormState, selectedForm]);
 
   const toggleCollapse = (themeId) =>
     setCollapsedThemes((p) => {
@@ -195,10 +220,11 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
       return { ...p, [themeKey]: !p[themeKey] };
     });
   const toggleInclude = (themeId) =>
-    setIncludeInTotal((p) => {
+    {
       const themeKey = `${selectedForm}_${themeId}`;
-      return { ...p, [themeKey]: !p[themeKey] };
-    });
+      const newInclude = { ...(includeInTotal || {}), [themeKey]: !(includeInTotal || {})[themeKey] };
+      updateFormState(selectedForm, { includeInTotal: newInclude });
+    };
 
   // ==========================
   // Firestore: lasting/lagring
@@ -210,9 +236,7 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
 
     async function loadInstance() {
       if (!planInstanceId) {
-        setFormName("");
-        setAnswers({});
-        setIncludeInTotal({});
+        setInitialFormData(selectedForm, { formName: "", answers: {}, includeInTotal: {} });
         return;
       }
       setLoading(true);
@@ -232,9 +256,11 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
 
           if (!mounted) return;
 
-          setFormName(data.name || "Uten navn");
-          setAnswers(data.answers || {});
-          setIncludeInTotal(data.includeInTotal || {});
+          setInitialFormData(selectedForm, {
+            formName: data.name || "Uten navn",
+            answers: data.answers || {},
+            includeInTotal: data.includeInTotal || {},
+          });
 
           // Update URL to include the correct instanceId for this form
           setSearchParams(
@@ -246,9 +272,7 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
           );
         } else {
           // Handle case where form for this plan doesn't exist (should not happen with new logic)
-          setFormName("Ny plan");
-          setAnswers({});
-          setIncludeInTotal({});
+          setInitialFormData(selectedForm, { formName: "Ny plan", answers: {}, includeInTotal: {} });
         }
       } catch (e) {
         console.error("Kunne ikke laste instans:", e);
@@ -260,7 +284,7 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
     return () => {
       mounted = false;
     };
-  }, [planInstanceId, selectedForm, userId, setSearchParams]);
+  }, [planInstanceId, selectedForm, userId, setSearchParams, setInitialFormData]);
 
   // Generic save function to reduce duplication
   const saveForm = async (isCopy = false) => {
@@ -346,7 +370,7 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
           type="text"
           placeholder="Skjemanavn (f.eks. Felt A – høst 2025)"
           value={formName}
-          onChange={(e) => setFormName(e.target.value)}
+          onChange={handleNameChange}
           style={{
             flex: 1,
             padding: "8px 10px",
@@ -371,7 +395,7 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
       {temaer.map((theme) => {
         const themeKey = `${selectedForm}_${theme.id}`;
         const themeScore = themeAverageScores[themeKey];
-        const isIncluded = !!includeInTotal[themeKey];
+        const isIncluded = !!includeInTotal?.[themeKey];
 
         return (
           <div key={theme.id} className="tema">
@@ -409,7 +433,15 @@ const MainContent = ({ updateTotalScore, selectedForm, userId }) => {
               style={{ display: collapsedThemes[themeKey] ? "none" : "block" }}
             >
               {theme.questions.map((question) => (
-                  <ScoringQuestion key={question.id} question={question} onAnswer={handleAnswerChange} answer={answers[question.id]?.score} onPriorityChange={handlePriorityChange} priority={answers[question.id]?.priority} />
+                  <ScoringQuestion
+                    key={question.id}
+                    question={question}
+                    onAnswer={handleAnswerChange}
+                    answer={answers?.[question.id]?.score}
+                    onPriorityChange={handlePriorityChange}
+                    priority={answers?.[question.id]?.priority}
+                    onCommentChange={handleCommentChange}
+                    comment={answers?.[question.id]?.comment} />
                 ))}
             </div>
           </div>
