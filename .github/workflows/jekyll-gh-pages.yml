@@ -2,7 +2,7 @@ name: Deploy site to GitHub Pages
 
 on:
   push:
-    branches: ["reactbranch"]   # kjør når du pusher til main
+    branches: ["main"]   # kjør når du pusher til main
   workflow_dispatch:     # lar deg trigge manuelt fra Actions
 
 permissions:
