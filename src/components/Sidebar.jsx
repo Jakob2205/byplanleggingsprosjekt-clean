@@ -298,6 +298,17 @@ const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
                 >
                   Avbryt
                 </button>
+                <button
+                  onClick={confirmDeletePlan}
+                  style={{
+                    padding: '10px 20px',
+                    border: 'none',
+                    backgroundColor: '#d9534f',
+                    color: 'white',
+                  }}
+                >
+                  Slett
+                </button>
               </div>
             </div>
           </div>

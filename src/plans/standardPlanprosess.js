@@ -18,10 +18,10 @@ const standardPlanprosess = {
         { id: 'theme_impact', title: 'Virkning' },
       ],
       priorityMultipliers: {
-        "Lav": 0.5,
-        "Medium": 1,
-        "Høy": 2,
-        "Ikke aktuell": 0
+        "Lav": 0.5, // Score is halved
+        "Medium": 1,  // Score is unchanged
+        "Høy": 2,   // Score is doubled
+        "Ikke aktuell": 0 // Score is ignored
       }
     },
     {
@@ -44,10 +44,10 @@ const standardPlanprosess = {
         { id: 'theme_economy', title: 'Økonomi' },
       ],
       priorityMultipliers: {
-        "Lav": 0.5,
-        "Medium": 1,
-        "Høy": 2,
-        "Ikke aktuell": 0
+        "Lav": 0.5, // Score is halved
+        "Medium": 1,  // Score is unchanged
+        "Høy": 2,   // Score is doubled
+        "Ikke aktuell": 0 // Score is ignored
       }
     },
     {
@@ -66,10 +66,10 @@ const standardPlanprosess = {
         { id: 'theme_approval', title: 'Godkjenning' },
       ],
       priorityMultipliers: {
-        "Lav": 0.5,
-        "Medium": 1,
-        "Høy": 2,
-        "Ikke aktuell": 0
+        "Lav": 0.5, // Score is halved
+        "Medium": 1,  // Score is unchanged
+        "Høy": 2,   // Score is doubled
+        "Ikke aktuell": 0 // Score is ignored
       }
     }
   ]

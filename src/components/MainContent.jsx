@@ -153,19 +153,22 @@ const MainContent = ({
 
     theme.questions.forEach(q => {
       const answerData = answers?.[q.id];
-      if (answers && answerData && answerData.score !== undefined) {
-        answeredQuestions++; // This seems to be always 1 if answered.
-        const priority = answerData.priority || "Medium";
+      const priority = answerData?.priority || "Medium";
+
+      // Only include questions that have a score and are not marked as "Ikke aktuell" in the average calculation.
+      if (answers && answerData && answerData.score !== undefined && priority !== "Ikke aktuell") {
+        answeredQuestions++;
         const multiplier = formTemplate.priorityMultipliers[priority] || 1;
         total += answerData.score * multiplier;
       }
     });
 
+    // A theme is only active if it has at least 3 relevant, answered questions.
     if (answeredQuestions < 3) return null;
 
     const score = total / answeredQuestions;
     return parseFloat(Math.max(-5, Math.min(score, 5)).toFixed(2));
-  }, [answers, formTemplate]);
+  }, [answers, formTemplate]); // This dependency array is correct, no change needed here.
 
   const themeAverageScores = useMemo(() => {
     const scores = {};
@@ -174,7 +177,7 @@ const MainContent = ({
       scores[themeKey] = getThemeScore(t);
     });
     return scores;
-  }, [temaer, getThemeScore, selectedForm]);
+  }, [temaer, getThemeScore, selectedForm]); // This dependency array is also correct.
 
   // Auto-deaktiver tema < 3 spørsmål (trygg – kun sett state hvis noe endres)
   useEffect(() => {
@@ -212,7 +215,7 @@ const MainContent = ({
       overall = activeScores.reduce((acc, s) => acc + parseFloat(s), 0) / activeScores.length;
     }
     updateFormState(selectedForm, { score: parseFloat(Math.max(-5, Math.min(overall, 5)).toFixed(2)) });
-  }, [themeAverageScores, includeInTotal, temaer, updateFormState, selectedForm]);
+  }, [themeAverageScores, includeInTotal, temaer, updateFormState, selectedForm]); // This useEffect is also correct.
 
   const toggleCollapse = (themeId) =>
     setCollapsedThemes((p) => {

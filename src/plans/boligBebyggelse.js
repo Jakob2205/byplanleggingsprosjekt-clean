@@ -38,8 +38,11 @@ const planInitiativData = {
     { id: "q27", theme: "t2", text: "Har man i tilstrekkelig grad tatt med og sikret kvaliteter som må utbedres i omkringliggende områder, f. eks infrastruturtiltak, skolevei m.m.?" },
     { id: "q28", theme: "t2", text: "Er foreslått utvikling i tråd med tenkt helhetlig utvikling av nærområdet?" }
   ],
-  questionMultipliers: {
-    q1: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 }, q2: { Lav: 1, Normal: 1.4, Høy: 1.8, "Ikke aktuelt": 1 }, q3: { Lav: 1, Normal: 1.4, Høy: 1.8, "Ikke aktuelt": 1 }, q4: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 }, q5: { Lav: 0.6, Normal: 0.8, Høy: 1, "Ikke aktuelt": 1 }, q6: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 }, q7: { Lav: 0.8, Normal: 1.1, Høy: 1.3, "Ikke aktuelt": 1 }, q8: { Lav: 0.8, Normal: 1.1, Høy: 1.4, "Ikke aktuelt": 1 }, q9: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 }, q10: { Lav: 0.8, Normal: 1.1, Høy: 1.3, "Ikke aktuelt": 1 }, q11: { Lav: 0.5, Normal: 0.8, Høy: 1, "Ikke aktuelt": 1 }, q12: { Lav: 0.6, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 }, q13: { Lav: 0.7, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 }, q14: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 }, q15: { Lav: 0.6, Normal: 0.8, Høy: 1, "Ikke aktuelt": 1 }, q16: { Lav: 0.5, Normal: 0.9, Høy: 1.3, "Ikke aktuelt": 1 }, q17: { Lav: 0.7, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 }, q18: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 }, q19: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 }, q20: { Lav: 0.7, Normal: 1, Høy: 1.3, "Ikke aktuelt": 1 }, q21: { Lav: 0.6, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 }, q22: { Lav: 0.8, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 }, q23: { Lav: 0.7, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 }, q24: { Lav: 0.6, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 }, q25: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 }, q26: { Lav: 0.6, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 }, q27: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 }, q28: { Lav: 0.6, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 }
+  priorityMultipliers: {
+    "Lav": 0.5,
+    "Medium": 1,
+    "Høy": 2,
+    "Ikke aktuell": 0
   }
 };
 
@@ -165,116 +168,14 @@ const forstegangsbehandlingData = {
     { id: "q89", theme: "tema9", text: "I hvilke grad er bestemmelser konkrete og dekkende for å sikre planens intensjoner og kvaliteter?" },
     { id: "q90", theme: "tema9", text: "Er det samsvar mellom ikke-juridiske og juridisk bindende dokumenter og illustrasjoner?" }
   ],
-  questionMultipliers: {
-    // Tema 1 Egnethet
-    q1: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q2: { Lav: 1, Normal: 1.4, Høy: 1.8, "Ikke aktuelt": 1 },
-    q3: { Lav: 1, Normal: 1.4, Høy: 1.8, "Ikke aktuelt": 1 },
-    q4: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q5: { Lav: 0.6, Normal: 0.8, Høy: 1, "Ikke aktuelt": 1 },
-    q6: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q7: { Lav: 0.8, Normal: 1.1, Høy: 1.3, "Ikke aktuelt": 1 },
-    q8: { Lav: 0.8, Normal: 1.1, Høy: 1.4, "Ikke aktuelt": 1 },
-    q9: { Lav: 0.6, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
-    q10: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q11: { Lav: 0.8, Normal: 1.1, Høy: 1.3, "Ikke aktuelt": 1 },
-    q12: { Lav: 0.5, Normal: 0.8, Høy: 1, "Ikke aktuelt": 1 },
-    q13: { Lav: 0.6, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q14: { Lav: 0.7, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q15: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q16: { Lav: 0.6, Normal: 0.8, Høy: 1, "Ikke aktuelt": 1 },
-    q17: { Lav: 0.5, Normal: 0.9, Høy: 1.3, "Ikke aktuelt": 1 },
-
-    // Tema 2 Infrastruktur og samferdsel
-    q18: { Lav: 0.7, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q19: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q20: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q21: { Lav: 0.7, Normal: 1, Høy: 1.3, "Ikke aktuelt": 1 },
-    q22: { Lav: 0.6, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q23: { Lav: 0.8, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
-    q24: { Lav: 0.7, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q25: { Lav: 0.6, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
-    q26: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q27: { Lav: 0.6, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-
-    // Tema 3 Utforming og plassering av bygg
-    q28: { Lav: 0.7, Normal: 1.1, Høy: 1.4, "Ikke aktuelt": 1 },
-    q29: { Lav: 0.5, Normal: 1, Høy: 1.5, "Ikke aktuelt": 1 },
-    q30: { Lav: 0.4, Normal: 0.8, Høy: 1.2, "Ikke aktuelt": 1 },
-    q31: { Lav: 0.8, Normal: 1.1, Høy: 1.4, "Ikke aktuelt": 1 },
-    q32: { Lav: 0.8, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
-    q33: { Lav: 0.6, Normal: 1, Høy: 1.3, "Ikke aktuelt": 1 },
-    q34: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q35: { Lav: 0.5, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
-    q36: { Lav: 0.5, Normal: 1, Høy: 1.3, "Ikke aktuelt": 1 },
-    q37: { Lav: 0.5, Normal: 0.8, Høy: 1, "Ikke aktuelt": 1 },
-    q38: { Lav: 0.6, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
-    q39: { Lav: 0.6, Normal: 0.8, Høy: 1, "Ikke aktuelt": 1 },
-    q40: { Lav: 0.6, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q41: { Lav: 0.6, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
-    q42: { Lav: 0.8, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
-    q43: { Lav: 0.6, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
-
-    // Tema 4 Natur- og grøntområder
-    q44: { Lav: 0.6, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q45: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q46: { Lav: 0.6, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q47: { Lav: 0.9, Normal: 1.2, Høy: 1.6, "Ikke aktuelt": 1 },
-    q48: { Lav: 0.5, Normal: 0.8, Høy: 1, "Ikke aktuelt": 1 },
-    q49: { Lav: 0.5, Normal: 0.9, Høy: 1.2, "Ikke aktuelt": 1 },
-    q50: { Lav: 0.8, Normal: 1, Høy: 1.3, "Ikke aktuelt": 1 },
-    q51: { Lav: 0.5, Normal: 0.8, Høy: 1.1, "Ikke aktuelt": 1 },
-    q52: { Lav: 0.8, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
-    q53: { Lav: 0.4, Normal: 0.7, Høy: 1, "Ikke aktuelt": 1 },
-    q54: { Lav: 0.7, Normal: 1.1, Høy: 1.5, "Ikke aktuelt": 1 },
-
-    // Tema 5 Barn og unges interesser
-    q55: { Lav: 1, Normal: 1.2, Høy: 1.4, "Ikke aktuelt": 1 },
-    q56: { Lav: 0.6, Normal: 0.8, Høy: 1, "Ikke aktuelt": 1 },
-    q57: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q58: { Lav: 1, Normal: 1.2, Høy: 1.6, "Ikke aktuelt": 1 },
-    q59: { Lav: 0.9, Normal: 1.1, Høy: 1.4, "Ikke aktuelt": 1 },
-    q60: { Lav: 0.7, Normal: 0.9, Høy: 1.1, "Ikke aktuelt": 1 },
-    q61: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q62: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q63: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q64: { Lav: 0.6, Normal: 0.8, Høy: 1, "Ikke aktuelt": 1 },
-
-    // Tema 6 Universell utforming og tilgjengelighet
-    q65: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q66: { Lav: 0.6, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
-    q67: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q68: { Lav: 1, Normal: 1.2, Høy: 1.4, "Ikke aktuelt": 1 },
-    q69: { Lav: 0.6, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q70: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-
-    // Tema 7 Vann og avløp
-    q71: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q72: { Lav: 0.6, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q73: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q74: { Lav: 0.5, Normal: 0.9, Høy: 1.1, "Ikke aktuelt": 1 },
-    q75: { Lav: 0.6, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q76: { Lav: 0.8, Normal: 1, Høy: 1.4, "Ikke aktuelt": 1 },
-    q77: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q78: { Lav: 0.6, Normal: 1, Høy: 1.1, "Ikke aktuelt": 1 },
-
-    // Tema 8 Rekkefølgekrav
-    q79: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q80: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q81: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q82: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q83: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-
-    // Tema 9 Kvalitet på plan og kunnskapsgrunnlag
-    q84: { Lav: 0.8, Normal: 1, Høy: 1.2, "Ikke aktuelt": 1 },
-    q85: { Lav: 1, Normal: 1.2, Høy: 1.4, "Ikke aktuelt": 1 },
-    q86: { Lav: 1, Normal: 1.2, Høy: 1.4, "Ikke aktuelt": 1 },
-    q87: { Lav: 1, Normal: 1.2, Høy: 1.4, "Ikke aktuelt": 1 },
-    q88: { Lav: 1, Normal: 1.2, Høy: 1.4, "Ikke aktuelt": 1 },
-    q89: { Lav: 1, Normal: 1.2, Høy: 1.4, "Ikke aktuelt": 1 },
-    q90: { Lav: 1, Normal: 1.2, Høy: 1.4, "Ikke aktuelt": 1 }
+  priorityMultipliers: {
+    "Lav": 0.5,
+    "Medium": 1,
+    "Høy": 2,
+    "Ikke aktuell": 0
   }
 };
+
 
 const boligbebyggelsePlan = {
   key: 'boligbebyggelse',
@@ -285,27 +186,26 @@ const boligbebyggelsePlan = {
       title: 'Planinitiativ',
       questions: planInitiativData.questions,
       themes: planInitiativData.themes,
-      priorityMultipliers: planInitiativData.questionMultipliers,
+      priorityMultipliers: planInitiativData.priorityMultipliers,
     },
     {
       key: 'forstegangsbehandling',
       title: 'Førstegangsbehandling',
       questions: forstegangsbehandlingData.questions,
       themes: forstegangsbehandlingData.themes,
-      priorityMultipliers: forstegangsbehandlingData.questionMultipliers,
+      priorityMultipliers: forstegangsbehandlingData.priorityMultipliers,
     },
     {
       key: 'sluttbehandling',
       title: 'Sluttbehandling',
-      questions: [
-        { id: 'bs1', text: 'Er alle juridiske krav for sluttbehandling oppfylt?', theme: 'legal' },
-        { id: 'bs2', text: 'Er det endelige planforslaget i samsvar med vedtak fra høringsrunden?', theme: 'consistency' },
-      ],
-      themes: [
-        { id: 'legal', title: 'Juridisk Sjekk' },
-        { id: 'consistency', title: 'Samsvar' },
-      ],
-      priorityMultipliers: { "Lav": 0.5, "Medium": 1, "Høy": 2, "Ikke aktuell": 0 },
+      questions: [], // Placeholder for sluttbehandling questions
+      themes: [],    // Placeholder for sluttbehandling themes
+      priorityMultipliers: {
+        "Lav": 0.5,
+        "Medium": 1,
+        "Høy": 2,
+        "Ikke aktuell": 0
+      },
     },
   ],
 };
