@@ -9,7 +9,7 @@ const Footer = ({ formScores, planTemplate }) => {
       <div style={{ fontWeight: 'bold' }}>
         Totalverdi: {totalScore.toFixed(2)}
       </div>
-      {planTemplate?.forms.map(form => (
+      {planTemplate?.forms?.map(form => (
         <div key={form.key}>
           {form.title}: {(formScores[form.key] || 0).toFixed(2)}
         </div>

@@ -26,7 +26,7 @@ const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
 
   // A flat map of all templates for easy lookup by key.
   const ALL_TEMPLATES = useMemo(() =>
-    Object.values(PLAN_TEMPLATES).flatMap(plan => plan.forms).reduce((acc, form) => ({ ...acc, [form.key]: form }), {}),
+    Object.values(PLAN_TEMPLATES).flatMap(plan => plan.forms || []).reduce((acc, form) => ({ ...acc, [form.key]: form }), {}),
   []);
 
   useEffect(() => {
@@ -74,8 +74,8 @@ const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
   const handleNewPlan = async () => {
     if (!userId) return;
 
-    const planTemplate = PLAN_TEMPLATES[selectedPlan];
-    if (!planTemplate) return;
+    const planTemplate = PLAN_TEMPLATES[selectedPlan] || {};
+    if (!planTemplate.forms || planTemplate.forms.length === 0) return;
 
     const planInstanceId = uuidv4();
     const batch = writeBatch(db);
@@ -95,7 +95,13 @@ const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
     });
 
     await batch.commit();
-    setSearchParams({ planInstanceId, formId: planTemplate.forms[0].key });
+
+    const params = { planInstanceId };
+    // If there are forms, navigate to the first one.
+    if (planTemplate.forms && planTemplate.forms.length > 0) {
+      params.formId = planTemplate.forms[0].key;
+    }
+    setSearchParams(params);
   };
 
   const requestDeletePlan = (plan) => {
@@ -210,7 +216,13 @@ const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
                       background: "#fff",
                       cursor: "pointer",
                     }}
-                    onClick={() => setSearchParams({ planInstanceId: plan.planInstanceId, formId: plan.forms[0].formId })}
+                    onClick={() => {
+                      const firstFormId = PLAN_TEMPLATES[plan.planTemplateKey]?.forms[0]?.key || 'planinitiativ';
+                      setSearchParams({ 
+                        planInstanceId: plan.planInstanceId, 
+                        formId: firstFormId 
+                      });
+                    }}
                     title={`Åpne “${plan.name}”`}
                   >
                     <div
@@ -281,30 +293,10 @@ const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
                   onClick={cancelDelete}
                   style={{
                     padding: '10px 20px',
-                    border: '1px solid #ccc',
-                    borderRadius: '6px',
-                    background: '#f0f0f0',
-                    cursor: 'pointer',
-                    fontWeight: 'bold',
-                    minWidth: '80px',
+                    border: '1px solid #ccc'
                   }}
                 >
-                  Nei
-                </button>
-                <button
-                  onClick={confirmDeletePlan}
-                  style={{
-                    padding: '10px 20px',
-                    border: '1px solid #c00',
-                    borderRadius: '6px',
-                    background: '#dc3545',
-                    color: 'white',
-                    cursor: 'pointer',
-                    fontWeight: 'bold',
-                    minWidth: '80px',
-                  }}
-                >
-                  Ja
+                  Avbryt
                 </button>
               </div>
             </div>

@@ -25,7 +25,7 @@ import { AuthProvider, useAuth, RequireAuth } from "./context/AuthContext";
 function MainLayout() {
   const [selectedPlan, setSelectedPlan] = useState(Object.keys(PLAN_TEMPLATES)[0] || "");
   const { user } = useAuth(); // Firebase user
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const planInstanceId = searchParams.get("planInstanceId");
 
   // Lifted state for all forms within a plan instance
@@ -61,6 +61,15 @@ function MainLayout() {
 
   const formId = searchParams.get("formId");
 
+  const handleSelectForm = (formKey) => {
+    if (planInstanceId) {
+      setSearchParams({ planInstanceId, formId: formKey });
+    } else {
+      // Optional: handle case where no plan is selected.
+      // Maybe show a notification to select a plan first.
+    }
+  };
+
   return (
     <div className="app-container" style={{
       display: 'grid',
@@ -75,7 +84,7 @@ function MainLayout() {
       overflow: 'hidden'
     }}>
       <div className="header-area" style={{ gridArea: 'header' }}>
-        <Header selectedPlanKey={selectedPlan} />
+        <Header selectedForm={formId} onSelectForm={handleSelectForm} />
       </div>
       <div className="sidebar-area" style={{ gridArea: 'sidebar', overflowY: 'auto' }}>
         <Sidebar

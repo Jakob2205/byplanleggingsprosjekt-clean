@@ -1,6 +1,4 @@
 // src/plans/boligbebyggelse.js
-import ScoringForm from '../components/forms/ScoringForm';
-
 
 // Data previously in src/scripts/boligBebyggelsePlanIn.js
 const planInitiativData = {
@@ -278,34 +276,38 @@ const forstegangsbehandlingData = {
   }
 };
 
-
-export const boligbebyggelsePlan = {
-  id: 'boligbebyggelse',
-  name: 'Boligbebyggelse',
-  stages: [
+const boligbebyggelsePlan = {
+  key: 'boligbebyggelse',
+  title: 'Boligbebyggelse',
+  forms: [
     {
-      id: 'planinitiativ',
-      name: 'Planinitiativ',
-      component: ScoringForm,
-      data: planInitiativData,
+      key: 'planinitiativ',
+      title: 'Planinitiativ',
+      questions: planInitiativData.questions,
+      themes: planInitiativData.themes,
+      priorityMultipliers: planInitiativData.questionMultipliers,
     },
     {
-      id: 'forstegangsbehandling',
-      name: 'Førstegangsbehandling',
-      component: ScoringForm,
-      data: forstegangsbehandlingData,
+      key: 'forstegangsbehandling',
+      title: 'Førstegangsbehandling',
+      questions: forstegangsbehandlingData.questions,
+      themes: forstegangsbehandlingData.themes,
+      priorityMultipliers: forstegangsbehandlingData.questionMultipliers,
     },
     {
-      id: 'horingsinnspill',
-      name: 'Høringsinnspill',
-      // component: HoringsinnspillForm, // To be added later
-      data: { /* ...data for this stage... */ },
-    },
-    {
-      id: 'sluttbehandling',
-      name: 'Sluttbehandling',
-      // component: SluttbehandlingForm, // To be added later
-      data: { /* ...data for this stage... */ },
+      key: 'sluttbehandling',
+      title: 'Sluttbehandling',
+      questions: [
+        { id: 'bs1', text: 'Er alle juridiske krav for sluttbehandling oppfylt?', theme: 'legal' },
+        { id: 'bs2', text: 'Er det endelige planforslaget i samsvar med vedtak fra høringsrunden?', theme: 'consistency' },
+      ],
+      themes: [
+        { id: 'legal', title: 'Juridisk Sjekk' },
+        { id: 'consistency', title: 'Samsvar' },
+      ],
+      priorityMultipliers: { "Lav": 0.5, "Medium": 1, "Høy": 2, "Ikke aktuell": 0 },
     },
   ],
 };
+
+export default boligbebyggelsePlan;
