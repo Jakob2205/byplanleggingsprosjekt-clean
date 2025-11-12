@@ -46,6 +46,11 @@ jobs:
           touch dist/.nojekyll
         # ⬆️ Vite bruker "dist". Hvis du bruker Create React App, bytt "dist" -> "build".
 
+      - name: Add a cache-busting file
+        run: |
+          echo "Cache-bust for run ${{ github.run_id }}" > dist/cache-bust.txt
+        # This creates a new file on every run, helping to invalidate CDN caches.
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
