@@ -42,7 +42,6 @@ const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
     const q = query(
       base,
       where("userId", "==", userId),
-      where("planTemplateKey", "==", selectedPlan),
       limit(50)
     );
 
@@ -53,8 +52,13 @@ const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
         // Group forms by planInstanceId
         const plans = items.reduce((acc, form) => {
           const { planInstanceId, name } = form;
-          if (!acc[planInstanceId]) {
-            acc[planInstanceId] = { planInstanceId, name: name || "Uten navn", forms: [] };
+          if (!acc[planInstanceId]) { // Add planTemplateKey to the grouped object
+            acc[planInstanceId] = { 
+              planInstanceId, 
+              name: name || "Uten navn", 
+              planTemplateKey: form.planTemplateKey, // Store this for later use
+              forms: [] 
+            };
           }
           acc[planInstanceId].forms.push(form);
           return acc;
@@ -69,7 +73,7 @@ const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
     );
 
     return () => unsub();
-  }, [userId, selectedPlan]);
+  }, [userId]);
 
   const handleNewPlan = async () => {
     if (!userId) return;
@@ -194,7 +198,7 @@ const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
 
         {userId && !loadingList && myForms.length === 0 && (
           <div style={{ color: "#666", fontSize: 14, marginTop: 8 }}>
-            {`Ingen lagrede planer for “${currentPlan?.title ?? selectedPlan}”.`}
+            {`Du har ingen lagrede planer.`}
           </div>
         )}
 

@@ -198,8 +198,21 @@ const boligbebyggelsePlan = {
     {
       key: 'sluttbehandling',
       title: 'Sluttbehandling',
-      questions: [], // Placeholder for sluttbehandling questions
-      themes: [],    // Placeholder for sluttbehandling themes
+      questions: [
+        { id: 'bs1', text: 'Er alle juridiske krav for sluttbehandling av boligbebyggelse oppfylt?', theme: 'legal_final' },
+        { id: 'bs2', text: 'Er det endelige planforslaget i samsvar med vedtak fra høringsrunden?', theme: 'consistency_final' },
+        { id: 'bs3', text: 'Er infrastruktur som vei, vann og avløp ferdigstilt og godkjent?', theme: 'infrastructure_final' },
+        { id: 'bs4', text: 'Er fellesarealer og lekeplasser ferdigstilt i henhold til planen?', theme: 'amenities_final' },
+        { id: 'bs5', text: 'Er det utstedt ferdigattest for alle boenheter?', theme: 'legal_final' },
+        { id: 'bs6', text: 'Er garantier og forsikringer for byggeprosjektet på plass?', theme: 'legal_final' },
+        { id: 'bs7', text: 'Er planen for avfallshåndtering implementert?', theme: 'infrastructure_final' },
+      ],
+      themes: [
+        { id: 'legal_final', title: 'Juridisk og formelt' },
+        { id: 'consistency_final', title: 'Samsvar med vedtak' },
+        { id: 'infrastructure_final', title: 'Infrastruktur' },
+        { id: 'amenities_final', title: 'Fellesarealer og fasiliteter' },
+      ],
       priorityMultipliers: {
         "Lav": 0.5,
         "Medium": 1,

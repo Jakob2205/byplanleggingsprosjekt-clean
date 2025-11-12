@@ -60,6 +60,9 @@ const standardPlanprosess = {
         { id: 'q_final4', text: 'Spørsmål AA: Er det utarbeidet en plan for overlevering?', theme: 'theme_conditions' },
         { id: 'q_final5', text: 'Spørsmål BB: Er alle økonomiske avslutninger gjort?', theme: 'theme_conditions' },
         { id: 'q_final6', text: 'Spørsmål CC: Er det behov for en evaluering av prosessen?', theme: 'theme_approval' },
+        { id: 'q_final7', text: 'Spørsmål DD: Er planen kunngjort i henhold til loven?', theme: 'theme_approval' },
+        { id: 'q_final8', text: 'Spørsmål EE: Er det noen klager på vedtaket som må behandles?', theme: 'theme_approval' },
+        { id: 'q_final9', text: 'Spørsmål FF: Er planen juridisk bindende etter vedtak?', theme: 'theme_conditions' },
       ],
       themes: [
         { id: 'theme_conditions', title: 'Vilkår' },
