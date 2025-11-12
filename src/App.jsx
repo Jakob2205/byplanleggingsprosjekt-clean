@@ -1,7 +1,6 @@
 // Planleggingsprosjekt/src/App.jsx
 import { useState, useCallback, useEffect } from "react";
 import {
-  BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
@@ -9,6 +8,7 @@ import {
 } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 
+import { HashRouter as Router } from "react-router-dom";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import MainContent from "./components/MainContent";
