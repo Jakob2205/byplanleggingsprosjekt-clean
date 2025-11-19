@@ -1,9 +1,10 @@
+import GenericForm from '../components/GenericForm';
+
 const standardPlanprosess = {
   key: 'standardPlanprosess',
   title: 'Standard Planprosess',
-  forms: [
-    {
-      key: 'planinitiativ',
+  forms: {
+    planinitiativ: {
       title: 'Planinitiativ',
       questions: [
         { id: 'q_init1', text: 'Spørsmål A: Er planinitiativet i tråd med kommunens overordnede strategier?', theme: 'theme_strategy' },
@@ -24,8 +25,7 @@ const standardPlanprosess = {
         "Ikke aktuell": 0 // Score is ignored
       }
     },
-    {
-      key: 'forstegangsbehandling',
+    forstegangsbehandling: {
       title: 'Førstegangsbehandling',
       questions: [
         { id: 'q1', text: 'Spørsmål 1: Er prosjektet i tråd med overordnede mål?', theme: 'theme_general' },
@@ -50,9 +50,57 @@ const standardPlanprosess = {
         "Ikke aktuell": 0 // Score is ignored
       }
     },
-    {
-      key: 'sluttbehandling',
+    casestudie: {
+      title: 'Casestudie',
+      component: GenericForm,
+      formConfig: [
+        { id: 'stdCaseDesc', type: 'textarea', label: 'Beskrivelse av casestudie for standard planprosess', name: 'stdCaseDesc', defaultValue: '' }
+      ],
+      questions: [
+        { id: 'stdCaseDesc', text: 'Beskrivelse av casestudie for standard planprosess', theme: 'general', type: 'textarea', defaultValue: '', scoreLogic: (val) => (val && val.length > 0 ? 1 : 0) }
+      ],
+      themes: [
+        { id: 'general', title: 'Generelt' }
+      ],
+      priorityMultipliers: {
+        "Lav": 0.5, "Medium": 1, "Høy": 2, "Ikke aktuell": 0
+      },
+    },
+    'politisk-skjema': {
+      title: 'Politisk skjema',
+      component: GenericForm,
+      formConfig: [
+        { id: 'stdPoliticalSummary', type: 'textarea', label: 'Politisk behandling og vedtak for standard planprosess', name: 'stdPoliticalSummary', defaultValue: '' }
+      ],
+      questions: [
+        { id: 'stdPoliticalSummary', text: 'Politisk behandling og vedtak for standard planprosess', theme: 'general', type: 'textarea', defaultValue: '', scoreLogic: (val) => (val && val.length > 0 ? 1 : 0) }
+      ],
+      themes: [
+        { id: 'general', title: 'Generelt' }
+      ],
+      priorityMultipliers: {
+        "Lav": 0.5, "Medium": 1, "Høy": 2, "Ikke aktuell": 0
+      },
+    },
+    medvirkningskjema: {
+      title: 'Medvirkningskjema',
+      component: GenericForm,
+      formConfig: [
+        { id: 'stdParticipationSummary', type: 'textarea', label: 'Oppsummering av medvirkning for standard planprosess', name: 'stdParticipationSummary', defaultValue: '' }
+      ],
+      questions: [
+        { id: 'stdParticipationSummary', text: 'Oppsummering av medvirkning for standard planprosess', theme: 'general', type: 'textarea', defaultValue: '', scoreLogic: (val) => (val && val.length > 0 ? 1 : 0) }
+      ],
+      themes: [
+        { id: 'general', title: 'Generelt' }
+      ],
+      priorityMultipliers: {
+        "Lav": 0.5, "Medium": 1, "Høy": 2, "Ikke aktuell": 0
+      },
+    },
+    sluttbehandling: {
       title: 'Sluttbehandling',
+      // This form uses ScoringQuestion implicitly via MainContent
       questions: [
         { id: 'q_final1', text: 'Spørsmål X: Er alle vilkår og rekkefølgekrav oppfylt?', theme: 'theme_conditions' },
         { id: 'q_final2', text: 'Spørsmål Y: Er planen klar for endelig vedtak?', theme: 'theme_approval' },
@@ -74,8 +122,8 @@ const standardPlanprosess = {
         "Høy": 2,   // Score is doubled
         "Ikke aktuell": 0 // Score is ignored
       }
-    }
-  ]
+    },
+  }
 };
 
 export default standardPlanprosess;

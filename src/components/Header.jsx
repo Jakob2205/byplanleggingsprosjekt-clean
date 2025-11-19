@@ -2,15 +2,7 @@
 import React from "react";
 import { useAuth } from "../context/AuthContext";
 import "../styles/header.css";
-
-const universalForms = [
-   { key: "planinitiativ", title: "Planinitiativ" },
-  { key: "forstegangsbehandling", title: "Førstegangsbehandling" },
-  { key: "casestudie", title: "Casestudie" },
-  { key: "politisk-skjema", title: "Politisk skjema" },
-  { key: "medvirkningskjema", title: "Medvirkningskjema" },
-  { key: "sluttbehandling", title: "Sluttbehandling" },
-];
+import { UNIVERSAL_FORMS } from "../constants/forms";
 
 const Header = ({ selectedForm, onSelectForm }) => {
   const { user, logout } = useAuth();
@@ -29,7 +21,7 @@ const Header = ({ selectedForm, onSelectForm }) => {
       <h1>Plansikt</h1>
 
       <div className="tabs">
-        {universalForms.map((form) => (
+        {UNIVERSAL_FORMS.map((form) => (
           <button
             key={form.key}
             className={`tab-button ${selectedForm === form.key ? "active" : ""}`}

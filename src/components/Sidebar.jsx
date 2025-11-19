@@ -16,6 +16,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { PLAN_TEMPLATES } from "./plan-templates";
+import { UNIVERSAL_FORMS } from "../constants/forms";
 
 const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -78,33 +79,34 @@ const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
   const handleNewPlan = async () => {
     if (!userId) return;
 
-    const planTemplate = PLAN_TEMPLATES[selectedPlan] || {};
-    if (!planTemplate.forms || planTemplate.forms.length === 0) return;
+    if (UNIVERSAL_FORMS.length === 0) return;
 
     const planInstanceId = uuidv4();
     const batch = writeBatch(db);
     const now = serverTimestamp();
 
-    planTemplate.forms.forEach(formTemplate => {
+    UNIVERSAL_FORMS.forEach(form => {
+      const formKey = form.key;
       const newFormRef = doc(collection(db, "forms"));
       batch.set(newFormRef, {
         userId,
-        formId: formTemplate.key,
+        formId: formKey,
         planInstanceId,
         planTemplateKey: selectedPlan,
         name: "Ny plan",
         createdAt: now,
         updatedAt: now,
+        // Initialize with empty answers/state for consistency
+        answers: {},
+        includeInTotal: {},
       });
     });
 
     await batch.commit();
 
     const params = { planInstanceId };
-    // If there are forms, navigate to the first one.
-    if (planTemplate.forms && planTemplate.forms.length > 0) {
-      params.formId = planTemplate.forms[0].key;
-    }
+    // Navigate to the first form in the new plan
+    params.formId = UNIVERSAL_FORMS[0].key;
     setSearchParams(params);
   };
 
@@ -204,11 +206,8 @@ const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
 
         <div className="form-list-container" style={{ overflowY: 'auto', flex: 1 }}>
           <ul style={{ listStyle: "none", padding: 0, margin: "8px 0 0" }}>
-            {myForms.map((plan) => (
-              <li
-                key={plan.planInstanceId}
-                style={{ marginBottom: 8, display: "flex", gap: "4px" }}
-              >
+            {myForms.map((plan) => ( // Removed unused 'index' parameter
+              <li key={plan.planInstanceId} style={{ marginBottom: 8, display: "flex", gap: "4px" }}>
                 <div style={{ flex: 1 }}>
                   <button
                     style={{
@@ -221,10 +220,12 @@ const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
                       cursor: "pointer",
                     }}
                     onClick={() => {
-                      const firstFormId = PLAN_TEMPLATES[plan.planTemplateKey]?.forms[0]?.key || 'planinitiativ';
+                      const formsInPlan = PLAN_TEMPLATES[plan.planTemplateKey]?.forms;
+                      const firstFormKey = Array.isArray(formsInPlan) ? formsInPlan[0]?.key : Object.keys(formsInPlan || {})[0];
+
                       setSearchParams({ 
                         planInstanceId: plan.planInstanceId, 
-                        formId: firstFormId 
+                        formId: firstFormKey || ''
                       });
                     }}
                     title={`Åpne “${plan.name}”`}

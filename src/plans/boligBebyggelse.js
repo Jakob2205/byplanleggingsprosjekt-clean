@@ -1,4 +1,6 @@
 // src/plans/boligbebyggelse.js
+import { UNIVERSAL_FORMS } from '../constants/forms';
+import GenericForm from '../components/GenericForm';
 
 // Data previously in src/scripts/boligBebyggelsePlanIn.js
 const planInitiativData = {
@@ -180,38 +182,88 @@ const forstegangsbehandlingData = {
 const boligbebyggelsePlan = {
   key: 'boligbebyggelse',
   title: 'Boligbebyggelse',
-  forms: [
-    {
-      key: 'planinitiativ',
+  forms: {
+    planinitiativ: {
       title: 'Planinitiativ',
+      // This form uses ScoringQuestion implicitly via MainContent
       questions: planInitiativData.questions,
       themes: planInitiativData.themes,
       priorityMultipliers: planInitiativData.priorityMultipliers,
     },
-    {
-      key: 'forstegangsbehandling',
+    forstegangsbehandling: {
       title: 'Førstegangsbehandling',
+      // This form uses ScoringQuestion implicitly via MainContent
       questions: forstegangsbehandlingData.questions,
       themes: forstegangsbehandlingData.themes,
       priorityMultipliers: forstegangsbehandlingData.priorityMultipliers,
     },
-    {
-      key: 'sluttbehandling',
-      title: 'Sluttbehandling',
-      questions: [
-        { id: 'bs1', text: 'Er alle juridiske krav for sluttbehandling av boligbebyggelse oppfylt?', theme: 'legal_final' },
-        { id: 'bs2', text: 'Er det endelige planforslaget i samsvar med vedtak fra høringsrunden?', theme: 'consistency_final' },
-        { id: 'bs3', text: 'Er infrastruktur som vei, vann og avløp ferdigstilt og godkjent?', theme: 'infrastructure_final' },
-        { id: 'bs4', text: 'Er fellesarealer og lekeplasser ferdigstilt i henhold til planen?', theme: 'amenities_final' },
-        { id: 'bs5', text: 'Er det utstedt ferdigattest for alle boenheter?', theme: 'legal_final' },
-        { id: 'bs6', text: 'Er garantier og forsikringer for byggeprosjektet på plass?', theme: 'legal_final' },
-        { id: 'bs7', text: 'Er planen for avfallshåndtering implementert?', theme: 'infrastructure_final' },
+    casestudie: {
+      title: 'Casestudie',
+      component: GenericForm,
+      formConfig: [ // GenericForm uses this for rendering
+        { id: 'caseDescription', type: 'textarea', label: 'Beskrivelse av casestudie', name: 'caseDescription', defaultValue: '' }
+      ],
+      questions: [ // MainContent uses this for scoring/theme grouping
+        { id: 'caseDescription', text: 'Beskrivelse av casestudie', theme: 'general', type: 'textarea', defaultValue: '', scoreLogic: (val) => (val && val.length > 0 ? 1 : 0) }
       ],
       themes: [
+        { id: 'general', title: 'Generelt' }
+      ],
+      priorityMultipliers: {
+        "Lav": 0.5, "Medium": 1, "Høy": 2, "Ikke aktuell": 0
+      },
+    },
+    'politisk-skjema': {
+      title: 'Politisk skjema',
+      component: GenericForm,
+      formConfig: [ // GenericForm uses this for rendering
+        { id: 'politicalSummary', type: 'textarea', label: 'Politisk behandling og vedtak', name: 'politicalSummary', defaultValue: '' }
+      ],
+      questions: [ // MainContent uses this for scoring/theme grouping
+        { id: 'politicalSummary', text: 'Politisk behandling og vedtak', theme: 'general', type: 'textarea', defaultValue: '', scoreLogic: (val) => (val && val.length > 0 ? 1 : 0) }
+      ],
+      themes: [
+        { id: 'general', title: 'Generelt' }
+      ],
+      priorityMultipliers: {
+        "Lav": 0.5, "Medium": 1, "Høy": 2, "Ikke aktuell": 0
+      },
+    },
+    medvirkningskjema: {
+      title: 'Medvirkningskjema',
+      component: GenericForm,
+      formConfig: [ // GenericForm uses this for rendering
+        { id: 'participationSummary', type: 'textarea', label: 'Oppsummering av medvirkning', name: 'participationSummary', defaultValue: '' }
+      ],
+      questions: [ // MainContent uses this for scoring/theme grouping
+        { id: 'participationSummary', text: 'Oppsummering av medvirkning', theme: 'general', type: 'textarea', defaultValue: '', scoreLogic: (val) => (val && val.length > 0 ? 1 : 0) }
+      ],
+      themes: [
+        { id: 'general', title: 'Generelt' }
+      ],
+      priorityMultipliers: {
+        "Lav": 0.5, "Medium": 1, "Høy": 2, "Ikke aktuell": 0
+      },
+    },
+    sluttbehandling: {
+      title: 'Sluttbehandling',
+      component: GenericForm,
+      formConfig: [ // GenericForm uses this for rendering
+        { id: 'legalReqsMet', type: 'checkbox', label: 'Alle juridiske krav er oppfylt', name: 'legalReqsMet', defaultValue: false },
+        { id: 'infraComplete', type: 'checkbox', label: 'Infrastruktur er ferdigstilt og godkjent', name: 'infraComplete', defaultValue: false },
+        { id: 'finalCertIssued', type: 'checkbox', label: 'Ferdigattest er utstedt', name: 'finalCertIssued', defaultValue: false },
+        { id: 'finalComments', type: 'textarea', label: 'Avsluttende kommentarer', name: 'finalComments', defaultValue: '' },
+      ],
+      questions: [ // MainContent uses this for scoring/theme grouping
+        { id: 'legalReqsMet', text: 'Alle juridiske krav er oppfylt', theme: 'legal_final', type: 'checkbox', defaultValue: false, scoreLogic: (val) => (val ? 1 : 0) },
+        { id: 'infraComplete', text: 'Infrastruktur er ferdigstilt og godkjent', theme: 'infrastructure_final', type: 'checkbox', defaultValue: false, scoreLogic: (val) => (val ? 1 : 0) },
+        { id: 'finalCertIssued', text: 'Ferdigattest er utstedt', theme: 'legal_final', type: 'checkbox', defaultValue: false, scoreLogic: (val) => (val ? 1 : 0) },
+        { id: 'finalComments', text: 'Avsluttende kommentarer', theme: 'general_final', type: 'textarea', defaultValue: '', scoreLogic: (val) => (val && val.length > 0 ? 1 : 0) },
+      ],
+      themes: [ // Define themes
         { id: 'legal_final', title: 'Juridisk og formelt' },
-        { id: 'consistency_final', title: 'Samsvar med vedtak' },
         { id: 'infrastructure_final', title: 'Infrastruktur' },
-        { id: 'amenities_final', title: 'Fellesarealer og fasiliteter' },
+        { id: 'general_final', title: 'Generelt' },
       ],
       priorityMultipliers: {
         "Lav": 0.5,
@@ -220,7 +272,7 @@ const boligbebyggelsePlan = {
         "Ikke aktuell": 0
       },
     },
-  ],
+  }
 };
 
 export default boligbebyggelsePlan;

@@ -1,5 +1,6 @@
 // Planleggingsprosjekt/src/components/MainContent.jsx
 import { useState, useEffect, useCallback, useMemo } from "react";
+import PropTypes from 'prop-types'; // Import PropTypes
 import { useSearchParams } from "react-router-dom";
 // Firestore
 import { db } from "../firebase-config"; // Correct path
@@ -15,6 +16,7 @@ import {
   getDocs,
   writeBatch,
 } from "firebase/firestore";
+import GenericForm from "./GenericForm";
 import { PLAN_TEMPLATES } from "./plan-templates";
 
 const ScoringQuestion = ({ question, onAnswer, answer, onPriorityChange, priority, onCommentChange, comment }) => {
@@ -33,7 +35,7 @@ const ScoringQuestion = ({ question, onAnswer, answer, onPriorityChange, priorit
       <div style={{ marginTop: '5px' }}>
         <label>
           Prioritet:
-          {priorityOptions.map((opt) => (
+          {priorityOptions.map(opt => (
             <label key={opt.value} style={{ marginLeft: '10px' }}>
               <input
                 type="radio"
@@ -81,77 +83,88 @@ const ScoringQuestion = ({ question, onAnswer, answer, onPriorityChange, priorit
 };
 
 const MainContent = ({
-  selectedForm,
+  selectedPlan,
   userId,
-  answers,
+  initialAnswers,
   formName,
   includeInTotal,
   updateFormState,
   setInitialFormData,
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const formId = searchParams.get('formId');
 
-  const formTemplate = useMemo(() => {
-    if (!selectedForm) return null;
-    for (const planKey in PLAN_TEMPLATES) {
-      const form = PLAN_TEMPLATES[planKey].forms.find(f => f.key === selectedForm);
-      if (form) return form;
-    }
-    return null;
-  }, [selectedForm]);
-
-  const { questions, themes } = useMemo(() => {
-    const { questions: qs = [], themes: thms = [] } = formTemplate || {};
-    return { questions: qs, themes: thms };
-  }, [formTemplate]);
-
-  const temaer = useMemo(() => {
-    return themes.map(theme => ({
-      ...theme,
-      questions: questions.filter(q => q.theme === theme.id)
-    }));
-  }, [themes, questions]);
-
-  // ---- Lokal state ----
+  // ---- Hooks must be called at the top level ----
   const [collapsedThemes, setCollapsedThemes] = useState({});
   const [loading, setLoading] = useState(false);
 
   const planInstanceId = searchParams.get("planInstanceId");
   const instanceId = searchParams.get("instanceId");
 
+  // ---- Memoized values and callbacks ----
+  // These are safe to call unconditionally.
+  // If formId or selectedPlan is missing, they will just return null/empty values.
+
+  const answers = initialAnswers; // Use initialAnswers prop
+
+  const handleNameChange = (e) => {
+    updateFormState(formId, { formName: e.target.value });
+  };
+
+  // ---- Logic that depends on props ----
+
+  const formInfo = useMemo(() => {
+    if (!selectedPlan || !formId) return null;
+    const forms = PLAN_TEMPLATES[selectedPlan]?.forms;
+    if (!forms) return null;
+
+    // Handle both array-based (old) and object-based (new) form structures
+    if (Array.isArray(forms)) {
+      return forms.find(f => f.key === formId) || null;
+    }
+    return forms[formId] || null;
+  }, [selectedPlan, formId]);
+
+  // formInfo now directly contains the full form template including questions, themes, etc.
+  const formTemplate = formInfo;
+  const { questions = [], themes = [], priorityMultipliers = {} } = formTemplate || {};
+
+  const temaer = useMemo(() => {
+    return (themes || []).map(theme => ({
+      ...theme,
+      questions: (questions || []).filter(q => q.theme === theme.id)
+    }));
+  }, [themes, questions]);
+
   const handleAnswerChange = useCallback((questionId, score) => {
     const newAnswers = {
       ...(answers || {}),
       [questionId]: { ...(answers || {})[questionId], score },
     };
-    updateFormState(selectedForm, { answers: newAnswers });
-  }, [answers, updateFormState, selectedForm]);
+    updateFormState(formId, { answers: newAnswers });
+  }, [answers, updateFormState, formId]);
 
   const handlePriorityChange = useCallback((questionId, priority) => {
     const newAnswers = {
       ...(answers || {}),
       [questionId]: { ...(answers || {})[questionId], priority },
     };
-    updateFormState(selectedForm, { answers: newAnswers });
-  }, [answers, updateFormState, selectedForm]);
+    updateFormState(formId, { answers: newAnswers });
+  }, [answers, updateFormState, formId]);
 
   const handleCommentChange = useCallback((questionId, comment) => {
     const newAnswers = {
       ...(answers || {}),
       [questionId]: { ...(answers || {})[questionId], comment },
     };
-    updateFormState(selectedForm, { answers: newAnswers });
-  }, [answers, updateFormState, selectedForm]);
-
-  const handleNameChange = (e) => {
-    updateFormState(selectedForm, { formName: e.target.value });
-  };
+    updateFormState(formId, { answers: newAnswers });
+  }, [answers, updateFormState, formId]);
 
   const getThemeScore = useCallback((theme) => {
     let total = 0;
     let answeredQuestions = 0;
 
-    theme.questions.forEach(q => {
+    (theme.questions || []).forEach(q => {
       const answerData = answers?.[q.id];
       const priority = answerData?.priority || "Medium";
 
@@ -159,7 +172,7 @@ const MainContent = ({
       if (answers && answerData && answerData.score !== undefined && priority !== "Ikke aktuell") {
         answeredQuestions++;
         const multiplier = formTemplate.priorityMultipliers[priority] || 1;
-        total += answerData.score * multiplier;
+        total += (answerData.score || 0) * multiplier; // Ensure score is a number
       }
     });
 
@@ -167,46 +180,57 @@ const MainContent = ({
     if (answeredQuestions < 3) return null;
 
     const score = total / answeredQuestions;
-    return parseFloat(Math.max(-5, Math.min(score, 5)).toFixed(2));
+    return parseFloat(Math.max(-5, Math.min(score, 5)).toFixed(2)); // Clamp score between -5 and 5
   }, [answers, formTemplate]); // This dependency array is correct, no change needed here.
 
-  const themeAverageScores = useMemo(() => {
+  const { themeAverageScores, calculatedIncludeInTotal } = useMemo(() => {
     const scores = {};
+    const newIncludeInTotal = {};
     (temaer || []).forEach((t) => {
-      const themeKey = `${selectedForm}_${t.id}`;
+      const themeKey = `${formId}_${t.id}`;
       scores[themeKey] = getThemeScore(t);
+      newIncludeInTotal[themeKey] = scores[themeKey] !== null;
     });
-    return scores;
-  }, [temaer, getThemeScore, selectedForm]); // This dependency array is also correct.
+    return { themeAverageScores: scores, calculatedIncludeInTotal: newIncludeInTotal };
+  }, [temaer, getThemeScore, formId]); // This dependency array is also correct.
 
   // Auto-deaktiver tema < 3 spørsmål (trygg – kun sett state hvis noe endres)
   useEffect(() => {
-    const currentInclude = includeInTotal || {};
-    const next = { ...currentInclude };
+    // Use the `includeInTotal` prop directly as the current state
+    const currentIncludeState = includeInTotal || {};
+    const next = { ...currentIncludeState };
     let changed = false;
 
     (temaer || []).forEach((t) => {
-      const themeKey = `${selectedForm}_${t.id}`;
+      const themeKey = `${formId}_${t.id}`;
       const score = themeAverageScores[themeKey]; // null eller tall
-      if (score === null && currentInclude[themeKey] !== false) {
+      if (score === null && currentIncludeState[themeKey] !== false) {
         next[themeKey] = false;
         changed = true;
-      } else if (score !== null && !(themeKey in currentInclude)) {
+      } else if (score !== null && !(themeKey in currentIncludeState)) {
         next[themeKey] = true;
         changed = true;
       }
     });
 
-    if (changed) {
-      updateFormState(selectedForm, { includeInTotal: next });
+    // Only update if `next` is actually different from `currentIncludeState`
+    // This deep comparison prevents infinite loops due to new object references with same content.
+    if (changed && JSON.stringify(next) !== JSON.stringify(currentIncludeState)) {
+      updateFormState(formId, { includeInTotal: next });
     }
-  }, [themeAverageScores, temaer, selectedForm, includeInTotal, updateFormState]);
+
+  }, [themeAverageScores, temaer, formId, includeInTotal, updateFormState]); // Dependency array updated
+
+  // Memoize the stringified dependencies to prevent the effect from running unnecessarily.
+  const overallScoreDeps = useMemo(() => {
+    return JSON.stringify({ themeAverageScores, includeInTotal });
+  }, [themeAverageScores, includeInTotal]);
 
   // Totalverdi
   useEffect(() => {
     const activeScores = (temaer || [])
-      .map((t) => `${selectedForm}_${t.id}`)
-      .filter((themeKey) => includeInTotal?.[themeKey])
+      .map((t) => `${formId}_${t.id}`)
+      .filter((themeKey) => includeInTotal?.[themeKey] === true)
       .map((themeKey) => themeAverageScores[themeKey])
       .filter((s) => s !== null && s !== undefined);
 
@@ -214,19 +238,19 @@ const MainContent = ({
     if (activeScores.length > 0) {
       overall = activeScores.reduce((acc, s) => acc + parseFloat(s), 0) / activeScores.length;
     }
-    updateFormState(selectedForm, { score: parseFloat(Math.max(-5, Math.min(overall, 5)).toFixed(2)) });
-  }, [themeAverageScores, includeInTotal, temaer, updateFormState, selectedForm]); // This useEffect is also correct.
+    updateFormState(formId, { score: parseFloat(Math.max(-5, Math.min(overall, 5)).toFixed(2)) });
+  }, [overallScoreDeps, temaer, updateFormState, formId]); // Use the memoized dependency
 
   const toggleCollapse = (themeId) =>
     setCollapsedThemes((p) => {
-      const themeKey = `${selectedForm}_${themeId}`;
+      const themeKey = `${formId}_${themeId}`;
       return { ...p, [themeKey]: !p[themeKey] };
     });
   const toggleInclude = (themeId) =>
     {
-      const themeKey = `${selectedForm}_${themeId}`;
+      const themeKey = `${formId}_${themeId}`;
       const newInclude = { ...(includeInTotal || {}), [themeKey]: !(includeInTotal || {})[themeKey] };
-      updateFormState(selectedForm, { includeInTotal: newInclude });
+      updateFormState(formId, { includeInTotal: newInclude });
     };
 
   // ==========================
@@ -239,7 +263,7 @@ const MainContent = ({
 
     async function loadInstance() {
       if (!planInstanceId) {
-        setInitialFormData(selectedForm, { formName: "", answers: {}, includeInTotal: {} });
+        setInitialFormData(formId, { formName: "", answers: {}, includeInTotal: {} });
         return;
       }
       setLoading(true);
@@ -249,7 +273,7 @@ const MainContent = ({
           collection(db, "forms"),
           where("planInstanceId", "==", planInstanceId),
           where("userId", "==", userId),
-          where("formId", "==", selectedForm)
+          where("formId", "==", formId)
         );
         const querySnapshot = await getDocs(q);
 
@@ -259,7 +283,7 @@ const MainContent = ({
 
           if (!mounted) return;
 
-          setInitialFormData(selectedForm, {
+          setInitialFormData(formId, {
             formName: data.name || "Uten navn",
             answers: data.answers || {},
             includeInTotal: data.includeInTotal || {},
@@ -275,7 +299,7 @@ const MainContent = ({
           );
         } else {
           // Handle case where form for this plan doesn't exist (should not happen with new logic)
-          setInitialFormData(selectedForm, { formName: "Ny plan", answers: {}, includeInTotal: {} });
+          setInitialFormData(formId, { formName: "Ny plan", answers: {}, includeInTotal: {} });
         }
       } catch (e) {
         console.error("Kunne ikke laste instans:", e);
@@ -283,12 +307,12 @@ const MainContent = ({
       setLoading(false);
     }
 
-    if (userId && selectedForm) loadInstance();
+    if (userId && formId) loadInstance();
     return () => {
       mounted = false;
     };
-  }, [planInstanceId, selectedForm, userId, setSearchParams, setInitialFormData]);
-
+  }, [planInstanceId, formId, userId, setSearchParams, setInitialFormData]);
+  
   // Generic save function to reduce duplication
   const saveForm = async (isCopy = false) => {
     try {
@@ -300,7 +324,7 @@ const MainContent = ({
       const isNew = !instanceId || isCopy;
       const dataToSave = {
         name: formName || "Uten navn",
-        answers,
+        answers: initialAnswers,
         includeInTotal,
         updatedAt: serverTimestamp(),
         userId: userId,
@@ -348,7 +372,23 @@ const MainContent = ({
   // Lagre som kopi
   const handleSaveAsCopy = () => saveForm(true);
 
-  if (!selectedForm || !formTemplate) {
+  // ---- Conditional Rendering ----
+  // This now happens after all hooks have been called.
+
+  if (formInfo && formInfo.component === GenericForm) {
+    const { component: FormComponent, ...componentProps } = formInfo;
+    return (
+      <FormComponent
+        key={`${selectedPlan}-${formId}`}
+        formId={formId}
+        initialAnswers={initialAnswers}
+        updateFormState={updateFormState}
+        setInitialFormData={setInitialFormData}
+        {...componentProps}
+      />
+    );
+  }
+  if (!formId || !formTemplate) {
     return (
       <main style={{ padding: '20px' }}>
         <h2>Velkommen</h2>
@@ -401,7 +441,7 @@ const MainContent = ({
       <h2>{formTemplate.title}</h2>
 
       {temaer.map((theme) => {
-        const themeKey = `${selectedForm}_${theme.id}`;
+        const themeKey = `${formId}_${theme.id}`;
         const themeScore = themeAverageScores[themeKey];
         const isIncluded = !!includeInTotal?.[themeKey];
 
@@ -460,3 +500,14 @@ const MainContent = ({
 };
 
 export default MainContent;
+
+// Prop validation for MainContent
+MainContent.propTypes = {
+  selectedPlan: PropTypes.string.isRequired,
+  userId: PropTypes.string, // userId can be null if not logged in
+  initialAnswers: PropTypes.object,
+  formName: PropTypes.string,
+  includeInTotal: PropTypes.object,
+  updateFormState: PropTypes.func.isRequired,
+  setInitialFormData: PropTypes.func.isRequired,
+};

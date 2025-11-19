@@ -1,12 +1,12 @@
 // Planleggingsprosjekt/src/App.jsx
 import { useState, useCallback, useEffect } from "react";
 import {
-  Routes,
   Route,
+  Routes,
   Navigate,
   useLocation,
-} from "react-router-dom";
-import { useSearchParams } from "react-router-dom";
+} from "react-router-dom"; // No change needed here
+import { useSearchParams } from "react-router-dom"; // No change needed here
 
 import { HashRouter as Router } from "react-router-dom";
 import Header from "./components/Header";
@@ -47,13 +47,14 @@ function MainLayout() {
   }, [planInstanceId]);
 
   const updateFormState = useCallback((formId, newState) => {
-    setPlanData(prev => ({
-      scores: { ...prev.scores, ...newState.score && { [formId]: newState.score } },
-      answers: { ...prev.answers, ...newState.answers && { [formId]: newState.answers } },
-      formNames: { ...prev.formNames, ...newState.formName && { [formId]: newState.formName } },
-      includeInTotals: { ...prev.includeInTotals, ...newState.includeInTotal && { [formId]: newState.includeInTotal } },
-    }));
-  }, []);
+    setPlanData(prev => {
+      const newScores = newState.score !== undefined ? { ...prev.scores, [formId]: newState.score } : prev.scores;
+      const newAnswers = newState.answers ? { ...prev.answers, [formId]: newState.answers } : prev.answers;
+      const newFormNames = newState.formName ? { ...prev.formNames, [formId]: newState.formName } : prev.formNames;
+      const newIncludeInTotals = newState.includeInTotal ? { ...prev.includeInTotals, [formId]: newState.includeInTotal } : prev.includeInTotals;
+      return { scores: newScores, answers: newAnswers, formNames: newFormNames, includeInTotals: newIncludeInTotals };
+    });
+  }, []); // Empty dependency array makes this function stable
 
   const setInitialFormData = useCallback((formId, data) => {
     updateFormState(formId, data);
@@ -94,16 +95,21 @@ function MainLayout() {
         />
       </div>
       <div className="main-content-area" style={{ gridArea: 'main', overflowY: 'auto', padding: '20px' }}>
-        <MainContent
-          selectedForm={formId} // Pass formId from URL to MainContent
-          userId={user?.uid}
-          // Pass lifted state and handlers down
-          answers={planData.answers[formId]}
-          formName={planData.formNames[formId]}
-          includeInTotal={planData.includeInTotals[formId]}
-          updateFormState={updateFormState}
-          setInitialFormData={setInitialFormData}
-        />
+        {formId ? (
+          <MainContent
+            selectedForm={formId} // Pass formId from URL to MainContent
+            selectedPlan={selectedPlan} // Pass selectedPlan to MainContent
+            userId={user?.uid}
+            // Pass lifted state and handlers down
+            initialAnswers={planData.answers[formId]}
+            formName={planData.formNames[formId]}
+            includeInTotal={planData.includeInTotals[formId]}
+            updateFormState={updateFormState}
+            setInitialFormData={setInitialFormData}
+          />
+        ) : (
+          <div>Please select a plan and a form to continue.</div>
+        )}
       </div>
       <div className="footer-area" style={{ gridArea: 'footer' }}>
         <Footer formScores={planData.scores} planTemplate={PLAN_TEMPLATES[selectedPlan]} />
@@ -112,21 +118,28 @@ function MainLayout() {
   );
 }
 
+function Root() {
+  const auth = useAuth();
+  return <Navigate to={auth.user ? "/plans" : "/login"} replace />;
+}
+
 export default function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
+          <Route path="/login" element={<Login />} />
           <Route
-            path="/"
+            path="/plans"
             element={
               <RequireAuth>
                 <MainLayout />
               </RequireAuth>
             }
           />
-          <Route path="/login" element={<Login />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* The Root component handles the initial redirect */}
+          <Route path="/" element={<Root />} />
+          <Route path="*" element={<Navigate to="/plans" replace />} />
         </Routes>
       </Router>
     </AuthProvider>
