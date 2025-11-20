@@ -484,12 +484,12 @@ const MainContent = ({
                   <ScoringQuestion
                     key={question.id}
                     question={question}
-                    onAnswer={handleAnswerChange}
-                    answer={answers?.[question.id]?.score}
-                    onPriorityChange={handlePriorityChange}
-                    priority={answers?.[question.id]?.priority}
-                    onCommentChange={handleCommentChange}
-                    comment={answers?.[question.id]?.comment} />
+                    onAnswer={handleAnswerChange} // Callback to update score
+                    answer={answers?.[question.id]?.score} // The score value, can be undefined initially
+                    onPriorityChange={handlePriorityChange} // Callback to update priority
+                    priority={answers?.[question.id]?.priority || 'Medium'} // Default to 'Medium' to ensure it's always controlled
+                    onCommentChange={handleCommentChange} // Callback to update comment
+                    comment={answers?.[question.id]?.comment || ''} />
                 ))}
             </div>
           </div>

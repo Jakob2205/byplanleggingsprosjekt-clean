@@ -206,7 +206,7 @@ const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {
 
         <div className="form-list-container" style={{ overflowY: 'auto', flex: 1 }}>
           <ul style={{ listStyle: "none", padding: 0, margin: "8px 0 0" }}>
-            {myForms.map((plan) => ( // Removed unused 'index' parameter
+            {myForms.map((plan) => (
               <li key={plan.planInstanceId} style={{ marginBottom: 8, display: "flex", gap: "4px" }}>
                 <div style={{ flex: 1 }}>
                   <button

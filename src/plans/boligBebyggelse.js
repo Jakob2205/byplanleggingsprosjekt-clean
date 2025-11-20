@@ -199,12 +199,8 @@ const boligbebyggelsePlan = {
     },
     casestudie: {
       title: 'Casestudie',
-      component: GenericForm,
-      formConfig: [ // GenericForm uses this for rendering
-        { id: 'caseDescription', type: 'textarea', label: 'Beskrivelse av casestudie', name: 'caseDescription', defaultValue: '' }
-      ],
-      questions: [ // MainContent uses this for scoring/theme grouping
-        { id: 'caseDescription', text: 'Beskrivelse av casestudie', theme: 'general', type: 'textarea', defaultValue: '', scoreLogic: (val) => (val && val.length > 0 ? 1 : 0) }
+      questions: [
+        { id: 'caseDescription', text: 'Vurder kvaliteten på casestudien', theme: 'general' }
       ],
       themes: [
         { id: 'general', title: 'Generelt' }
@@ -215,12 +211,8 @@ const boligbebyggelsePlan = {
     },
     'politisk-skjema': {
       title: 'Politisk skjema',
-      component: GenericForm,
-      formConfig: [ // GenericForm uses this for rendering
-        { id: 'politicalSummary', type: 'textarea', label: 'Politisk behandling og vedtak', name: 'politicalSummary', defaultValue: '' }
-      ],
-      questions: [ // MainContent uses this for scoring/theme grouping
-        { id: 'politicalSummary', text: 'Politisk behandling og vedtak', theme: 'general', type: 'textarea', defaultValue: '', scoreLogic: (val) => (val && val.length > 0 ? 1 : 0) }
+      questions: [
+        { id: 'politicalSummary', text: 'Vurder kvaliteten på politisk behandling og vedtak', theme: 'general' }
       ],
       themes: [
         { id: 'general', title: 'Generelt' }
@@ -231,12 +223,8 @@ const boligbebyggelsePlan = {
     },
     medvirkningskjema: {
       title: 'Medvirkningskjema',
-      component: GenericForm,
-      formConfig: [ // GenericForm uses this for rendering
-        { id: 'participationSummary', type: 'textarea', label: 'Oppsummering av medvirkning', name: 'participationSummary', defaultValue: '' }
-      ],
-      questions: [ // MainContent uses this for scoring/theme grouping
-        { id: 'participationSummary', text: 'Oppsummering av medvirkning', theme: 'general', type: 'textarea', defaultValue: '', scoreLogic: (val) => (val && val.length > 0 ? 1 : 0) }
+      questions: [
+        { id: 'participationSummary', text: 'Vurder kvaliteten på oppsummering av medvirkning', theme: 'general' }
       ],
       themes: [
         { id: 'general', title: 'Generelt' }
@@ -247,18 +235,11 @@ const boligbebyggelsePlan = {
     },
     sluttbehandling: {
       title: 'Sluttbehandling',
-      component: GenericForm,
-      formConfig: [ // GenericForm uses this for rendering
-        { id: 'legalReqsMet', type: 'checkbox', label: 'Alle juridiske krav er oppfylt', name: 'legalReqsMet', defaultValue: false },
-        { id: 'infraComplete', type: 'checkbox', label: 'Infrastruktur er ferdigstilt og godkjent', name: 'infraComplete', defaultValue: false },
-        { id: 'finalCertIssued', type: 'checkbox', label: 'Ferdigattest er utstedt', name: 'finalCertIssued', defaultValue: false },
-        { id: 'finalComments', type: 'textarea', label: 'Avsluttende kommentarer', name: 'finalComments', defaultValue: '' },
-      ],
-      questions: [ // MainContent uses this for scoring/theme grouping
-        { id: 'legalReqsMet', text: 'Alle juridiske krav er oppfylt', theme: 'legal_final', type: 'checkbox', defaultValue: false, scoreLogic: (val) => (val ? 1 : 0) },
-        { id: 'infraComplete', text: 'Infrastruktur er ferdigstilt og godkjent', theme: 'infrastructure_final', type: 'checkbox', defaultValue: false, scoreLogic: (val) => (val ? 1 : 0) },
-        { id: 'finalCertIssued', text: 'Ferdigattest er utstedt', theme: 'legal_final', type: 'checkbox', defaultValue: false, scoreLogic: (val) => (val ? 1 : 0) },
-        { id: 'finalComments', text: 'Avsluttende kommentarer', theme: 'general_final', type: 'textarea', defaultValue: '', scoreLogic: (val) => (val && val.length > 0 ? 1 : 0) },
+      questions: [
+        { id: 'legalReqsMet', text: 'I hvilken grad er alle juridiske krav oppfylt?', theme: 'legal_final' },
+        { id: 'infraComplete', text: 'I hvilken grad er infrastruktur ferdigstilt og godkjent?', theme: 'infrastructure_final' },
+        { id: 'finalCertIssued', text: 'I hvilken grad er ferdigattest utstedt?', theme: 'legal_final' },
+        { id: 'finalComments', text: 'Vurder kvaliteten på avsluttende kommentarer', theme: 'general_final' },
       ],
       themes: [ // Define themes
         { id: 'legal_final', title: 'Juridisk og formelt' },

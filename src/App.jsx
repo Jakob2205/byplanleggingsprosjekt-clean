@@ -36,14 +36,18 @@ function MainLayout() {
     includeInTotals: {},
   });
 
-  // Reset plan data when the plan instance changes
+  // Reset plan data ONLY when switching to a NEW plan instance.
   useEffect(() => {
-    setPlanData({
-      scores: {},
-      answers: {},
-      formNames: {},
-      includeInTotals: {},
-    });
+    // This effect now correctly clears data only when the planInstanceId changes from one ID to another.
+    // It will not run on the initial load or when the ID is null.
+    return () => {
+      setPlanData({
+        scores: {},
+        answers: {},
+        formNames: {},
+        includeInTotals: {},
+      });
+    };
   }, [planInstanceId]);
 
   const updateFormState = useCallback((formId, newState) => {
@@ -101,7 +105,7 @@ function MainLayout() {
             selectedPlan={selectedPlan} // Pass selectedPlan to MainContent
             userId={user?.uid}
             // Pass lifted state and handlers down
-            initialAnswers={planData.answers[formId]}
+            initialAnswers={planData.answers[formId] || {}}
             formName={planData.formNames[formId]}
             includeInTotal={planData.includeInTotals[formId]}
             updateFormState={updateFormState}

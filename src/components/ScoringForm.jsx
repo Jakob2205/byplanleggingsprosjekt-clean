@@ -1,10 +1,17 @@
 // src/components/forms/ScoringForm.jsx
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
-const ScoringForm = ({ title, data }) => {
-  const { themes, questions, questionMultipliers } = data;
-  const [answers, setAnswers] = useState({});
-  const [priorities, setPriorities] = useState({});
+const ScoringForm = ({ title, data, initialState = {}, onStateChange }) => {
+  const { themes, questions, priorityMultipliers: formMultipliers } = data;
+  const [answers, setAnswers] = useState(initialState.answers || {});
+  const [priorities, setPriorities] = useState(initialState.priorities || {});
+
+  // Effect to update parent state when local state changes
+  useEffect(() => {
+    if (onStateChange) {
+      onStateChange({ answers, priorities });
+    }
+  }, [answers, priorities, onStateChange]);
 
   const handleAnswerChange = (questionId, value) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
@@ -17,16 +24,24 @@ const ScoringForm = ({ title, data }) => {
   const totalScore = useMemo(() => {
     let score = 0;
     for (const questionId in answers) {
+      const question = questions.find(q => q.id === questionId);
+      if (!question) continue;
+
       const answerValue = answers[questionId];
-      const priority = priorities[questionId] || "Normal";
-      const multiplier = questionMultipliers[questionId]?.[priority] || 1;
+      const priority = priorities[questionId] || "Medium";
+
+      // Use question-specific multipliers if they exist, otherwise fall back to form-level multipliers.
+      const multipliers = question.priorityMultipliers || formMultipliers;
+
+      // Get the multiplier for the selected priority, defaulting to 1 if not found.
+      const multiplier = multipliers?.[priority] ?? 1;
 
       if (answerValue !== undefined && answerValue !== null) {
         score += answerValue * multiplier;
       }
     }
     return score.toFixed(2);
-  }, [answers, priorities, questionMultipliers]);
+  }, [answers, priorities, questions, formMultipliers]);
 
   const answerOptions = [
     { label: "Svært negativt", value: -2 },
@@ -36,7 +51,7 @@ const ScoringForm = ({ title, data }) => {
     { label: "Svært positivt", value: 2 },
   ];
 
-  const priorityOptions = ["Lav", "Normal", "Høy", "Ikke aktuelt"];
+  const priorityOptions = ["Lav", "Medium", "Høy", "Ikke aktuell"];
 
   return (
     <div>
@@ -68,7 +83,7 @@ const ScoringForm = ({ title, data }) => {
                   <label>
                     Prioritet:
                     <select
-                      value={priorities[question.id] || "Normal"}
+                      value={priorities[question.id] || "Medium"}
                       onChange={(e) => handlePriorityChange(question.id, e.target.value)}
                     >
                       {priorityOptions.map((p) => (
@@ -88,4 +103,3 @@ const ScoringForm = ({ title, data }) => {
 };
 
 export default ScoringForm;
-

@@ -52,12 +52,8 @@ const standardPlanprosess = {
     },
     casestudie: {
       title: 'Casestudie',
-      component: GenericForm,
-      formConfig: [
-        { id: 'stdCaseDesc', type: 'textarea', label: 'Beskrivelse av casestudie for standard planprosess', name: 'stdCaseDesc', defaultValue: '' }
-      ],
       questions: [
-        { id: 'stdCaseDesc', text: 'Beskrivelse av casestudie for standard planprosess', theme: 'general', type: 'textarea', defaultValue: '', scoreLogic: (val) => (val && val.length > 0 ? 1 : 0) }
+        { id: 'stdCaseDesc', text: 'Vurder kvaliteten på casestudien', theme: 'general' }
       ],
       themes: [
         { id: 'general', title: 'Generelt' }
@@ -68,12 +64,8 @@ const standardPlanprosess = {
     },
     'politisk-skjema': {
       title: 'Politisk skjema',
-      component: GenericForm,
-      formConfig: [
-        { id: 'stdPoliticalSummary', type: 'textarea', label: 'Politisk behandling og vedtak for standard planprosess', name: 'stdPoliticalSummary', defaultValue: '' }
-      ],
       questions: [
-        { id: 'stdPoliticalSummary', text: 'Politisk behandling og vedtak for standard planprosess', theme: 'general', type: 'textarea', defaultValue: '', scoreLogic: (val) => (val && val.length > 0 ? 1 : 0) }
+        { id: 'stdPoliticalSummary', text: 'Vurder kvaliteten på politisk behandling og vedtak', theme: 'general' }
       ],
       themes: [
         { id: 'general', title: 'Generelt' }
@@ -84,12 +76,8 @@ const standardPlanprosess = {
     },
     medvirkningskjema: {
       title: 'Medvirkningskjema',
-      component: GenericForm,
-      formConfig: [
-        { id: 'stdParticipationSummary', type: 'textarea', label: 'Oppsummering av medvirkning for standard planprosess', name: 'stdParticipationSummary', defaultValue: '' }
-      ],
       questions: [
-        { id: 'stdParticipationSummary', text: 'Oppsummering av medvirkning for standard planprosess', theme: 'general', type: 'textarea', defaultValue: '', scoreLogic: (val) => (val && val.length > 0 ? 1 : 0) }
+        { id: 'stdParticipationSummary', text: 'Vurder kvaliteten på oppsummering av medvirkning', theme: 'general' }
       ],
       themes: [
         { id: 'general', title: 'Generelt' }

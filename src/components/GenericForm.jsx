@@ -25,15 +25,22 @@ const GenericForm = ({ formId, title, formConfig, updateFormState, setInitialFor
       formConfig.forEach(configItem => { // The error points here, but the cause is the useEffect below
         const answerObject = initialAnswers?.[configItem.id];
         // Check for the rawValue, otherwise fall back to score, then defaultValue
-        state[configItem.id] = answerObject?.rawValue !== undefined
-          ? answerObject.rawValue
-          : configItem.defaultValue;
+        let value = answerObject?.rawValue;
+        if (value === undefined) {
+          value = configItem.defaultValue;
+        }
+        state[configItem.id] = value ?? ''; // Ensure it's never undefined, fallback to empty string
       });
     }
     return state;
   }, [formConfig, initialAnswers]);
 
   const [answers, setAnswers] = useState(getInitialState);
+
+  // When the form or initial answers change, reset the local state
+  useEffect(() => {
+    setAnswers(getInitialState());
+  }, [formId, initialAnswers, getInitialState]);
 
   // Set initial form data in the global state
   useEffect(() => {
@@ -89,8 +96,8 @@ const GenericForm = ({ formId, title, formConfig, updateFormState, setInitialFor
             {question.label}
             <input
               type={question.type}
-              checked={question.type === 'checkbox' ? (answers[question.id] === true) : undefined}
-              value={question.type !== 'checkbox' ? (answers[question.id] || '') : ''}
+              checked={question.type === 'checkbox' ? !!answers[question.id] : undefined}
+              value={question.type !== 'checkbox' ? (answers[question.id] ?? '') : ''}
               onChange={e => handleInputChange(question.id, e.target)}
               style={{ marginLeft: '10px' }}
             />
