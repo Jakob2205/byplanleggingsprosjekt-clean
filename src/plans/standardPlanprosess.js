@@ -7,7 +7,18 @@ const standardPlanprosess = {
     planinitiativ: {
       title: 'Planinitiativ',
       questions: [
-        { id: 'q_init1', text: 'Spørsmål A: Er planinitiativet i tråd med kommunens overordnede strategier?', theme: 'theme_strategy' },
+        {
+          id: 'q_init1',
+          text: 'Spørsmål A: Er planinitiativet i tråd med kommunens overordnede strategier?',
+          theme: 'theme_strategy',
+          // This is a SPECIFIC multiplier for this question only.
+          priorityMultipliers: {
+            "Lav": 0.25,
+            "Medium": 1,
+            "Høy": 5, // This question is extra important, so "Høy" has a very strong impact.
+            "Ikke aktuell": 0
+          }
+        },
         { id: 'q_init2', text: 'Spørsmål B: Er det foretatt en foreløpig vurdering av virkninger?', theme: 'theme_impact' },
         { id: 'q_init3', text: 'Spørsmål C: Er det identifisert interessekonflikter?', theme: 'theme_impact' },
         { id: 'q_init4', text: 'Spørsmål D: Er forslaget økonomisk gjennomførbart?', theme: 'theme_strategy' },
@@ -18,6 +29,7 @@ const standardPlanprosess = {
         { id: 'theme_strategy', title: 'Strategi' },
         { id: 'theme_impact', title: 'Virkning' },
       ],
+      // This is the GENERIC multiplier for all other questions in this form.
       priorityMultipliers: {
         "Lav": 0.5, // Score is halved
         "Medium": 1,  // Score is unchanged
@@ -52,8 +64,12 @@ const standardPlanprosess = {
     },
     casestudie: {
       title: 'Casestudie',
+      component: GenericForm,
+      formConfig: [
+        { id: 'stdCaseDesc', type: 'textarea', label: 'Beskrivelse av casestudie for standard planprosess', name: 'stdCaseDesc', defaultValue: '' }
+      ],
       questions: [
-        { id: 'stdCaseDesc', text: 'Vurder kvaliteten på casestudien', theme: 'general' }
+        { id: 'stdCaseDesc', text: 'Beskrivelse av casestudie for standard planprosess', theme: 'general', type: 'textarea', defaultValue: '', scoreLogic: (val) => (val && val.length > 0 ? 1 : 0) }
       ],
       themes: [
         { id: 'general', title: 'Generelt' }
@@ -64,8 +80,12 @@ const standardPlanprosess = {
     },
     'politisk-skjema': {
       title: 'Politisk skjema',
+      component: GenericForm,
+      formConfig: [
+        { id: 'stdPoliticalSummary', type: 'textarea', label: 'Politisk behandling og vedtak for standard planprosess', name: 'stdPoliticalSummary', defaultValue: '' }
+      ],
       questions: [
-        { id: 'stdPoliticalSummary', text: 'Vurder kvaliteten på politisk behandling og vedtak', theme: 'general' }
+        { id: 'stdPoliticalSummary', text: 'Politisk behandling og vedtak for standard planprosess', theme: 'general', type: 'textarea', defaultValue: '', scoreLogic: (val) => (val && val.length > 0 ? 1 : 0) }
       ],
       themes: [
         { id: 'general', title: 'Generelt' }
@@ -76,8 +96,12 @@ const standardPlanprosess = {
     },
     medvirkningskjema: {
       title: 'Medvirkningskjema',
+      component: GenericForm,
+      formConfig: [
+        { id: 'stdParticipationSummary', type: 'textarea', label: 'Oppsummering av medvirkning for standard planprosess', name: 'stdParticipationSummary', defaultValue: '' }
+      ],
       questions: [
-        { id: 'stdParticipationSummary', text: 'Vurder kvaliteten på oppsummering av medvirkning', theme: 'general' }
+        { id: 'stdParticipationSummary', text: 'Oppsummering av medvirkning for standard planprosess', theme: 'general', type: 'textarea', defaultValue: '', scoreLogic: (val) => (val && val.length > 0 ? 1 : 0) }
       ],
       themes: [
         { id: 'general', title: 'Generelt' }

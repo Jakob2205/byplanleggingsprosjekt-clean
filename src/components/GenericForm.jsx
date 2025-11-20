@@ -37,11 +37,6 @@ const GenericForm = ({ formId, title, formConfig, updateFormState, setInitialFor
 
   const [answers, setAnswers] = useState(getInitialState);
 
-  // When the form or initial answers change, reset the local state
-  useEffect(() => {
-    setAnswers(getInitialState());
-  }, [formId, initialAnswers, getInitialState]);
-
   // Set initial form data in the global state
   useEffect(() => {
     setInitialFormData(formId, {
