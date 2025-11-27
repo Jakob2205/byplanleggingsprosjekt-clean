@@ -15,7 +15,7 @@ import {
   writeBatch,
   serverTimestamp,
 } from "firebase/firestore";
-import { PLAN_TEMPLATES } from "./plan-templates";
+import { PLAN_TEMPLATES } from "../plans";
 import { UNIVERSAL_FORMS } from "../constants/forms";
 
 const Sidebar = ({ selectedPlan, onSelectPlan, userId }) => {

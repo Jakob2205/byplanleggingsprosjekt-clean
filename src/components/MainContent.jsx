@@ -17,7 +17,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import GenericForm from "./GenericForm";
-import { PLAN_TEMPLATES } from "./plan-templates";
+import { PLAN_TEMPLATES } from "../plans";
 
 const ScoringQuestion = ({ question, onAnswer, answer, onPriorityChange, priority, onCommentChange, comment }) => {
   const { id, text } = question;
@@ -219,7 +219,7 @@ const MainContent = ({
       updateFormState(formId, { includeInTotal: next });
     }
 
-  }, [themeAverageScores, temaer, formId, includeInTotal, updateFormState]); // Dependency array updated
+  }, [temaer, themeAverageScores, includeInTotal, formId, updateFormState]); // Depend on the actual values
 
   // Memoize the stringified dependencies to prevent the effect from running unnecessarily.
   const overallScoreDeps = useMemo(() => {
@@ -417,7 +417,7 @@ const MainContent = ({
         <input
           type="text"
           placeholder="Skjemanavn (f.eks. Felt A – høst 2025)"
-          value={formName}
+          value={formName || ''}
           onChange={handleNameChange}
           style={{
             flex: 1,

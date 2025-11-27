@@ -17,7 +17,7 @@ import Login from "./components/Login";
 
 import "./styles/main.css";
 import "./styles/app.css";
-import { PLAN_TEMPLATES } from "./components/plan-templates";
+import { PLAN_TEMPLATES } from "./plans";
 
 // ✅ Import everything from the context, including RequireAuth
 import { AuthProvider, useAuth, RequireAuth } from "./context/AuthContext";
@@ -38,16 +38,16 @@ function MainLayout() {
 
   // Reset plan data ONLY when switching to a NEW plan instance.
   useEffect(() => {
-    // This effect now correctly clears data only when the planInstanceId changes from one ID to another.
-    // It will not run on the initial load or when the ID is null.
-    return () => {
+    // This effect now correctly clears data when the planInstanceId changes.
+    // It will not run on the initial load if planInstanceId is null.
+    if (planInstanceId) {
       setPlanData({
         scores: {},
         answers: {},
         formNames: {},
         includeInTotals: {},
       });
-    };
+    }
   }, [planInstanceId]);
 
   const updateFormState = useCallback((formId, newState) => {
