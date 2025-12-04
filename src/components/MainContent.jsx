@@ -196,30 +196,27 @@ const MainContent = ({
 
   // Auto-deaktiver tema < 3 spørsmål (trygg – kun sett state hvis noe endres)
   useEffect(() => {
+    // Guard clause to prevent running when there are no themes, which can cause an infinite loop.
+    if (!temaer || temaer.length === 0) return;
+
     // Use the `includeInTotal` prop directly as the current state
-    const currentIncludeState = includeInTotal || {};
-    const next = { ...currentIncludeState };
+    const nextIncludeInTotal = { ...(includeInTotal || {}) };
     let changed = false;
 
     (temaer || []).forEach((t) => {
       const themeKey = `${formId}_${t.id}`;
       const score = themeAverageScores[themeKey]; // null eller tall
-      if (score === null && currentIncludeState[themeKey] !== false) {
-        next[themeKey] = false;
-        changed = true;
-      } else if (score !== null && !(themeKey in currentIncludeState)) {
-        next[themeKey] = true;
+      const shouldBeActive = score !== null;
+      if (nextIncludeInTotal[themeKey] !== shouldBeActive) {
+        nextIncludeInTotal[themeKey] = shouldBeActive;
         changed = true;
       }
     });
 
-    // Only update if `next` is actually different from `currentIncludeState`
-    // This deep comparison prevents infinite loops due to new object references with same content.
-    if (changed && JSON.stringify(next) !== JSON.stringify(currentIncludeState)) {
-      updateFormState(formId, { includeInTotal: next });
+    if (changed) {
+      updateFormState(formId, { includeInTotal: nextIncludeInTotal });
     }
-
-  }, [temaer, themeAverageScores, includeInTotal, formId, updateFormState]); // Depend on the actual values
+  }, [temaer, themeAverageScores, formId, updateFormState]); // Removed includeInTotal from dependencies
 
   // Memoize the stringified dependencies to prevent the effect from running unnecessarily.
   const overallScoreDeps = useMemo(() => {
