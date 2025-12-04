@@ -5,7 +5,13 @@ import GenericForm from '../components/GenericForm';
 const byggesakForstegangQuestions = [
     { id: 'bs_q1', text: 'Er søknaden komplett i henhold til lovverket?', theme: 'formaliteter' },
     { id: 'bs_q2', text: 'Er nabovarsling utført korrekt?', theme: 'formaliteter' },
-    { id: 'bs_q3', text: 'Er tiltaket i tråd med gjeldende reguleringsplan?', theme: 'planavklaring' },
+    { 
+      id: 'bs_q3', 
+      text: 'Er tiltaket i tråd med gjeldende reguleringsplan?', 
+      theme: 'planavklaring',
+      // This specific question has a higher weight for "Høy"
+      priorityMultipliers: { "Lav": 0.5, "Medium": 1, "Høy": 3, "Ikke aktuell": 0 },
+    },
     { id: 'bs_q4', text: 'Er det søkt om nødvendige dispensasjoner?', theme: 'planavklaring' },
     { id: 'bs_q5', text: 'Er ansvarsretter og gjennomføringsplan på plass?', theme: 'formaliteter' },
 ];
@@ -33,6 +39,7 @@ const byggesakPlan = {
         { id: 'formaliteter', title: 'Formaliteter' },
         { id: 'planavklaring', title: 'Planavklaring' },
       ],
+      // These are the default multipliers for any question in this form that doesn't have its own.
       priorityMultipliers: { "Lav": 0.5, "Medium": 1, "Høy": 2, "Ikke aktuell": 0 },
     },
 

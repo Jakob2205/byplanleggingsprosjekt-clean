@@ -1,5 +1,6 @@
 // components/Footer.jsx
 import React, { useMemo } from "react";
+import { UNIVERSAL_FORMS } from "../constants/forms";
 
 const Footer = ({ formScores, planTemplate }) => {
   const totalScore = Object.values(formScores).reduce((sum, score) => sum + (score || 0), 0);
@@ -14,6 +15,13 @@ const Footer = ({ formScores, planTemplate }) => {
     return Object.entries(planTemplate.forms).map(([key, value]) => ({ key, ...value }));
   }, [planTemplate]);
 
+  // Create a lookup map for universal titles for better performance
+  const universalTitles = useMemo(() => 
+    UNIVERSAL_FORMS.reduce((acc, form) => {
+      acc[form.key] = form.title;
+      return acc;
+    }, {}), []);
+
   return (
     <footer style={{ padding: '12px', borderTop: '1px solid #ddd', background: '#f8f8f8', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
       <div style={{ fontWeight: 'bold' }}>
@@ -21,7 +29,7 @@ const Footer = ({ formScores, planTemplate }) => {
       </div>
       {forms.map(form => (
         <div key={form.key}>
-          {form.title}: {(formScores[form.key] || 0).toFixed(2)}
+          {universalTitles[form.key] || form.title}: {(formScores[form.key] || 0).toFixed(2)}
         </div>
       ))}
     </footer>
